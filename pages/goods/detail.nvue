@@ -1,0 +1,178 @@
+<template>
+	<view>
+
+		<view class="tbc-page-background"></view>
+
+		<template v-if="goods.goods_id">
+
+			<view style="width: 750rpx;" v-if="response.slider">
+				<tbc-slider :slider="response.slider" />
+			</view>
+			<view style="width: 750rpx;" v-if="response.banner">
+				<tbc-banner :banner="response.banner" />
+			</view>
+			<view style="width: 750rpx;" v-if="response.countdown">
+
+				<tbc-countdown :countdown="response.countdown" @timeout="getGoodsDetail" />
+			</view>
+
+			<tbc-main-header :goods="goods" />
+
+			<view style="margin-top: 20rpx;background-color: #FFF;">
+				<floor-item label="规格" v-if="response.spec && response.spec.show" :text="response.spec.field.text" @click="showSku({code: 'all'})">
+					<tbc-spec :spec="response.spec" />
+				</floor-item>
+				<floor-item label="参数" v-if="response.attribute && response.attribute.show" :text="response.attribute.field.text" @click="$refs.base.open()"></floor-item>
+			</view>
+
+			<view style="margin-top: 20rpx;">
+				<tbc-detail :detail="goods.detail_mobile" />
+			</view>
+
+
+			<view style="height: 110rpx;"></view>
+			<view style="position: fixed;bottom: 0;width: 750rpx;background-color: #FFFFFF;">
+				<operation @click="showSku" :operation="response.operation" :goods="goods"></operation>
+			</view>
+
+
+			<uni-popup ref="base" type="bottom">
+				<attribute @close="$refs.base.close()" :attr="response.attribute.list"></attribute>
+			</uni-popup>
+			<!-- #ifndef APP-NVUE -->
+			<sku ref="sku"></sku>
+			<!-- #endif -->
+		</template>
+	</view>
+</template>
+
+<script>
+	import UniPopup from '@/components/uni-official/uni-popup/uni-popup.vue'
+	import tbcSlider from './components/detail/slider.nvue'
+	import tbcBanner from './components/detail/banner.nvue'
+	import tbcCountdown from './components/detail/countdown.nvue'
+	import tbcMainHeader from './components/detail/header.nvue'
+	import tbcSpec from './components/detail/spec.nvue'
+	import tbcDetail from './components/detail/detail.nvue'
+	import operation from './components/detail/operation.nvue'
+	import floorItem from './components/detail/floor-item.nvue'
+	import attribute from './components/detail/attribute.nvue'
+	import sku from './components/detail/sku.nvue'
+
+
+	export default {
+		components: {
+			UniPopup,
+			tbcSlider,
+			tbcBanner,
+			tbcCountdown,
+			tbcMainHeader,
+			tbcSpec,
+			tbcDetail,
+			operation,
+			floorItem,
+			attribute,
+			sku
+		},
+		
+		data() {
+			return {
+				goodsId: '',
+				goods: {},
+				response: {},
+				scrollTop: 0,
+				anchorPoint: [0],
+				toScrollTop: 0,
+				statusBarHeight: '',
+				fixedHeaderHeight: uni.upx2px(88),
+			}
+		},
+
+		computed: {
+			fixedHeaderExtStyle() {
+				let ratio = Math.floor((this.scrollTop / (this.fixedHeaderHeight) / 3) * 10) / 10
+				console.log(ratio)
+				if (ratio > 1) ratio = 1
+				return {
+					'background-color': 'rgba(255, 255, 255, ' + ratio + ')'
+				}
+			}
+		},
+
+
+		onLoad: function(options) {
+			this.statusBarHeight = uni.getSystemInfoSync().statusBarHeight
+			this.goodsId = options.goods_id
+			this.getGoodsDetail()
+		},
+
+		onUnload: function() {
+
+		},
+
+
+		onReady() {
+			// this.$refs.base.open()
+		},
+
+		// onPageScroll: function(e) {
+		// 	this.scrollTop = e.scrollTop
+		// },
+
+		onNavigationBarButtonTap(e) {
+			uni.showToast({
+				title: '功能暂未开发',
+				icon: 'none'
+			})
+		},
+		
+		
+		methods: {
+
+			// 显示筛选
+			showSku(button) {
+				// #ifdef APP-NVUE
+				uni.$emit('setButtonCode', button.code)
+				const drawer = uni.getSubNVueById('sku')
+				drawer.show('slide-in-bottom', 200);
+				// #endif
+				// #ifndef APP-NVUE
+				if (button.code) this.$refs.sku.open(button.code)
+				// #endif
+			},
+
+			// 初始化sku信息
+			skuInitialization() {
+				let data = this.response
+				// #ifdef APP-NVUE
+				uni.$emit('sku', data)
+				// #endif
+				// #ifndef APP-NVUE
+				setTimeout(() => {
+					this.$refs.sku.setOperation(data.operation.list)
+					this.$refs.sku.skuInitialization(data.sku.list, data.spec.list, this.goods)
+				}, 30)
+				// #endif
+			},
+
+			// 获取商品信息
+			async getGoodsDetail() {
+				if (!this.goodsId) return
+				const res = await uni.$http.get('/goods/detail', {
+					goods_id: this.goodsId
+				})
+				if (res.data.code !== 0) {
+					return uni.showToast({
+						title: res.data.message,
+						icon: 'none'
+					})
+				}
+				let data = res.data.data
+				data.basic.field.detail_mobile = JSON.parse(data.basic.field.detail_mobile)
+				this.goods = data.basic.field
+				this.response = data
+				this.skuInitialization()
+			}
+		}
+	}
+</script>

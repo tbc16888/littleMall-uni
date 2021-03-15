@@ -1,0 +1,212 @@
+<template>
+	<view>
+		<!-- 顶部城市、搜索 -->
+		<view style="position: fixed;top: var(--window-top);width: 750rpx;z-index:99">
+			<header-search></header-search>
+		</view>
+
+		<!-- 地图区域 -->
+		<!-- #ifdef H5 -->
+		<view style="position: fixed;top: var(--window-top);width: 750rpx;z-index:99">
+			<view style="height: 100rpx;"></view>
+			<view style="height: 440rpx;background-color: #009EFF;">
+				<map id="map" style="width: 750rpx;height:440rpx;position: relative;" :longitude="location.longitude" :latitude="location.latitude"
+				 :polyline="polylineList" @regionchange="onRegionChange" :polygons="polygonList" :scale="14" :include-points="includePoints">
+					<cover-image src="/static/icon/location_my.png" style="width: 48rpx;height: 72rpx;position:absolute;left: 351rpx;top: 214rpx;"></cover-image>
+				</map>
+			</view>
+		</view>
+		<!-- #endif -->
+		<!-- #ifndef H5 -->
+		<view style="position: fixed;top:100rpx;width: 750rpx;z-index:99">
+			<view style="height: 440rpx;background-color: #009EFF;">
+				<map id="map" style="width: 750rpx;height:440rpx;position: relative;" :longitude="location.longitude" :latitude="location.latitude"
+				 :polyline="polylineList" @regionchange="onRegionChange" :polygons="polygonList" :scale="14" :include-points="includePoints">
+					<cover-image src="/static/icon/location_my.png" style="width: 48rpx;height: 72rpx;position:absolute;left: 351rpx;top: 214rpx;"></cover-image>
+				</map>
+			</view>
+		</view>
+		<!-- #endif -->
+
+
+
+		<!-- 附近地址 -->
+		<!-- #ifdef H5 -->
+		<scroll-view scroll-y style="position: fixed;top: var(--window-top);width: 750rpx;bottom: 0;">
+			<view style="height: 540rpx;"></view>
+			<nearby-list :nearbyList="nearbyList"></nearby-list>
+		</scroll-view>
+		<!-- #endif -->
+
+		<!-- #ifndef H5 -->
+		<scroll-view scroll-y style="position: fixed;top:540rpx;width: 750rpx;bottom: 0;">
+			<nearby-list :nearbyList="nearbyList"></nearby-list>
+		</scroll-view>
+		<!-- #endif -->
+	</view>
+</template> 
+
+<script>
+
+	import map from './mixins/map.js'
+	import HeaderSearch from './components/Header.nvue'
+	import NearbyList from './components/NearbyList.nvue'
+	
+	// #ifdef APP-PLUS
+	const mapSearch = weex.requireModule('mapSearch')
+	// #endif
+
+	export default {
+
+		components: {
+			HeaderSearch,
+			NearbyList
+		},
+		
+		mixins: [map],
+
+		data() {
+			return {
+				location: {
+					latitude: 26.08,
+					longitude: 119.30,
+				},
+				controls: [],
+				longitude: '',
+				latitude: '',
+				isOnSearchPoi: false,
+				nearbyList: [],
+				initComplete: false,
+				mapPlusInstance: null,
+				mapInstance: null,
+				timer: null,
+				polygonList: [],
+				polylineList: [],
+				includePoints: []
+			}
+		},
+
+
+		onLoad: function() {
+			this.initMapInstance()
+			this.getLocation()
+			this.getDistributeArea()
+		},
+
+		methods: {
+
+			// 获取地图实例
+			initMapInstance() {
+				this.mapInstance = uni.createMapContext("map", this)
+			},
+
+			// 获取地位
+
+			// 视野变化
+			onRegionChange(e) {
+				console.log(e)
+				if (e.detail.type !== 'end') return
+				this.getLocationByMap()
+			},
+
+			// 地位获取位置
+			getLocationByMap() {
+				const that = this
+				that.mapInstance.getCenterLocation({
+					complete: function(res) {
+						console.log(res)
+						that.location.latitude = res.latitude
+						that.location.longitude = res.longitude
+						that.reverseGeocoder()
+					}
+				})
+			},
+
+			// 选择附近
+			choiceAddress(index) {
+				let item = this.nearbyList[index]
+				// console.log(item)
+				// if (!item.warehouse_id) {
+				// 	return uni.showToast({
+				// 		title: '该地址不在配范围内',
+				// 		icon: 'none'
+				// 	})
+				// }
+				uni.setStorageSync('map@choice', item)
+				uni.navigateBack()
+			},
+
+			
+
+
+			async getDistributeArea() {
+				const res = await uni.$http.get('/warehouse', {
+					location: [this.location.latitude, this.location.longitude].join(',')
+				})
+				if (res.data.code !== 0) return uni.showToast({
+					title: res.data.message,
+					icon: 'none'
+				})
+
+				let polygonList = []
+				let polylineList = []
+				let includePoints = []
+				res.data.data.list.forEach(item => {
+					let polygon = {}
+					for (let i in item) polygon[this.toHump(i)] = item[i]
+					polygon.strokeWidth = polygon.strokeWeight
+					polygon.fillColor += (polygon.fillOpacity * 100).toString(16)
+					polygon.fillColor = this.toRGBA(polygon.fillColor)
+					// ios color 不支持16进制
+
+					polygon.zIndex = 10
+					polygon.dottedLine = true
+					polygon.points = []
+					let pathList = item.path.split(":")
+					pathList.forEach(path => {
+						let location = path.split(",")
+						let point = {
+							latitude: location[1],
+							longitude: location[0],
+						}
+						polygon.points.push(point)
+						this.includePoints.push(point)
+					})
+					polygonList.push(polygon)
+					polylineList.push({
+						points: [...polygon.points, polygon.points[0]],
+						color: this.toRGBA(polygon.strokeColor + '64'),
+						dottedLine: true,
+						width: 2
+					})
+				})
+				this.polylineList = polylineList
+				this.polygonList = polygonList
+
+			},
+
+			toHump(string) {
+				return string.replace(/\_(\w)/g, function(all, letter) {
+					return letter.toUpperCase();
+				});
+			},
+
+			// #AF30021A
+			toRGBA(string) {
+				let number = []
+				string = string.substring(1)
+				for (let i = 0; i < string.length; i = i + 2) {
+					number.push(parseInt(string.substr(i, 2), 16))
+				}
+				number.push(number.pop() / 100)
+				console.log('rgba( ' + number.join(', ') + ' )')
+				return 'rgba( ' + number.join(', ') + ' )'
+			},
+
+		}
+	}
+</script>
+
+<style>
+
+</style>

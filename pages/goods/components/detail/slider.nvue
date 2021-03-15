@@ -1,0 +1,50 @@
+<template>
+	<view style="width: 750rpx;height:750rpx;position: relative;">
+		<swiper style="width: 750rpx;height:750rpx;" :autoplay="true" :interval="3000" :duration="300" @change="onSlideChange" circular>
+			<swiper-item class="tbc-flex-col" style="align-items: center;background-color: #FFF;justify-content: center;width: 750rpx;height:750rpx;"
+			 v-for="(item, index ) in slider.list" :key="index">
+				<image :src="item.value" mode="aspectFit" resize="contain" style="width: 750rpx;height:750rpx;" />
+			</swiper-item>
+		</swiper>
+		<view style="position: absolute;bottom: 40rpx;right: 30rpx;">
+			<view class="tbc-flex-row" style="flex-direction: row;height: 40rpx;padding-left: 30rpx;padding-right: 30rpx;background-color: rgba(100, 100, 100, 0.7);align-items: center;justify-content: center;border-radius: 40rpx;">
+				<text style="font-size:13px;color:#FFF">{{current}}</text>
+				<text style="font-size:13px;color:#FFF">/</text>
+				<text style="font-size:13px;color:#FFF">{{length}}</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		props: {
+			
+			slider: {
+				type: Object,
+				default() {
+					return {}
+				}
+			}
+		},
+
+		computed: {
+			
+			length() {
+				return this.slider.list.length
+			},
+		},
+
+		data() {
+			return {
+				current: 1
+			}
+		},
+
+		methods: {
+			onSlideChange(e) {
+				this.current = e.detail.current + 1
+			}
+		}
+	}
+</script>

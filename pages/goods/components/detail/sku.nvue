@@ -1,0 +1,280 @@
+<template>
+	<!-- #ifndef APP-PLUS -->
+	<uni-popup ref="sku" type="bottom">
+		<!-- #endif -->
+
+		<view class="tbc-flex-col"
+			style="flex-direction: column;background-color: #FFFFFF;border-top-left-radius: 16rpx;border-top-right-radius:16rpx;">
+			<!-- 头部信息 -->
+			<view class="tbc-flex-row" style="flex-direction: row;position: relative;height: 240rpx;">
+				<view style="height: 200rpx;width: 200rpx;margin:20rpx;">
+					<image :src="image" style="width: 200rpx;height: 200rpx;border-radius: 10rpx;"></image>
+				</view>
+
+				<view class="tbc-flex-col" style="flex: 1;flex-direction: column;">
+					<view style="flex: 1;"></view>
+					<view class="tbc-flex-row" style="flex-direction: row;align-items: flex-end;">
+						<text style="font-size:40rpx;color: #FF3300;">¥{{skuRealTimeInfo.price.min}}</text>
+						<template v-if="skuRealTimeInfo.price.min !== skuRealTimeInfo.price.max">
+							<text style="font-size:40rpx;color: #FF3300;"> - </text>
+							<text style="font-size:40rpx;color: #FF3300;">{{skuRealTimeInfo.price.max}}</text>
+						</template>
+					</view>
+					<view class="tbc-flex-row">
+						<text style="font-size: 24rpx;color: #8c8c8c;">库存{{skuRealTimeInfo.stock}}件</text>
+					</view>
+					<view style="height: 20rpx;"></view>
+				</view>
+
+				<view style="height: 40rpx;width:40rpx;position: absolute;right:30rpx;top:30rpx;z-index:99"
+					@click="close">
+					<image src="/static/icon/close_black.png" style="width:40rpx;height: 40rpx;"></image>
+				</view>
+			</view>
+
+			<scroll-view scroll-y class="tbc-flex-col"
+				style="flex-direction: column;align-items: center;width: 750rpx;flex: 1;"
+				:style="'height:' + scrollHeight+ 'px'">
+				<view class="tbc-flex-col" style="flex-direction: col;align-items: center;width: 750rpx;">
+
+					<view class="tbc-flex-col" style="flex-direction: column;width: 690rpx;"
+						v-for="(spec, idx) in skuAttrList" :key="idx">
+						<view class="tbc-flex-row" style="flex-direction: row;height: 90rpx;align-items: center;">
+							<text style="font-size: 28rpx;font-weight: bold;">{{spec.attr_name}}</text>
+						</view>
+						<view class="tbc-flex-row" style="flex-direction: row;flex-wrap: wrap;width: 690rpx;">
+							<view class="tbc-flex-row"
+								style="height: 60rpx;align-items: center;padding-left: 20rpx;padding-right: 20rpx;border-radius:10rpx;margin-right: 20rpx;align-items: center;justify-content: center;margin-bottom: 20rpx;word-wrap:break-word;border-width: 1px;border-style: solid;border-color: #f7f7f7;background-color: #f7f7f7;"
+								v-for="(item, index) in spec.props" :key="item.attr_value_label"
+								:style="skuAttrList[idx].checked == item.goods_attr_id ? 'border-color:#FF3C3F;background-color:#FFF7F7':'border-color: #f7f7f7;background-color: #f7f7f7;' + (skuAttrList[idx].props[item.goods_attr_id].disabled ? 'border-color:#DDD;background-color:#EEE;border-style:dashed':'')"
+								@click="onGoodsSkuAttrClick" :data-index="idx" :data-sub="index">
+								<text style="font-size: 26rpx;word-wrap:break-word;"
+									:style="skuAttrList[idx].checked == item.goods_attr_id ? 'color:#FF3C3F':'color: #444;'">{{item.attr_value_label}}</text>
+							</view>
+						</view>
+					</view>
+
+					<view class="tbc-flex-col" style="flex-direction: column;width: 690rpx;">
+						<view class="tbc-flex-row" style="flex-direction: row;height: 90rpx;align-items: center;">
+							<view style="flex: 1;">
+								<text style="font-size: 28rpx;font-weight: bold;">购买数量</text>
+							</view>
+							<view>
+								<stepper ref="stepper" :value="goodsNumber" @change="onGoodsNumberChange"
+									plusBackground="#F30" :min="1" />
+							</view>
+						</view>
+					</view>
+				</view>
+			</scroll-view>
+
+
+			<view class="tbc-flex-row"
+				style="flex-direction: row;width: 750rpx;height:100rpx;align-items: center;justify-content: center;">
+				<view class="tbc-flex-row"
+					style="flex-direction: row;width: 690rpx;height:80rpx;align-items: center;justify-content: center;background-color: #FA5151;border-radius: 80rpx;background-color: linear-gradient(to right, #FA5151, #ee0a24);background-image: linear-gradient(to right, #FA5151, #ee0a24);"
+					@click="onConfirmClick(buttonCode)" v-if="buttonCode !== 'all'">
+					<text style="color: #fff;font-size: 26rpx;">确定</text>
+				</view>
+
+				<view class="tbc-flex-row" style="flex-direction: row;width: 690rpx;" v-if="buttonCode == 'all'">
+					<view class="tbc-flex-row" style="height:40px;align-items: center;justify-content: center;flex: 1;"
+						:style="item.style" v-for="(item, index) in buttons" :key="index"
+						@click="onConfirmClick(item.code)">
+						<view class="tbc-flex-col" style="flex-direction: column;">
+							<text style="color: #fff;font-size:24rpx;font-family: PingFang SC;">{{item.text}}</text>
+							<text style="color: #fff;font-size:22rpx;font-family: PingFang SC;"
+								v-if="item.note">{{item.note}}</text>
+						</view>
+					</view>
+				</view>
+			</view>
+		</view>
+		<!-- #ifndef APP-PLUS -->
+	</uni-popup>
+	<!-- #endif -->
+</template>
+
+<script>
+	import skuPicker from '@/utils/sku-picker.js'
+	import uniPopup from '@/components/uni-official/uni-popup/uni-popup.vue'
+	import stepper from '@/components/tbc-components/stepper/index.nvue'
+	import operation from './mixins/operation.js'
+	export default {
+		components: {
+			uniPopup,
+			stepper
+		},
+
+		mixins: [operation],
+
+		data() {
+			return {
+				image: '',
+				goodsNumber: 1,
+				skuList: {},
+				skuAttrContainer: {}, // 规格所有属性值对象，key 为属性值表ID
+				skuSelected: {
+					goods_sku_key: ''
+				},
+				skuPickerInstance: null,
+				skuAttrList: [],
+				skuRealTimeInfo: {
+					stock: '',
+					price: {
+						min: 0,
+						max: 0
+					}
+				},
+				scrollHeight: 0,
+				buttonType: '',
+				buttons: [],
+				buttonCode: ''
+			}
+		},
+
+		mounted: function() {
+			let boxHeight = uni.getSystemInfoSync().windowHeight * 0.8
+			this.scrollHeight = boxHeight - uni.upx2px(100) - uni.upx2px(240)
+		},
+
+		methods: {
+
+			open(buttonCode) {
+				this.buttonCode = buttonCode
+				// #ifndef APP-PLUS
+				this.$refs.sku.open()
+				// #endif
+			},
+
+			close() {
+				this.$emit('close')
+				// #ifndef APP-PLUS
+				this.$refs.sku.close()
+				// #endif
+			},
+
+			setOperation(buttons) {
+
+				this.buttons = this.buttonsFormat(buttons)
+			},
+
+			async onGoodsNumberChange(data) {
+				this.goodsNumber = data.number
+				this.$refs.stepper.init(this.goodsNumber)
+			},
+
+			async onConfirmClick(code) {
+				console.log(code)
+				if (!code) return ''
+				const res = await uni.$http.post('/cart/add', {
+					goods_id: this.goods.goods_id,
+					goods_sku_key: this.skuSelected.goods_sku_key,
+					goods_number: this.goodsNumber,
+					is_checked: 1,
+					is_direct: code === 'buy' ? 1 : 0
+				})
+				if (res.data.code !== 0) {
+					return uni.showToast({
+						title: res.data.message,
+						icon: 'none'
+					})
+				}
+				if (code === 'buy') {
+					this.close()
+					uni.navigateTo({
+						url: "/pages/settlement/settlement?cart_id=" + res.data.data.cart_id
+					})
+				} else {
+					uni.showToast({
+						title: res.data.message
+					})
+				}
+			},
+
+
+			// 多规格初始化设置
+			skuInitialization(sku, spec, goods) {
+				this.goods = goods
+				if (!this.image) this.image = goods.goods_image
+				let skuList = {}
+				sku.forEach(item => skuList[item.goods_attr] = item)
+
+
+				let skuPickerInstance = skuPicker({
+					price: 'shop_price'
+				}).init(skuList)
+				let skuAttrList = []
+
+				spec.forEach((item, index) => {
+					skuAttrList[index] = {
+						props: {},
+						checked: 0,
+						attr_name: item.attr_name
+					}
+					item.props.forEach(attr => {
+						attr.checked = false
+						attr.disabled = skuPickerInstance.isDisabled(attr.goods_attr_id)
+						attr.index = index
+						skuAttrList[index].props[attr.goods_attr_id] = attr
+					})
+				})
+
+				let skuRealTimeInfo = skuPickerInstance.statistics()
+
+				this.skuList = skuList
+				this.skuAttrList = skuAttrList
+				this.skuPickerInstance = skuPickerInstance
+				this.skuRealTimeInfo = skuRealTimeInfo
+			},
+
+			// 规格参数属性被点击
+			onGoodsSkuAttrClick(e) {
+				const attrIndex = e.currentTarget.dataset.index
+				let skuAttrList = this.skuAttrList
+				let skuAttrItem = skuAttrList[attrIndex]
+				const attrValue = skuAttrItem.props[e.currentTarget.dataset.sub]
+				if (skuAttrItem.props[attrValue.goods_attr_id].disabled) return
+				skuAttrItem.checked = skuAttrItem.checked == attrValue.goods_attr_id ? 0 : attrValue.goods_attr_id
+
+				// 循环验证每个属性值是否可选择
+				let skuPickerInstance = this.skuPickerInstance
+				skuAttrList.forEach((attr, index) => {
+					let checked = []
+					for (let i in skuAttrList) {
+						if (index != i && skuAttrList[i].checked) {
+							checked.push(skuAttrList[i].checked)
+						}
+					}
+					for (let j in attr.props) {
+						attr.props[j].disabled = false
+						if (attr.props[j].goods_attr_id != attr.checked) {
+							attr.props[j].disabled = skuPickerInstance.isDisabled(checked.concat(attr.props[j]
+								.goods_attr_id))
+						}
+					}
+				})
+
+
+				// 获取每一种属性选中的值
+				let checked = []
+				skuAttrList.forEach(attr => {
+					if (attr.checked) checked.push(attr.checked)
+				})
+
+				let skuSelected = this.skuSelected
+				skuSelected.goods_sku_key = ''
+				if (checked.length === skuAttrList.length) {
+					let skuInfo = skuPickerInstance.getSkuInfo(checked)
+					skuSelected = skuInfo.skuInfo
+				}
+
+				let skuRealTimeInfo = skuPickerInstance.statistics(checked)
+				this.skuAttrList = skuAttrList
+				this.skuSelected = skuSelected
+				this.skuRealTimeInfo = skuRealTimeInfo
+				if (skuRealTimeInfo.image) this.image = skuRealTimeInfo.image
+			},
+		}
+	}
+</script>

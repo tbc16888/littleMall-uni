@@ -1,0 +1,48 @@
+<template>
+	<view class="tbc-flex-col" style="width: 750rpx;background-color: #FFFFFF;">
+		<template v-for="(item, index) in nearbyList">
+			<view class="tbc-flex-col" style="flex-direction: column;align-items: center;width: 750rpx;" :key="index">
+				<nearby-item @click="choiceAddress(index)" :item="item"></nearby-item>
+				<view style="width: 690rpx;background-color: #F5F5F5;height: 0.5px;" v-if="index < nearbyList.length - 1"></view>
+			</view>
+		</template>
+	</view>
+</template>
+
+<script>
+	import NearbyItem from './NearbyItem.nvue'
+	export default {
+		
+		props: {
+			nearbyList: {
+				type: Array,
+				default () {
+					return []
+				}
+			}
+		},
+		
+		components: {
+			NearbyItem
+		},
+		
+		methods: {
+			// 选择附近
+			choiceAddress(index) {
+				let item = this.nearbyList[index]
+				let location = item.location.split(',')
+				item.latitude = location.pop()
+				item.longitude = location.pop()
+				// console.log(item)
+				// if (!item.warehouse_id) {
+				// 	return uni.showToast({
+				// 		title: '该地址不在配范围内',
+				// 		icon: 'none'
+				// 	})
+				// }
+				uni.setStorageSync('map@choice', item)
+				uni.navigateBack()
+			},
+		}
+	}
+</script>

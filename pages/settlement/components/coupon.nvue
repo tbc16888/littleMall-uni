@@ -1,0 +1,32 @@
+<template>
+	<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;align-items: center;">
+		<view class="tbc-flex-row" style="flex-direction: row;width: 690rpx;align-items: center;">
+			<view>
+				<text style="font-size: 28rpx;">优惠券</text>
+			</view>
+			<view style="flex: 1;">
+				<text style="font-size: 28rpx;text-align: right;">{{coupon.text}}</text>
+			</view>
+			<view style="width:26rpx;height:30rpx;margin-left: 10rpx;">
+				<image src="/static/icon/arrow_right.png" style="width:26rpx;height: 30rpx;"></image>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		props: {
+			coupon: {
+				type: Object,
+				default () {
+					return {}
+				}
+			}
+		},
+
+		methods: {
+
+		}
+	}
+</script>

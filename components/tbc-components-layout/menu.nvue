@@ -1,0 +1,184 @@
+<template>
+	<view class="tbc-flex-col" style="flex-direction:column;align-items: center;position: relative;justify-content: center;"
+	 :style="outerStyle">
+
+		<scroll-view style="flex-direction: row;" class="tbc-flex-row" scroll-x scroll-with-animation :show-scrollbar="false"
+		 :style="containerStyle" @scroll="onCategoryBarScroll" v-if="!isPaging">
+			<view class="tbc-flex-row" style="flex-direction: row;">
+				<view class="tbc-flex-row" style="flex-direction: row;flex-wrap: wrap;align-content: flex-start;flex-shrink: 0;"
+				 :style="containerStyle" v-for="(group, idx) in groupList" :key="idx">
+					<view class="tbc-flex-col" style="flex-direction: column;align-items: center;" :style="itemStyle" v-for="(item, index) in group"
+					 :key="index">
+						<view class="tbc-flex-row" style="align-items: center;justify-content: center;">
+							<image :src="item.icon" :style="imageStyle"></image>
+						</view>
+						<text :style="fontStyle">{{item.label}}</text>
+					</view>
+				</view>
+			</view>
+		</scroll-view>
+
+
+		<swiper @change="onSwiperChange" style="" v-if="isPaging" :style="containerStyle">
+			<swiper-item v-for="(group, idx) in groupList" :key="idx" :style="containerStyle">
+				<view class="tbc-flex-row" style="flex-direction: row;">
+					<view class="tbc-flex-row" style="flex-direction: row;flex-wrap: wrap;flex-shrink: 0;" :key="idx" :style="containerStyle">
+						<view class="tbc-flex-col" style="flex-direction: column;align-items: center;" :style="itemStyle" v-for="(item, index) in group" @click="toLink(item)"
+						 :key="index">
+							<view class="tbc-flex-row" style="align-items: center;justify-content: center;">
+								<image :src="item.icon" :style="imageStyle"></image>
+							</view>
+							<text :style="fontStyle">{{item.label}}</text>
+						</view>
+					</view>
+				</view>
+			</swiper-item>
+		</swiper>
+
+		<!-- 指示器 -->
+		<view v-if="showIndicator">
+			
+			<view style="height: 10rpx;width: 50rpx;background-color: #EBEBEB;border-radius:6rpx;position: relative;" v-if="!isPaging">
+				<view style="width: 25rpx;height: 10rpx;border-radius: 6rpx;position:absolute;" :style="'left:' + left">
+					<view style="width: 25rpx;height: 10rpx;border-radius: 6rpx;" :style="activeBackground"></view>
+				</view>
+			</view>
+			
+			<view class="tbc-flex-row" style="flex-direction:row;align-items: center;justify-content: center;" v-if="isPaging">
+				<view style="width:6px;height:6px;margin-left: 2px;margin-right: 2px;border-radius: 6px;transition: all .6s;" v-for="i in groupList.length"
+				 :key="i" :style="i == activeIndex + 1 ? activeBackground:indicatorBackground"></view>
+			</view>
+		</view>
+	</view>
+</template>
+<script>
+	import common from './mixins/common.js'
+	export default {
+		props: {
+			module: {
+				type: Object,
+				default () {
+					return {
+
+					}
+				}
+			}
+		},
+		
+		mixins: [common],
+		
+		data() {
+			return {
+				left: 0,
+				activeIndex: 0
+			}
+		},
+
+		computed: {
+
+			// 显示指示器
+			showIndicator() {
+				let config = this.module.config.indicator || {show: 0}
+				return  config.show
+			},
+			
+			
+			
+			isPaging() {
+				return this.module.config.menu.paging || 0
+			},
+			
+			indicatorBackground() {
+				return 'background-color: rgba(0, 0, 0, .4)'
+			},
+			
+			activeBackground() {
+				let style = []
+				let config = this.module.config.indicator || {}
+				style.push('background-color: ' + (config.activeBackground || '#57CD5F'))
+				style.push('width:12px');
+				return style.join(';')
+			},
+
+			groupList() {
+				let groupList = []
+				let list = this.module.data
+				let rowNumber = this.module.config.menu.rowNumber * 2
+				for (let i = 0; i < list.length; i += rowNumber) {
+					groupList.push(list.slice(i, i + rowNumber));
+				}
+				return groupList
+			},
+
+			outerStyle() {
+				let style = []
+				let config = this.module.config.outer || {}
+				if (config.style) style.push(outer.style)
+				if (config.width) style.push('width: ' + config.width + 'rpx')
+				if (config.height) style.push('height: ' + config.height + 'rpx')
+				if (config.marginTop) style.push('margin-top:' + config.marginTop + 'rpx')
+				if (config.marginBottom) style.push('margin-top:' + config.marginBottom + 'rpx')
+				if (config.background) style.push('background-color:' + config.background)
+				if (config.paddingTop) style.push('padding-top:' + config.paddingTop + 'rpx')
+				if (config.paddingBottom) style.push('padding-bottom:' + config.paddingBottom + 'rpx')
+				return style.join(";")
+			},
+
+			containerStyle() {
+				let style = []
+				let config = this.module.config.container || {}
+				if (config.style) style.push(container.style)
+				if (config.width) style.push('width: ' + config.width + 'rpx')
+				if (config.height) style.push('height: ' + config.height + 'rpx')
+				if (config.background) style.push('background:' + config.background)
+				if (config.radius) style.push('border-radius:' + config.radius + 'rpx')
+				return style.join(";")
+			},
+
+			itemStyle() {
+				let style = []
+				let config = this.module.config.menu || {}
+				let width = this.module.config.container.width || this.module.config.outer.width
+				config.width = width / config.rowNumber
+				if (config.style) style.push(item.style)
+				if (config.width) style.push('width: ' + config.width + 'rpx')
+				if (config.height) style.push('height: ' + config.height + 'rpx')
+				if (config.marginBottom) style.push('margin-bottom:' + config.marginBottom + 'rpx')
+				return style.join(";")
+			},
+
+
+			imageStyle() {
+				let config = this.module.config.icon || {}
+				let style = []
+				if (config.style) style.push(image.style)
+				if (config.size) style.push('width: ' + config.size + 'rpx')
+				if (config.size) style.push('height: ' + config.size + 'rpx')
+				if (config.background) style.push('background-color:' + config.background)
+				if (config.marginBottom) style.push('margin-bottom: ' + config.marginBottom + 'rpx')
+				return style.join(";")
+			},
+
+			fontStyle() {
+				let style = []
+				let config = this.module.config.font || {}
+				if (config.marginTop) style.push('margin-top: ' + config.marginTop + 'rpx')
+				if (config.fontSize) style.push('font-size: ' + config.fontSize + 'rpx')
+				if (config.fontColor) style.push('color: ' + config.fontColor)
+				return style.join(";")
+			}
+		},
+
+		methods: {
+			onCategoryBarScroll(e) {
+				let ratio = e.detail.scrollLeft / uni.upx2px(750) * uni.upx2px(50)
+				this.left = uni.upx2px(Math.round(ratio)) + 'px'
+			},
+
+			onSwiperChange(e) {
+				let index = e.detail.current
+				this.activeIndex = index
+			}
+		}
+	}
+</script>

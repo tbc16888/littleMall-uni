@@ -1,0 +1,123 @@
+<template>
+
+	<view class="tbc-flex-row" style="flex-direction: row;width:690rpx;align-self:flex-start;">
+
+		<!-- 商品图片 -->
+		<view style="margin-right:20rpx" :style="imageSizeStyle">
+			<image :src="goods.goods_image" style="border-radius:6rpx;" :style="imageSizeStyle">
+			</image>
+		</view>
+
+		<!-- 左边信息 -->
+		<view class="tbc-flex-col" style="flex-direction: column;flex: 1;">
+
+			<view class="tbc-text-clamp-2" :style="titleStyle">
+				<text style="font-size:28rpx;text-overflow: ellipsis;lines:2;align-self:flex-start;line-height:32rpx">{{goods.goods_name}}</text>
+			</view>
+
+			<view :style="skuTextStyle">
+				<text style="color:#999;font-size:24rpx;font-family: PingFang SC;font-weight: 500;">{{goods.goods_sku_text}}</text>
+			</view>
+
+
+			<view class="tbc-flex-row" style="flex-direction: row;height:40rpx;justify-items: center;align-items: center;" v-if="profit">
+				<view style="width:54rpx;background-color:#3c4148;">
+					<text style="color:#FFF;font-size:20rpx;font-family:PingFang SC;text-align:center;">收益</text>
+				</view>
+				<view style="background-color:#fce0b9;padding-left:10rpx;padding-right: 10rpx;">
+					<text style="color:#333;font-size:20rpx;font-family:PingFang SC;">¥{{profit}}</text>
+				</view>
+			</view>
+
+			<view style="flex: 1;"></view>
+			<view class="tbc-flex-row" style="flex-direction: row;">
+
+				<view class="tbc-flex-row" style="flex-direction: row;flex: 1;">
+					<!-- <text style="color:#FF3300;font-size:26rpx;font-weight: bold;font-family: PingFang SC;align-self: flex-end;padding-bottom:4rpx;">¥</text> -->
+					<text style="color:#FF3300;font-size:36rpx;font-weight: bold;font-family: PingFang SC;" v-if="goods.goods_price !=='0.00' || !goods.integral">¥{{goods.goods_price}}</text>
+					<text style="color:#FF3300;font-size:30rpx;font-weight: bold;font-family: PingFang SC;" v-if="goods.goods_price ==='0.00' && goods.integral">{{goods.integral}}积分</text>
+				</view>
+
+				<view>
+					<text style="color:#333;font-size:26rpx;">x{{goods.goods_number}}</text>
+				</view>
+			</view>
+		</view>
+
+		<!-- <view class="tbc-flex-col" style="width: 140rpx;align-items: flex-end;">
+			<view class="tbc-flex-row" style="flex-direction: row;align-items: flex-end;">
+				<text style="font-size: 22rpx;color: #333;padding-bottom:2rpx;">¥</text>
+				<text style="font-size: 32rpx;color: #333;">{{goods.activity_price}}</text>
+			</view>
+			<view>
+				<text style="color:#999;font-size:26rpx;">x{{goods.goods_number}}</text>
+			</view>
+		</view> -->
+	</view>
+</template>
+<script>
+	export default {
+
+		props: {
+			goods: {
+				type: Object,
+				default () {
+					return {
+
+					}
+				}
+			},
+
+			profit: {
+				type: Number,
+				default () {
+					return 0
+				}
+			},
+
+			imageSize: {
+				type: Number,
+				default () {
+					return 160
+				}
+			},
+
+			width: {
+				type: Number,
+				default: 690
+			},
+		},
+
+		computed: {
+
+			imageSizeStyle() {
+				return 'width: ' + this.imageSize + 'rpx;height:' + this.imageSize + 'rpx;'
+			},
+
+			titleStyle() {
+				let style = []
+				style.push('width: ' + (this.width - this.imageSize - 10 - 40) + 'rpx')
+				// #ifndef APP-NVUE
+				style.push('line-height: 1')
+				// #endif
+				return style.join(';')
+			},
+
+			skuTextStyle() {
+				let style = [this.titleStyle]
+				// #ifndef APP-PLUS
+				style.push('margin-top: 12rpx')
+				// #endif
+				return style.join(';')
+			},
+		},
+
+		methods: {
+			routerTo() {
+				uni.navigateTo({
+					url: '/pages/goods/detail?goods_id=' + this.goods.goods_id
+				})
+			}
+		}
+	}
+</script>

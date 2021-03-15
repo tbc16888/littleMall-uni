@@ -1,0 +1,199 @@
+<template>
+	<view>
+		<view class="tbc-page-background"></view>
+		<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;align-items: center;">
+			<view style="background-color: #FFFFFF;margin-top: 20rpx;">
+				<tbc-dynamic-form :form="dynamicForm" ref="form" />
+			</view>
+		</view>
+		<view style="position: fixed;bottom: 20rpx;left: 30rpx;right: 30rpx;">
+			<view class="tbc-flex-col" style="align-items: center;">
+				<view class="tbc-flex-row"
+					style="height: 90rpx;align-items: center;justify-content: center;background-color: #db0018;width:690rpx;border-radius:90rpx;margin-top:30rpx;"
+					@click="formSubmit">
+					<text style="color: #fff;font-size: 26rpx;">确定</text>
+				</view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	import tbcDynamicForm from '@/components/tbc-components/dynamic-form/index.nvue'
+	export default {
+
+		components: {
+			tbcDynamicForm
+		},
+
+		data() {
+			return {
+				dynamicForm: [
+					// {
+					// 	label: '地址',
+					// 	value: '',
+					// 	field: 'address',
+					// 	type: 'page',
+					// 	page: '/pages/location/location',
+					// 	placeholder: '选择详细地址',
+					// 	arrow: 1
+					// },
+					{
+						label: '收货人',
+						value: '',
+						field: 'contact',
+						type: 'input',
+						placeholder: '请填写收货人姓名',
+					},
+					{
+						label: '联系电话',
+						value: '',
+						field: 'contact_number',
+						type: 'tel',
+						placeholder: '手机号码'
+					},
+
+					{
+						label: '所在地区',
+						value: [],
+						field: 'region',
+						type: 'selector',
+						placeholder: '省市区县、乡镇等',
+						api: '/basic.region',
+						level: 3,
+						init: []
+					},
+					{
+						label: '详细地址',
+						value: '',
+						field: 'address',
+						type: 'input',
+						placeholder: '请选择详细地址'
+					},
+					{
+						label: '门牌号',
+						value: '',
+						field: 'house_number',
+						type: 'input',
+						placeholder: '例：1栋2层301室'
+					},
+					{
+						label: '设为默认地址',
+						note: '每次下单会默认推荐使用该地址',
+						value: 1,
+						field: 'is_default',
+						type: 'switch',
+						color: '#db0018',
+						labelStyle: 'width:400rpx'
+					},
+					{
+						label: '省',
+						value: '',
+						field: 'province',
+						type: 'hidden'
+					},
+					{
+						label: '市',
+						value: '',
+						field: 'city',
+						type: 'hidden'
+					},
+					{
+						label: '区',
+						value: '',
+						field: 'district',
+						type: 'hidden'
+					},
+					{
+						label: '经度',
+						value: '',
+						field: 'longitude',
+						type: 'hidden'
+					},
+					{
+						label: '纬度',
+						value: '',
+						field: 'latitude',
+						type: 'hidden'
+					},
+				],
+			}
+		},
+
+		onLoad: function(options) {
+			this.addressId = options.address_id ? options.address_id : ''
+			uni.setNavigationBarTitle({
+				title: (this.addressId ? '编辑' : '新增') + '地址'
+			})
+			this.getAddressInfo()
+		},
+
+		onShow: function() {
+			// let address = uni.getStorageSync('map@choice')
+			// if (address) this.setDynamicForm({
+			// 	address: address.title,
+			// 	district: address.adcode,
+			// 	province: address.adcode.substr(0, 3) + '000',
+			// 	city: address.adcode.substr(0, 4) + '00',
+			// 	longitude: address.longitude,
+			// 	latitude: address.latitude
+			// })
+			// console.log(address)
+		},
+
+		onReady() {
+			this.$refs.form.init(this.dynamicForm)
+		},
+
+		methods: {
+
+			setDynamicForm(data) {
+				this.dynamicForm.forEach(item => {
+					if (typeof data[item.field] !== 'undefined') item.value = data[item.field]
+					if (item.field === 'region' && typeof data.province !== 'undefined') {
+						item.value = [data.province, data.city, data.district]
+						item.init = item.value
+					}
+				});
+				if (this.$refs.form) this.$refs.form.init(this.dynamicForm) // this.$refs.form.initSelector()
+			},
+
+
+			async getAddressInfo() {
+				if (!this.addressId) return
+				const res = await uni.$http.get('/user.address/detail', {
+					address_id: this.addressId
+				})
+				if (res.data.code !== 0) {
+					return uni.showToast({
+						title: res.data.message,
+						icon: 'none'
+					})
+				}
+				this.setDynamicForm(res.data.data)
+			},
+
+
+			// 提交
+			async formSubmit() {
+				let form = this.$refs.form.getFormData()
+				form.address_id = this.addressId
+				let region = form.region || []
+				form.province = region.shift() || ''
+				form.city = region.shift() || ''
+				form.district = region.shift() || ''
+				console.log(JSON.stringify(form))
+				// this.dynamicForm.forEach(item => form[item.field] = item.value)
+				const api = '/user.address/' + (form.address_id ? 'edit' : 'add')
+				const res = await uni.$http.post(api, form)
+				if (res.data.code !== 0) {
+					return uni.showToast({
+						title: res.data.message,
+						icon: 'none'
+					})
+				}
+				uni.navigateBack()
+			}
+		}
+	}
+</script>

@@ -1,0 +1,32 @@
+<template>
+	<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;align-items: center;">
+		<view class="tbc-flex-col" style="flex-direction: column;width: 690rpx;">
+			<view class="tbc-flex-row" style="height: 88rpx;align-items: center;flex-direction: row;">
+				<text style="font-family:PingFang SC;font-weight: bold;font-size:28rpx;color:#333333;">全部商品</text>
+			</view>
+			<view v-for="(goods, index) in goods.list" :key="index" style="padding-bottom: 40rpx;">
+				<order-goods :goods="goods"></order-goods>
+			</view>
+		</view>
+	</view>
+</template>
+<script>
+	import OrderGoods from '@/components/app/SettlementGoods.nvue'
+	export default {
+
+		components: {
+			OrderGoods
+		},
+
+		props: {
+			goods: {
+				type: Object,
+				default () {
+					return {
+						
+					}
+				}
+			}
+		}
+	}
+</script>

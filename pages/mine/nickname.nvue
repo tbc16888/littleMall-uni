@@ -1,0 +1,80 @@
+<template>
+	<view>
+
+		<view class="tbc-page-background"></view>
+
+		<view style="height: 20rpx;"></view>
+		<view class="tbc-flex-col" style="width: 750rpx;align-items: center;background-color: #FFF;">
+			<view style="font-size: 26rpx;color: #999;height: 80rpx;justify-content: center;width: 690rpx;">
+				<input type="text" style="font-size: 28rpx;" @confirm="inputConfirm" v-model="keyword" placeholder="请输入昵称" />
+			</view>
+		</view>
+
+		<!-- #ifdef MP-WEIXIN -->
+		<view style="height: 20rpx;"></view>
+		<view class="tbc-flex-row" style="align-items: center;justify-content: center;height: 110rpx;" @click="formSubmit">
+			<view class="tbc-flex-row" style="height:80rpx;align-items: center;justify-content: center;background-color: #db0018;width:750rpx;">
+				<text style="color: #fff;font-size: 26rpx;">确定</text>
+			</view>
+		</view>
+		<!-- #endif -->
+	</view>
+</template>
+
+<script>
+	import {
+		mapGetters
+	} from 'vuex'
+	export default {
+		data() {
+			return {
+				keyword: '',
+				userInfo: {}
+			}
+		},
+
+		computed: {
+			...mapGetters(['loginUserInfo'])
+		},
+
+		onLoad: function() {
+			this.keyword = this.loginUserInfo.nick_name
+		},
+
+		onNavigationBarButtonTap(event) {
+			if (event.index === 0) {
+				this.formSubmit()
+			}
+		},
+
+		methods: {
+
+			inputConfirm() {
+				uni.hideKeyboard()
+			},
+
+			async formSubmit() {
+				if (!this.keyword) {
+					return uni.showToast({
+						title: "请输入昵称",
+						icon: "none"
+					})
+				}
+				const res = await uni.$http.post('/user/profile', {
+					nick_name: this.keyword
+				})
+
+				if (res.data.code !== 0) {
+					return uni.showToast({
+						title: res.data.message,
+						icon: "none"
+					})
+				}
+				let info = JSON.parse(JSON.stringify(this.loginUserInfo))
+				info.nick_name = this.keyword
+				this.$store.commit('setLoginUserInfo', info)
+				uni.navigateBack()
+			}
+		}
+	}
+</script>

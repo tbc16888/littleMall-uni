@@ -1,0 +1,193 @@
+<template>
+	<view class="tbc-flex-row" style="flex-direction: row;width: 750rpx;">
+		<view class="tbc-flex-row" style="flex-direction: row;width:100rpx;align-items: center;justify-content: center;">
+			<view style="width: 40rpx;height: 40rpx;" @click="toggleSelected" v-if="!goods.is_invalid">
+				<image :src="'/static/icon/radio'+ (goods.is_checked ? '_on':'') + '.png'" style="width: 40rpx;height: 40rpx;"></image>
+			</view>
+			<text style="font-size: 22rpx;color: #999;" v-if="goods.is_invalid">失效</text>
+		</view>
+
+
+		<view class="tbc-flex-row" style="flex-direction: row;flex: 1;">
+
+			<view class="tbc-flex-col" style="margin-right: 20rpx;" :style="invalidStyle">
+				<view class="tbc-flex-col" style="position: relative;justify-content: center;" :style="imageSizeStyle">
+					<image :src="goods.goods_image" style="border-radius: 10rpx;" :style="imageSizeStyle"></image>
+					<view class="tbc-flex-col" style="position: absolute;height: 40rpx;background-color:rgba(0, 0, 0, 0.5);align-items: center;justify-content: center;border-radius: 40rpx;"
+					 v-if="goods.reason" :style="'width:' + imageSize +'rpx;'">
+						<text style="font-size: 24rpx;color: #FFF;font-family: PingFang SC;">{{goods.reason}}</text>
+					</view>
+				</view>
+			</view>
+
+
+			<!-- 左边信息 -->
+			<view class="tbc-flex-col" style="flex-direction: column;flex: 1;" :style="invalidStyle">
+				<view class="tbc-text-clamp-2" :style="titleSizeStyle">
+					<text style="font-size:28rpx;text-overflow: ellipsis;lines:2;align-self:flex-start;font-family: PingFang SC;">{{goods.goods_name}}</text>
+				</view>
+
+				<view class="tbc-flex-row" style="margin-top: 6rpx;flex-direction: row;flex-wrap: wrap;">
+					<text style="color:#999;font-size:24rpx;font-family: PingFang SC;">{{goods.goods_sku_text}}</text>
+				</view>
+
+				<view style="flex: 1;"></view>
+
+
+				<view style="height:12rpx;"></view>
+
+				<view class="tbc-flex-row" style="flex-direction: row;align-items: center;">
+					<view class="tbc-flex-row" style="flex: 1;flex-direction: row;">
+
+						<view class="tbc-flex-row" style="flex-direction: row;align-self: center;" v-if="goods.integral">
+							<text style="color:#FF3300;font-size:36rpx;font-family: PingFang SC;font-weight: bold;">{{goods.integral}}</text>
+							<text style="color:#FF3300;font-size:26rpx;font-family: PingFang SC;font-weight: bold;padding-top: 8rpx;">积分</text>
+							<text style="color:#FF3300;font-size:36rpx;font-family: PingFang SC;font-weight: bold;" v-if="goods.goods_price">+</text>
+						</view>
+
+						<view class="tbc-flex-row" style="flex-direction: row;" v-if="goods.goods_price">
+							<text style="color:#FF3300;font-size:26rpx;font-family: PingFang SC;font-weight: bold;padding-top: 10rpx;">¥</text>
+							<text style="color:#FF3300;font-size:36rpx;font-family: PingFang SC;font-weight: bold;">{{goods.goods_price}}</text>
+						</view>
+					</view>
+
+					<view style="margin-right: 20rpx;" v-if="!goods.is_invalid">
+						<stepper :value="goods.goods_number" @change="onGoodsNumberChange" ref="stepper" plusBackground="#F30"></stepper>
+					</view>
+				</view>
+
+
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	import Stepper from '@/components/tbc-components/stepper/index.nvue'
+	export default {
+		components: {
+			Stepper
+		},
+
+		props: {
+
+			goods: {
+				type: Object,
+				default () {
+					return {}
+				}
+			},
+
+			imageSize: {
+				type: Number,
+				default () {
+					return 160
+				}
+			},
+
+			width: {
+				type: Number,
+				default: 750
+			},
+		},
+
+		computed: {
+			radioImagePath() {
+
+			},
+
+			imageSizeStyle() {
+				let style = []
+				style.push('width: ' + this.imageSize + 'rpx')
+				style.push('height: ' + this.imageSize + 'rpx')
+				return style.join(';')
+			},
+
+			titleSizeStyle() {
+				return 'width: ' + (this.width - this.imageSize - 90) + 'rpx;'
+			},
+
+			invalidText() {
+				if (this.goods.sale_status !== 1) return '已下架';
+				if (this.goods.goods_number > this.goods.stock) return '补货中';
+				return ''
+			},
+
+			invalidStyle() {
+				return {
+					'opacity': this.goods.is_invalid ? 0.5 : 1
+				}
+			},
+		},
+
+		methods: {
+
+			// 更改状态
+			async toggleSelected() {
+				let goods = JSON.parse(JSON.stringify(this.goods))
+				goods.is_checked = (Number)(!goods.is_checked)
+				const res = this.editCartGoods(goods)
+			},
+
+			async onGoodsNumberChange(data) {
+				let that = this
+				let goods = JSON.parse(JSON.stringify(this.goods))
+				goods.goods_number = data.number
+				if (data.number < 1) {
+					uni.showModal({
+						title: "提示",
+						content: "确定要从购物车中删除吗？",
+						complete(ret) {
+							if (ret.confirm) that.deleteFromCart()
+						}
+					})
+				} else {
+
+					this.editCartGoods(goods)
+					// const res = await uni.$http.post('/cart/edit', {
+					// 	goods_id: cartInfo.goods_id,
+					// 	goods_sku_hash: cartInfo.goods_sku_hash,
+					// 	goods_number: cartInfo.goods_number,
+					// 	is_selected: cartInfo.is_selected,
+					// 	is_quick_buy: 0,
+					// })
+					// if (res.data.code !== 0) {
+					// 	return uni.showToast({
+					// 		title: res.data.message,
+					// 		icon: 'none'
+					// 	})
+					// }
+					// this.$refs.stepper.init(data.number)
+				}
+
+			},
+
+			// 更新商品信息
+			async editCartGoods(goods) {
+				const res = await uni.$http.post('/cart/edit', {
+					goods_id: this.goods.goods_id,
+					goods_sku_key: this.goods.goods_sku_key,
+					goods_number: goods.goods_number,
+					is_checked: goods.is_checked,
+					is_direct: 0,
+				})
+				if (res.data.code !== 0) {
+					return uni.showToast({
+						title: res.data.message,
+						icon: 'none'
+					})
+				}
+				this.$emit('refresh')
+			},
+
+
+			// 删除购物车中的商品
+			async deleteFromCart() {
+				const res = await uni.$http.post('/cart/delete', {
+					cart_id: this.goods.cart_id
+				})
+				this.$emit('refresh')
+			}
+		}
+	}
+</script>

@@ -1,0 +1,11 @@
+.tbc-flex-row{display: flex;flex-direction: row}
+.tbc-flex-col{display: flex;flex-direction: column}
+uni-view.tbc-flex-row{display: flex;flex-direction: row}
+uni-view.tbc-flex-col{display: flex;flex-direction: column}
+.tbc-text-clamp-1{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow:hidden}
+.tbc-text-clamp-2{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+uni-view.tbc-text-clamp-1{display:-webkit-box}
+uni-view.tbc-text-clamp-2{display:-webkit-box}
+::-webkit-scrollbar{display: none;}
+button::after{border:none;}
+button:not([size='mini']) {min-height:auto;width:auto;margin-left: auto;margin-right: auto;}

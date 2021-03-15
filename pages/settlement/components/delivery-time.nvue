@@ -1,0 +1,74 @@
+<template>
+	<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;align-items: center;">
+		<view class="tbc-flex-row" style="flex-direction: row;align-items: center;width: 690rpx;" @click="showPicker">
+			<view style="">
+				<text style="font-size: 28rpx;">送达时间</text>
+			</view>
+			<view style="flex: 1;">
+				<text style="font-size: 28rpx;text-align: right;">尽快送达</text>
+			</view>
+			<view style="width:26rpx;height:30rpx;margin-left: 10rpx;">
+				<image src="/static/icon/arrow_right.png" style="width:26rpx;height: 30rpx;"></image>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+
+		props: {
+			range: {
+				type: Array,
+				default: []
+			}
+		},
+
+		data() {
+			return {
+				columnIndexValue: [0, 0]
+			}
+		},
+
+		computed: {
+			deliveryTimeData() {
+				return [this.column1Data, this.column2Data]
+			},
+
+			column1Data() {
+				if (!this.range.length) return []
+				let result = []
+				this.range.forEach(item => {
+					result.push(item.label)
+				})
+				return result
+			},
+
+			column2Data() {
+				if (!this.range.length) return []
+				let result = []
+				this.range[this.columnIndexValue[0]].list.forEach(time => {
+					result.push([time[0].label, time[1].label].join(" - "))
+				})
+				return result
+			}
+		},
+
+		methods: {
+			showPicker() {
+				// #ifdef APP-NVUE
+				const drawer = uni.getSubNVueById('deliveryTime')
+				drawer.show('slide-in-bottom', 200);
+				// #endif
+				// #ifdef H5
+				this.$refs.picker.open()
+				// #endif
+			},
+
+			onPickerColumnChange(e) {
+				console.log(e.detail.value)
+				this.columnIndexValue = e.detail.value
+			}
+		}
+	}
+</script>

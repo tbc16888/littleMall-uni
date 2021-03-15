@@ -1,0 +1,190 @@
+<template>
+	<view>
+		
+		<!-- #ifdef H5 -->
+		<view class="tbc-page-background"></view>
+		<!-- #endif -->
+		
+		<!-- 顶部城市、搜索 -->
+		<view style="position: fixed;top: var(--window-top);width: 750rpx;z-index:99">
+			<header-search></header-search>
+		</view>
+
+		
+		<!-- #ifdef H5 -->
+		<scroll-view scroll-y style="position: fixed;top: var(--window-top);width: 750rpx;bottom: 0;">
+			<view style="height: 100rpx;"></view>
+			<!-- #endif -->
+
+			<!-- #ifndef H5 -->
+			<scroll-view scroll-y style="position: fixed;top:100rpx;width: 750rpx;bottom: 0;">
+				<!-- #endif -->
+
+
+
+				<view class="tbc-flex-col" style="flex-direction: column;align-items: center;width: 750rpx;background-color: #FFF;">
+					<view class="tbc-flex-row" style="flex-direction: row;height:90rpx;align-items: center;background-color: #F5F5F5;width: 750rpx;padding-left: 30rpx;">
+						<text style="font-size: 26rpx;color: #666;">当前定位地址</text>
+					</view>
+					<view class="tbc-flex-row" style="flex-direction: row;width: 690rpx;align-items: center;padding-top:30rpx;padding-bottom:30rpx;">
+
+						<view class="tbc-flex-col" style="flex:1">
+							<text style="font-size:30rpx;color: #333;">定位失败，请手动选择</text>
+							<!-- 	<view style="margin-top: 8rpx;">
+				<text style="font-size: 28rpx;color: #999;">你</text>
+			</view> -->
+						</view>
+						<view class="tbc-flex-row" style="flex-direction: column;align-items: center;margin-left:40rpx;">
+							<text style="font-size: 28rpx;color: #008f00;">重新定位</text>
+						</view>
+					</view>
+				</view>
+
+				<!-- 我的地址 -->
+				<view class="tbc-flex-col" style="flex-direction: column;align-items: center;width: 750rpx;background-color: #FFF;"
+				 v-if="addressList.length">
+
+					<view class="tbc-flex-row" style="flex-direction: row;height:90rpx;align-items: center;background-color: #F5F5F5;width:750rpx;padding-left: 30rpx;">
+						<text style="font-size: 26rpx;color: #666;">我的收货地址</text>
+					</view>
+
+
+					<view class="tbc-flex-col" style="align-items: center;" v-for="(addressInfo, index) in addressList" :key="index">
+						<view class="tbc-flex-col" style="width: 690rpx;padding-top:20rpx;padding-bottom:20rpx;" @click="onAddressClick(index)">
+							<view class="tbc-flex-row">
+								<text style="font-size:28rpx;margin-top:10rpx;color: #333;">{{addressInfo.address}}</text>
+							</view>
+
+							<view class="tbc-flex-row" style="flex-direction: row;margin-top: 10rpx;">
+								<text style="font-size:28rpx;color:#999;">{{addressInfo.contact}}</text>
+								<text style="font-size:28rpx;color:#999;margin-left:10rpx;">{{addressInfo.contact_number}}</text>
+							</view>
+						</view>
+						<view style="height: 1px;width: 750rpx;background-color: #F5F5F5;" v-if="index < addressList.length - 1"></view>
+					</view>
+				</view>
+
+				<!-- 附近地址 -->
+				<view class="tbc-flex-col" style="flex-direction: column;align-items: center;width: 750rpx;background-color: #FFF;"
+				 v-if="nearbyList.length">
+					<view class="tbc-flex-row" style="flex-direction: row;height:90rpx;align-items: center;background-color: #F5F5F5;width: 750rpx;padding-left: 30rpx;">
+						<text style="font-size: 26rpx;color: #666;">附近地址</text>
+					</view>
+
+					<template v-for="(item, index) in nearbyList">
+						<view class="tbc-flex-col" style="flex-direction: column;align-items: center;width: 750rpx;" :key="index">
+							<nearby-item @click="choiceAddress(index)" :item="item"></nearby-item>
+							<view style="width: 690rpx;background-color: #F5F5F5;height: 0.5px;" v-if="index < nearbyList.length - 1"></view>
+						</view>
+					</template>
+				</view>
+			</scroll-view>
+	</view>
+</template>
+
+<script>
+	import http from '@/utils/http.js'
+	import address from '@/mixins/address.js'
+	import map from './mixins/map.js'
+	import HeaderSearch from './components/Header.nvue'
+	import NearbyItem from './components/NearbyItem.nvue'
+
+
+
+	export default {
+
+		mixins: [map, address],
+
+		components: {
+			HeaderSearch,
+			NearbyItem
+		},
+
+		data() {
+			return {
+				location: {
+					longitude: 26.075302,
+					latitude: 119.306239,
+				},
+				longitude: '',
+				latitude: '',
+				nearbyList: [],
+				initComplete: false,
+				addressList: []
+			}
+		},
+
+
+		onLoad: function() {
+			this.getLocation()
+			this.getUserAddressList()
+		},
+
+		methods: {
+
+			async onAddressClick(index) {
+				let item = this.addressList[index]
+				const res = await http.post('/warehouse/set', {
+					address_id: item.address_id
+				})
+				if (res.data.code !== 0) {
+					return uni.showToast({
+						title: res.data.message,
+						icon: 'none'
+					})
+				}
+				this.$store.state.test = item.address
+				uni.setStorageSync('address', item)
+				uni.navigateBack()
+				// uni.showToast({
+				// 	title: res.data.message
+				// })
+				// console.log(item)
+			},
+
+			// 获取地位
+			
+
+
+			// 选择附近
+			choiceAddress(index) {
+				let item = this.nearbyList[index]
+				// if (!item.warehouse_id) {
+				// 	return uni.showToast({
+				// 		title: '该地址不在配范围内',
+				// 		icon: 'none'
+				// 	})
+				// }
+				uni.setStorage({
+					key: 'map@choice',
+					data: item
+				})
+				uni.navigateBack()
+			},
+
+	
+
+			async getUserAddressList() {
+				const res = await http.get('/address', {
+					page: 1,
+					size: 1000
+				})
+				if (res.data.code !== 0) {
+					return uni.showToast({
+						title: res.data.message,
+						icon: 'none'
+					})
+				}
+				let data = res.data.data
+				data.list.forEach(item => {
+					item = this.addressFormat(item)
+				})
+				this.addressList = this.addressList.concat(data.list)
+			},
+		}
+	}
+</script>
+
+<style>
+
+</style>

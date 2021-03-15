@@ -1,0 +1,30 @@
+<template>
+	<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;align-items: center;">
+		<view class="tbc-flex-row" style="flex-direction: row;margin-top:8rpx;width: 690rpx;" v-for="(item, index) in charges.list"
+		 :key="index">
+			<view style="flex: 1;">
+				<text style="font-size: 12px;color: #3d4244;" v-if="!item.highlight">{{item.label}}</text>
+				<text style="font-size: 16px;color: #3d4244;" v-if="item.highlight">{{item.label}}</text>
+			</view>
+			<view>
+				<text style="font-size: 12px;color: #3d4244;" v-if="!item.highlight">{{item.text}}</text>
+				<text style="font-size: 16px;color: #ff5500;" v-if="item.highlight">{{item.text}}</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		props: {
+			charges: {
+				type: Object,
+				default () {
+					return {
+						
+					}
+				}
+			}
+		}
+	}
+</script>

@@ -1,0 +1,154 @@
+<template>
+	<view v-if="initialized">
+
+		<view class="tbc-page-background"></view>
+
+
+		<view class="tbc-flex-col" style="width: 750rpx;" v-if="!isLogged">
+			<empty :isLogged="isLogged"></empty>
+		</view>
+
+		<template v-if="isLogged">
+			<view class="tbc-flex-col" style="width: 750rpx;" v-if="!response.submit.show">
+				<empty :isLogged="isLogged"></empty>
+			</view>
+			
+			<view class="tbc-flex-col" style="width: 750rpx;background-color: #FFF;" v-for="(cart, index) in dataList" :key="cart.cart_id">
+				<view style="padding-bottom:30rpx;padding-top: 30rpx;">
+					<cart-item :goods="cart" :width="710" @refresh="getDataList"></cart-item>
+				</view>
+				<view style="height: 1px;width: 750rpx;background-color: #F5F5F5;" v-if="index < dataList.length - 1"></view>
+			</view>
+
+			<view class="tbc-flex-col" v-if="invalidList.length">
+				<view class="tbc-flex-row" style="flex-direction: row;height:90rpx;width: 750rpx;align-items: center;">
+					<view style="flex:1">
+						<text style="font-size: 26rpx;margin-left:30rpx;">失效商品</text>
+					</view>
+					<view style="padding-right: 30rpx;" @click="clearInvalid">
+						<text style="font-size: 26rpx;">清空</text>
+					</view>
+				</view>
+				<view class="tbc-flex-col" style="width: 750rpx;background-color: #FFF;" v-for="(cart, index) in invalidList" :key="cart.cart_id">
+					<view style="padding-bottom:30rpx;padding-top: 30rpx;">
+						<cart-item :goods="cart" :width="710" @refresh="getDataList"></cart-item>
+					</view>
+					<view style="height: 1px;width: 750rpx;background-color: #F5F5F5;" v-if="index < invalidList.length - 1"></view>
+				</view>
+			</view>
+
+
+			<view style="height: 110rpx;"></view>
+			<view style="position: fixed;bottom:0;width: 750rpx;z-index:9" v-if="response.submit.show" :style="fixedBottomStyle">
+				<cart-footer :submit="response.submit" @refresh="getDataList" />
+				<view style="width:750rpx;height: 1px;background-color: #F1F1F1;"></view>
+			</view>
+		</template>
+	</view>
+</template>
+
+<script>
+	import empty from './components/empty.nvue'
+	import CartItem from './components/item.nvue'
+	import CartFooter from './components/footer.nvue'
+	import cart from './mixins/cart.js'
+	export default {
+
+		components: {
+			empty,
+			CartItem,
+			CartFooter,
+		},
+
+		mixins: [cart],
+
+		data() {
+			return {
+				dataList: [],
+				invalidList: [],
+				fixedBottomStyle: '',
+				initialized: false,
+				response: {
+					submit: {
+						show: false
+					}
+				},
+				isLogged: false
+			}
+		},
+
+		onReady: function() {
+			this.fixedBottomStyle = 'bottom:' + uni.getSystemInfoSync().windowBottom + 'px'
+		},
+
+		onShow: function() {
+			this.getDataList()
+		},
+
+		onPullDownRefresh: function() {
+			this.getDataList()
+		},
+
+		methods: {
+
+			async clearInvalid() {
+				uni.showModal({
+					title: '提示',
+					content: '确定要清空吗？',
+					complete: (res) => {
+						if (res.cancel) return;
+						this.sendClearInvalid()
+					}
+				})
+			},
+
+			async sendClearInvalid() {
+				let id = []
+				this.invalidList.forEach(item => id.push(item.cart_id))
+				const res = await uni.$http.post('/cart/delete', {
+					cart_id: id.join(',')
+				})
+				if (res.data.code !== 0) {
+					return uni.showToast({
+						title: res.data.message,
+						icon: 'none'
+					})
+				}
+				this.getDataList()
+			},
+
+
+			async getDataList() {
+				const res = await uni.$http.get('/cart')
+				this.initialized = true
+				this.isLogged = !(res.data.code === 401)
+				uni.stopPullDownRefresh()
+				if (res.data.code !== 0) {
+					if (res.data.code === 401) {
+						this.dataList = []
+						this.invalidList = []
+						return
+					}
+					return uni.showToast({
+						title: res.data.message,
+						icon: 'none'
+					})
+				}
+				let data = res.data.data
+				let dataList = []
+				let invalidList = []
+				data.items.data.list.forEach(item => {
+					if (item.is_invalid) {
+						invalidList.push(item)
+					} else {
+						dataList.push(item)
+					}
+				})
+				console.log(dataList)
+				this.dataList = dataList
+				this.invalidList = invalidList
+				this.response = data
+			}
+		}
+	}
+</script>

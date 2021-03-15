@@ -1,0 +1,56 @@
+<template>
+	<view>
+		<view class="tbc-page-background"></view>
+		
+		
+		<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;align-items: center;background-color: #FFF;">
+			<view style="height: 40rpx;"></view>
+			<view class="tbc-flex-col" style="width: 690rpx;">
+				<view class="tbc-flex-row" style="flex-direction: row;margin-bottom: 10rpx;" v-for="(item, index) in shippingList" :key="index">
+					<view>
+						<text style="font-size: 24rpx;">{{item.label}}：</text>
+					</view>
+					<view>
+						<text style="font-size: 24rpx;font-weight: bold;">{{item.text}}</text>
+					</view>
+				</view>
+			</view>
+			<view style="height: 20rpx;"></view>
+		</view>
+		<view style="height: 20rpx;"></view>
+		
+		
+		
+		
+		<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;position: relative;background-color: #FFFFFF;padding-top: 30rpx;">
+			<view style="border-left-width: 1px;border-left-color: #DBDBDB;border-style:dashed;position: absolute;left:56rpx;top:0rpx;bottom:30rpx;"></view>
+			<view class="tbc-flex-row" style="flex-direction: row;position: relative;padding:15rpx 30rpx;width: 750rpx;margin-bottom: 20px;" v-for="i in 10" :key="i">
+				<view style="width: 20rpx;height: 20rpx;border-radius:50%;background-color:#979797;position: absolute;left:46rpx;top:30rpx;"></view>
+				<view class="tbc-flex-col" style="flex-direction: column;margin-left: 80rpx;width: 610rpx;">
+					<text style="font-size: 24rpx;color:#999999;">福建省福州市仓山区紫竹苑公司】 派件中 派件人: 张贻钦 电话 17635481320 如有疑问，请联系：05918639</text>
+					<text style="font-size: 24rpx;color:#999999;margin-top:8rpx;">2017-04-01 12:00:00</text>
+				</view>
+				<!-- <view style="background-color: #FFF;position:absolute;left: 0;width: 80rpx;top:0rpx;height:50rpx;" v-if="i == 1"></view> -->
+				<view style="background-color: #FFF;position:absolute;left: 0;width: 80rpx;bottom: 0;top: 50rpx;" v-if="i == 10"></view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				shippingList: [
+					{label: '承运公司', text: '邮政速递包裹'},
+					{label: '联系电话', text: '11183'},
+					{label: '运单号', text: '9830151174295'},
+				]
+			}
+		},
+		
+		methods: {
+
+		}
+	}
+</script>

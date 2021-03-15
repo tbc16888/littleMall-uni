@@ -1,0 +1,86 @@
+<template>
+	<view>
+		<view class="tbc-page-background"></view>
+
+		<view class="tbc-tabbar-container" v-for="(tabBar, idx) in setItemList" :key="idx">
+			<view style="height: 20rpx;"></view>
+			<view class="tbc-tabbar-wrapper" style="background-color: #FFF;">
+				<view class="tbc-cell" v-for="(item, index) in tabBar" :key="index" :class="{'tbc-bottom-line': index < tabBar.length - 1}" style="height: 110rpx;">
+					<view class="tbc-cell-col" style="display: flex;flex-direction: column;">
+						<text class="tbc-cell-text">{{item.label}}</text>
+						<text v-if="item.remark" style="color: #B2B2B2;font-size: 24rpx;margin-top: 10rpx;">{{item.remark}}</text>
+					</view>
+					<view class="tbc-cell-content">
+						<text v-if="item.type == 'text'">{{item.value}}</text>
+
+						<view style="width: 38rpx;height: 38rpx;float: right" v-if="item.type == 'image'">
+							<image :src="item.value" style="width: 100%;height: 100%;"></image>
+						</view>
+
+						<switch v-if="item.type == 'switch'" :checked="(Boolean)(item.value)" @change="formSubmit(item)" />
+					</view>
+					<view class="tbc-cell-col arrow" style="margin-left:30rpx;" v-if="item.page">
+						<text class="iconfont icon-right" style="font-size: 14px;color:#969799"></text>
+					</view>
+				</view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	import http from '@/utils/http.js'
+	import {
+		mapState
+	} from 'vuex'
+	export default {
+		data() {
+			return {
+				setItemList: [
+					[{
+						label: '免打扰',
+						value: 1,
+						field: 'is_not_disturb',
+						type: 'switch',
+						remark: '开启后将不再接收消通知'
+					}],
+					[{
+							label: '震动',
+							value: 0,
+							field: 'is_vibrate',
+							type: 'switch',
+							remark: '新消息将会有震动提醒'
+						},
+						{
+							label: '声音',
+							value: 0,
+							field: 'is_sound',
+							type: 'switch',
+							remark: '新消息将会有声音提醒'
+						}
+					]
+				],
+
+			}
+		},
+
+
+		onLoad: function(option) {
+			uni.setNavigationBarTitle({
+				title: '新消息通知'
+			})
+		},
+
+
+		methods: {
+			async formSubmit(data) {
+				console.log(data)
+				// const res = await http.post('/')
+			}
+		}
+	}
+</script>
+
+<style>
+	@import '../../common/style/nvue.css';
+</style>

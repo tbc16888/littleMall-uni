@@ -1,0 +1,179 @@
+<template>
+	<view>
+		<view style="position: fixed;top: -100px;">{{refresh}}</view>
+		<!-- #ifndef APP-PLUS-NVUE -->
+		<view class="tbc-page-background">{{refresh}}</view>
+		<view style="position: fixed;top: var(--window-top);width: 750rpx;z-index:9">
+			<tab-bar-list :list="tabBarList" :current="tabBarIndex" @change="onTabBarClick"></tab-bar-list>
+		</view>
+		<view style="height:108rpx;"></view>
+		<view class="tbc-flex-col" style="width: 750rpx;;" v-for="(item, index) in orderList" :key="index">
+			<order-item :item="item" :index="index" @payment="showPaymentSelector" @refresh="onItemRefresh(index)"></order-item>
+			<view style="height: 20rpx;"></view>
+		</view>
+		<none v-if="total > -1 && !orderList.length "></none>
+		<!-- #endif-->
+
+		<!-- #ifdef APP-PLUS-NVUE -->
+		<view style="position: fixed;top: 0;width: 750rpx;">
+			<tab-bar-list :list="tabBarList" :current="tabBarIndex" @change="onTabBarClick"></tab-bar-list>
+		</view>
+		<tbc-list ref="list" top="90rpx" @refresh="initOrderList" @loading="getOrderList">
+			<cell>
+				<view style="height: 18rpx;"></view>
+			</cell>
+			<cell v-for="(item, index) in orderList" :key="index">
+				<view class="tbc-flex-col" style="width: 750rpx;;">
+					<order-item :item="item" :index="index" @payment="showPaymentSelector" @refresh="onItemRefresh(index)"></order-item>
+					<view style="height: 20rpx;"></view>
+				</view>
+			</cell>
+			<cell>
+				<none v-if="total > -1 && !orderList.length "></none>
+			</cell>
+		</tbc-list>
+		<!-- #endif-->
+		<order-payment ref="payment"></order-payment>
+	</view>
+</template>
+
+<script>
+	import tbcList from '@/components/tbc-components-nvue/list.nvue'
+	import none from '@/components/app/None.nvue'
+	import orderItem from './components/orderItem.nvue'
+	import tabBarList from './components/tabBarList.nvue'
+	import orderPayment from '@/components/app/OrderPayment.vue'
+	export default {
+
+		components: {
+			tbcList,
+			none,
+			tabBarList,
+			orderItem,
+			orderPayment
+		},
+
+		data() {
+			return {
+				tabBarIndex: -1,
+				tabBarCode: '',
+				tabBarList: [{
+						label: '待付款',
+						params: {
+							order_status: 2,
+							tab: 'waitPay'
+						}
+					},
+					{
+						label: '待发货',
+						params: {
+							order_status: 4,
+							tab: 'waitSend'
+						}
+					},
+					{
+						label: '待收货',
+						params: {
+							order_status: 6,
+							tab: 'waitConfirm'
+						}
+					},
+					{
+						label: '待评价',
+						params: {
+							is_comment: 0,
+							tab: 'waitComment'
+						}
+					},
+					{
+						label: '全部',
+						params: {}
+					}
+				],
+				orderList: [],
+				total: -1,
+				page: 1,
+				inRequest: false,
+				refresh: 0
+			}
+		},
+
+		onLoad: function(options) {
+			let index = this.tabBarList.findIndex(item => item.params.tab === options.tab)
+			if (index < 0) index = this.tabBarList.length - 1
+			this.onTabBarClick(index)
+		},
+
+		onPullDownRefresh: function() {
+			this.initOrderList()
+		},
+
+		onReachBottom: function() {
+			this.getOrderList()
+		},
+
+		methods: {
+			showPaymentSelector(item) {
+				let order = item.basic.data.field
+				console.log(order)
+				this.$refs.payment.show(order)
+			},
+
+			onTabBarClick(index, item) {
+				if (this.tabBarIndex == index) return
+				this.tabBarIndex = index
+				this.orderList = []
+				this.initOrderList()
+			},
+
+			async initOrderList() {
+				this.page = 1
+				this.total = -1
+				this.getOrderList()
+			},
+			
+			async onItemRefresh(index) {
+				let order = this.orderList[index].basic.data.field
+				const res = await uni.$http.get('/order/detail', {
+					order_sn: order.order_sn
+				})
+				if (res.data.code !== 0) return ;
+				this.orderList[index] = res.data.data
+				this.refresh++
+			},
+			
+			async getOrderList() {
+				if (this.total === this.orderList.length) return
+				const res = await uni.$http.get('/order', {
+					page: this.page++,
+					...this.tabBarList[this.tabBarIndex].params
+				})
+				this.stopPullDownRefresh()
+				if (res.data.code !== 0) {
+					return uni.showToast({
+						title: res.data.message,
+						icon: 'none'
+					})
+				}
+				let data = res.data.data
+				// data.list.forEach(item => {
+				// 	let total = 0
+				// 	item.goods.data.list.forEach(goods => {
+				// 		total += goods.goods_number
+				// 	})
+				// 	item.total_goods_number = total
+				// })
+				this.total = data.total
+				if (this.page <= 2) this.orderList = []
+				this.orderList = this.orderList.concat(data.list)
+			},
+			stopPullDownRefresh() {
+				// #ifdef APP-NVUE
+				this.$refs.list.stopPullDownRefresh()
+				// #endif
+				uni.stopPullDownRefresh()
+			},
+
+		}
+	}
+</script>

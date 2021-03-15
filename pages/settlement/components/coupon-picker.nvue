@@ -1,0 +1,104 @@
+<template>
+	<view class="tbc-flex-col" style="flex-direction: column;background-color: #FFFFFF;border-top-left-radius: 16rpx;border-top-right-radius:16rpx;">
+		<view class="tbc-flex-row" style="flex-direction: row;padding: 30rpx;position: relative;">
+			<view class="tbc-flex-col" style="flex: 1;flex-direction: column;">
+				<text style="font-size: 30rpx;">优惠券</text>
+			</view>
+			<view style="height: 40rpx;width:40rpx;position: absolute;right:30rpx;top:30rpx;z-index:99" @click="close">
+				<image src="/static/icon/close_black.png" style="width:40rpx;height: 40rpx;"></image>
+			</view>
+		</view>
+		<view class="tbc-flex-row" style="flex-direction: row;width: 750rpx;height: 90rpx;background-color: #FFF;">
+			<view class="tbc-flex-row" style="flex-direction: row;align-items: center;justify-content: center;flex: 1;position: relative;"
+			 v-for="(item, index) in tabBarList" :key="index" @click="onItemClick(index)">
+				<text style="color: #333333;font-size: 24rpx;font-family:PingFang SC;">{{item.label}}</text>
+				<view style="width: 60rpx;height: 6rpx;border-radius: 4rpx;background-color: #FF3300;position: absolute;bottom: 0;"
+				 v-if="index === tabBarIndex"></view>
+			</view>
+		</view>
+
+		<scroll-view class="tbc-flex-col" style="flex-direction: col;align-items: center;height:700rpx;width: 750rpx;background-color: #F5F5F5;"
+		 scroll-y>
+			<view style="width: 750rpx;margin-top: 20rpx;flex-direction: column;align-items: center;" :key="index" class="tbc-flex-col"
+			 v-for="(coupon, index) in usable">
+				<coupon-item :coupon="coupon" @click="onTapCouponItem" mode="2" :checked="current"></coupon-item>
+			</view>
+			<view style="height: 20rpx;"></view>
+		</scroll-view>
+
+
+		<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;align-items: center;height: 100rpx;justify-content: center;"
+		 @click="close()">
+			<view class="tbc-flex-row" style="flex-direction: row;align-items: center;background-color:#FF3300;width: 690rpx;justify-content: center;height: 80rpx;border-radius: 40px;">
+				<text style="font-size: 30rpx;color: #FFF;">确定</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	import CouponItem from '@/components/app/CouponItem.nvue'
+
+	export default {
+
+		components: {
+			CouponItem
+		},
+
+		props: {
+
+			current: {
+
+			},
+
+			usable: {
+				type: Array,
+				default: []
+			}
+		},
+
+		data() {
+			return {
+				tabBarIndex: 0,
+				tabBarList: [{
+						label: '可用优惠券',
+					},
+					{
+						label: '不可用优惠券',
+					}
+				],
+				total: -1,
+				page: 1,
+				dataList: [],
+				notAvailableList: []
+			}
+		},
+
+		methods: {
+			close() {
+				this.$emit('close')
+			},
+
+			onTapCouponItem(coupon) {
+				if (this.current === coupon.user_coupon_id) coupon.user_coupon_id = ''
+				this.$emit('change', coupon)
+			},
+			
+			onItemClick(index) {
+				this.tabBarIndex = index
+				if (!this.notAvailableList.length) this.getNotAvailableList()
+			},
+			
+			async getNotAvailableList() {
+				const res = await uni.$http.get('/user.coupon/notAvailable')
+				if (res.data.code !== 0) {
+					return uni.showToast({
+						title: res.data.message,
+						icon: 'none'
+					})
+				}
+				this.notAvailableList = res.data.data.list
+			},
+		}
+	}
+</script>

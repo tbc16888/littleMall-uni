@@ -1,0 +1,59 @@
+<template>
+	<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;align-items: center;">
+		<view class="tbc-flex-row" style="flex-direction: row;width: 690rpx;align-items: center;">
+			<view class="tbc-flex-col" style="flex-direction: column;flex: 1;">
+				<text style="font-size: 28rpx;">使用积分</text>
+				<text style="font-size: 24rpx;color: #f37b26;" v-if="integral.field.note">{{integral.field.note}}</text>
+			</view>
+			<view style="margin-left: 40rpx;" v-if="!isDisabled">
+				<switch :color="color" @change="onSwitchChange" :checked="Boolean(integral.switch.checked)"></switch>
+			</view>
+			<!-- 无法动态改变选中的值 -->
+			<view style="margin-left: 40rpx;" v-if="isDisabled">
+				<switch :color="color" :disabled="isDisabled" />
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		props: {
+			integral: {
+				type: Object,
+				default () {
+					return {}
+				}
+			}
+		},
+
+		data() {
+			return {
+				checked: false
+			}
+		},
+
+
+		computed: {
+			isDisabled() {
+				let bool = this.integral.switch.disabled || false
+				return Boolean(bool)
+			},
+			
+			color() {
+				let color = this.integral.switch.color || '#f37b26'
+				return color
+			}
+		},
+
+		methods: {
+
+			onSwitchChange(e) {
+				let integral = e.detail.value ? this.integral.field.discount : 0
+				this.$emit('change', {
+					value: integral
+				})
+			}
+		}
+	}
+</script>

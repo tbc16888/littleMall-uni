@@ -1,0 +1,56 @@
+<template>
+	<view class="tbc-flex-col" style="flex-direction:column;align-items: center;justify-content: center;padding-bottom: 50rpx;padding-top: 50rpx;"
+	 :style="backgroundColor">
+		<view style="height: 100rpx;"></view>
+		<view :style="statusBarHeight"></view>
+		<view class="tbc-flex-row" style="flex-direction: row;width: 690rpx;">
+			<view style="flex: 1;">
+				<text style="font-size: 34rpx;color: #FFF;">{{status.field.text}}</text>
+				<text style="font-size: 24rpx;color: #FFF;margin-top: 10rpx;" v-if="note">{{note}}</text>
+			</view>
+			<!-- <view style="width: 60rpx;height: 60rpx;background-color: #000000;">
+			</view> -->
+			<view class="tbc-flex-row" style="flex-direction: row;font-family:黑体" v-if="digital.length">
+				<text style="color: #FFF;">剩余：</text>
+				<text style="color: #FFF;" v-for="(item, index) in digital" :key="index">{{item.value}}{{item.label}}</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		props: {
+
+			status: {
+				type: Object,
+				defualt() {
+					return {}
+				}
+			},
+
+
+			digital: {
+				type: Array,
+				default () {
+					return []
+				}
+			}
+		},
+
+		computed: {
+
+			note() {
+				return this.status.field.note || ''
+			},
+			statusBarHeight() {
+				return 'height:' + uni.getSystemInfoSync().statusBarHeight + 'px'
+			},
+
+			backgroundColor() {
+				if (typeof this.status.style === 'undefined') return ''
+				return 'background-color:' + this.status.style.background
+			}
+		}
+	}
+</script>

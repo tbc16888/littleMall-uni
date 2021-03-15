@@ -1,0 +1,68 @@
+<template>
+	<view class="tbc-flex-row" style="flex-direction: row;height:90rpx;background-color: #FFF;">
+		<view class="tbc-flex-row" style="align-items: center;justify-content: center;position: relative;margin-left: 30rpx;margin-right: 30rpx;flex-direction: row;flex: 1;"
+		 v-for="(item, index) in tabBarList" :key="item.label" @click="onTabBarClick(index, item)">
+			<text style="font-size: 28rpx;color: #666;" :style="index === tabBarIndex ? 'color:#FA5151':''">{{item.label}}</text>
+			<view class="tbc-flex-col" style="flex-direction: column;margin-left: 4rpx;" v-if="item.type === 'sort' && item.code == 'price'">
+				<image src="/static/icon/sort-up-red.png" style="width: 14rpx;height: 9rpx;margin: 2rpx;" v-if="item.value == 'asc'"></image>
+				<image src="/static/icon/sort-up.png" style="width: 14rpx;height: 9rpx;margin: 2rpx;" v-if="!(item.value == 'asc')"></image>
+				<image src="/static/icon/sort-down.png" style="width: 14rpx;height: 9rpx;margin: 2rpx;" v-if="!(item.value == 'desc')"></image>
+				<image src="/static/icon/sort-down-red.png" style="width: 14rpx;height: 9rpx;margin: 2rpx;" v-if="item.value == 'desc'"></image>
+			</view>
+
+
+			<template v-if="item.type === 'filter'">
+				<image style="height:22rpx;width:23rpx;margin-left: 4rpx;" src="/static/icon/filter.png"></image>
+			</template>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				tabBarIndex: 0,
+				tabBarList: [{
+						label: '综合',
+						type: 'sort',
+						code: '',
+						value: '',
+					},
+					{
+						label: '销量',
+						type: 'sort',
+						code: 'sales',
+						value: ''
+					},
+					{
+						label: '价格',
+						type: 'sort',
+						code: 'price',
+						value: ''
+					},
+					{
+						label: '筛选',
+						type: 'filter'
+					}
+				],
+			}
+		},
+
+		methods: {
+			onTabBarClick(index) {
+				let item = this.tabBarList[index]
+				if (item.type === 'filter') return this.$emit('showFilter')
+				item.value = (item.value === 'desc' ? 'asc' : 'desc')
+				if (this.tabBarIndex !== index && this.tabBarIndex > -1) {
+					this.tabBarList[this.tabBarIndex].value = ''
+				}
+				if (item.code !== 'price') item.value = 'desc'
+				this.tabBarIndex = index
+				this.sort = ''
+				if (item.code) this.sort = [item.code, item.value].join("_")
+				this.$emit('init')
+			},
+		}
+	}
+</script>

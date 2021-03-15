@@ -1,0 +1,149 @@
+<template>
+	<view class="tbc-flex-row" style="flex-direction: row;align-items: center;">
+
+		<view class="tbc-flex-col" style="flex-direction: column;align-items: center;justify-content: center;border-width: 1px;border-style: solid;border-color: #666;border-radius: 30rpx;margin-bottom: 10rpx;margin-top:10rpx;position:relative;"
+		 @tap.stop="_minus()" v-show="layout.indexOf('minus') > -1" :style="minusButtonStyle">
+			<view style="width:9px;height: 1px;background-color: #333;"></view>
+		</view>
+
+
+		<!-- <input type="number" class="tbc-stepper-input" v-model="value" v-show="layout.indexOf('input') > -1" @confirm="_confirm" style="width:68rpx;background-color: #FFF;height:48rpx;font-size: 30rpx;text-align: center;" 
+		 @blur="_confirm"></input> -->
+		<view class="tbc-flex-row" style="" v-show="layout.indexOf('input') > -1">
+			<text style="width:68rpx;background-color: #FFF;height:48rpx;font-size: 30rpx;text-align: center;line-height: 48rpx;">{{number}}</text>
+		</view>
+
+		<view class="tbc-flex-col" style="flex-direction: column;align-items: center;justify-content: center;border-width: 1px;border-style: solid;border-color: #008FFF;border-radius: 30rpx;margin-bottom: 10rpx;margin-top:10rpx;position:relative;"
+		 @tap.stop="_plus()" v-show="layout.indexOf('plus') > -1" :style="plusButtonStyle">
+			<view style="width:9px;height: 1px;background-color: #fff;"></view>
+			<view style="width: 1px;height:9px;background-color: #fff;position: absolute;"></view>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		props: {
+
+			value: {
+				type: Number
+			},
+
+			layout: {
+				type: String,
+				default: 'minus, input, plus'
+			},
+
+			min: {
+				type: Number,
+				default: 0
+			},
+
+			max: {
+				type: Number,
+				default: 100000
+			},
+
+			step: {
+				type: Number,
+				default: 1
+			},
+
+			index: {
+				type: Number,
+				default: 1
+			},
+
+			size: {
+				type: Number,
+				default: 40
+			},
+			// 
+			mode: {
+				type: Number,
+				default: 1
+			},
+
+			plusBackground: {
+				type: String,
+				default: '#008FFF'
+			}
+		},
+
+		data() {
+			return {
+				number: 0,
+				flag: false
+			}
+		},
+
+		computed: {
+			buttonSizeStyle() {
+				let style = [];
+				style.push( 'width: ' + this.size + 'rpx')
+				style.push( 'height: ' + this.size + 'rpx')
+				return style.join(';')
+			},
+			
+			
+			minusButtonStyle() {
+				return this.buttonSizeStyle
+			},
+			
+			plusButtonStyle() {
+				let style = [];
+				style.push(this.buttonSizeStyle)
+				style.push('background-color:'+this.plusBackground)
+				style.push('border-color:'+this.plusBackground)
+				return style.join(';')
+			}
+		},
+
+		created() {
+			this.number = Number(this.value)
+		},
+
+		watch: {
+			value(val) {
+				this.number = Number(val)
+			}
+		},
+
+		methods: {
+			init(number) {
+				this.number = Number(number)
+			},
+
+			_confirm(e) {
+				if (this.flag) return
+				this.flag = true
+				setTimeout(() => {
+					this.flag = false
+				}, 30)
+				let value = Number(e.detail.value)
+				setTimeout(() => {
+					this._onStepperChange(value)
+				}, 0)
+			},
+
+			_minus() {
+				let number = Number(this.number) - Number(this.step)
+				if (number < this.min) return
+				this._onStepperChange(number)
+			},
+
+			_plus() {
+				let number = Number(this.number) + Number(this.step)
+				if (number > this.max) return
+				this._onStepperChange(number)
+			},
+
+			_onStepperChange(number) {
+				this.$emit('change', {
+					number,
+					index: this.index
+				})
+			}
+		}
+	}
+</script>

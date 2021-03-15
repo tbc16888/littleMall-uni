@@ -1,0 +1,27 @@
+<template>
+	<view>
+		<view class="tbc-flex-row" style="flex-direction: row;height: 100rpx;align-items: center;background-color: #FFF;">
+			<view class="tbc-flex-row" style="flex-direction: row;align-items: center;margin-left: 30rpx;margin-right: 20rpx;">
+				<text style="font-size: 30rpx;color: #333;font-family:PingFang SC;">福州市</text>
+				<view style="width: 18rpx;height: 12rpx;margin-left: 10rpx;">
+					<image src="/static/icon/triangle-down.png" style="width: 18rpx;height: 12rpx;"></image>
+				</view>
+			</view>
+			<view class="tbc-flex-row" style="flex-direction: row;background-color: #F5F5F5;height: 60rpx;flex: 1;border-radius: 30rpx;align-items: center;margin-left: 10rpx;flex: 1;margin-right: 30rpx;">
+				<view style="margin-left: 24rpx;margin-right: 20rpx;">
+					<icon type="search" size='14' color='#999'></icon>
+				</view>
+				<view style="flex: 1;">
+					<input type="text" placeholder="请输入地址" style="font-size: 26rpx;" />
+				</view>
+			</view>
+		</view>
+		<!-- <view style="position: fixed;top: 100rpx;width: 750rpx;bottom: 0;background-color: #007AFF;"></view> -->
+	</view>
+</template>
+
+<script>
+	export default {
+
+	}
+</script>

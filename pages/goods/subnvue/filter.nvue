@@ -1,0 +1,40 @@
+<template>
+	<div>
+		<tbc-filter-list :filter-list="filterList" @change="changeFilterList" />
+	</div>
+</template>
+
+<script>
+	import tbcFilterList from '../components/list/filter-list.nvue'
+
+	export default {
+
+		components: {
+			tbcFilterList
+		},
+
+		data() {
+			return {
+				filterList: [],
+			}
+		},
+
+		created() {
+			uni.$on('filter-init', (data) => {
+				this.filterList = data
+			})
+		},
+		
+		methods: {
+			
+			hideDrawer() {
+				uni.getCurrentSubNVue().hide('auto')
+			},
+
+			changeFilterList(data) {
+				this.hideDrawer()
+				uni.$emit('filter-change', data)
+			}
+		}
+	}
+</script>

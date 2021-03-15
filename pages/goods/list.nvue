@@ -1,0 +1,271 @@
+<template>
+	<view>
+		<view class="tbc-page-background"></view>
+		<view style="position: fixed;top: 0;z-index:99;background-color: #FFFFFF;">
+			<!-- #ifdef APP-NVUE || H5 -->
+			<view :style="'height:' + statusBarHeight + 'px'"></view>
+			<!-- #endif -->
+			<tbc-search :keyword="this.keyword" :layout="layout" @changeLayout="toggleLayout" />
+			<tbc-filter-tabbar @init="initGoodsList" @showFilter="showFilter" />
+		</view>
+		<!-- #ifdef APP-NVUE || H5 -->
+		<view :style="'height:' + statusBarHeight + 'px'"></view>
+		<!-- #endif -->
+		<!-- #ifndef APP-NVUE -->
+		<view style="height: 210rpx;"></view>
+		<view class="tbc-flex-col" style="flex-direction: column;width:750rpx;">
+			<view style="width:750rpx;flex-direction: row;align-items: flex-start;;flex-wrap: wrap;flex-shrink: 0;"
+				class="tbc-flex-row" v-if="layout == 'col'">
+				<view style="width: 375rpx;flex-direction: column;align-items: center;margin-bottom: 20rpx;"
+					class="tbc-flex-col" v-for="goods in goodsList" :key="goods.goods_id">
+					<tbc-goods-item-col :goods="goods" :width="355" />
+				</view>
+			</view>
+		</view>
+
+		<view class="tbc-flex-col"
+			style="flex-direction: column;width: 750rpx;background-color: #FFF;align-items: center;"
+			v-if="layout == 'row'">
+			<view style="margin-bottom: 20rpx;margin-top: 20rpx;width: 690rpx;" class="tbc-flex-col"
+				v-for="goods in goodsList" :key="goods.goods_id">
+				<tbc-goods-item-row :goods="goods" :width="690" />
+			</view>
+		</view>
+
+		<none v-if="isShowNone"></none>
+		<view class="tbc-flex-col"
+			style="width:750rpx;flex-direction: column;align-items: center;background-color: #F5F5F5;">
+			<load-more :status="loadMoreStatus" :contentText="{
+				contentdown: '',
+				contentrefresh: '正在加载...',
+				contentnomore: '已全部加载'
+			}" v-if="!isRefreshing && !isShowNone"></load-more>
+		</view>
+		<!-- #endif -->
+
+		<!-- #ifdef APP-NVUE -->
+		<tbc-list @loading="getGoodsList" ref="list" @refresh="initGoodsList" top="230rpx"
+			:column-count="layout == 'row' ? 1:1">
+			<cell v-for="goods in goodsList" :key="goods.goods_id" v-if="layout == 'row'">
+				<view class="tbc-flex-col"
+					style="flex-direction: column;width: 750rpx;background-color: #FFF;align-items: center;">
+					<view style="margin-bottom: 20rpx;margin-top: 20rpx;width: 690rpx;" class="tbc-flex-col">
+						<tbc-goods-item-row :goods="goods" :width="690" />
+					</view>
+				</view>
+			</cell>
+
+			<!-- <cell v-for="goods in goodsList" :key="goods.goods_id" v-if="layout == 'col'">
+				<view style="width: 375rpx;flex-direction: column;align-items: center;margin-top: 20rpx;" class="tbc-flex-col">
+					<tbc-goods-item-col :goods="goods" :width="355" />
+				</view>
+			</cell> -->
+			<cell v-for="(group, index) in goodsGroup" :key="index" v-if="layout == 'col'">
+				<view style="width: 750rpx;flex-direction: row;">
+					<view style="width: 375rpx;flex-direction: column;align-items: center;margin-top: 20rpx;"
+						class="tbc-flex-col" v-for="goods in group" :key="goods.goods_id">
+						<tbc-goods-item-col :goods="goods" :width="355" />
+					</view>
+				</view>
+			</cell>
+
+			<cell v-if="isShowNone">
+				<none></none>
+			</cell>
+
+			<cell>
+				<view class="tbc-flex-col"
+					style="width:750rpx;flex-direction: column;align-items: center;height: 100rpx;justify-content: center;">
+					<load-more :status="loadMoreStatus" :contentText="{
+						contentdown: '',
+						contentrefresh: '正在加载...',
+						contentnomore: '已全部加载'
+					}" v-if="!isRefreshing && !isShowNone"></load-more>
+				</view>
+			</cell>
+		</tbc-list>
+		<!-- #endif -->
+
+
+
+		<uni-drawer :visible="showFilterPanel" mode="right" @close="closeDrawer('right')">
+			<scroll-view scroll-y="true" style="height: 100%;">
+				<tbc-filter-list :filter-list="filterList" @change="onFilterChange" />
+			</scroll-view>
+		</uni-drawer>
+	</view>
+</template>
+
+<script>
+	import tbcList from '@/components/tbc-components-nvue/list.nvue'
+	import None from '@/components/app/None.nvue'
+	import uniDrawer from '@/components/uni-official/uni-drawer/uni-drawer.vue'
+	import tbcSearch from './components/list/search.nvue'
+	import tbcFilterTabbar from './components/list/filter-tabbar.nvue'
+	import tbcFilterList from './components/list/filter-list.nvue'
+	import tbcGoodsItemCol from '@/components/app/GoodsItemCol.nvue'
+	import tbcGoodsItemRow from '@/components/app/GoodsItemRow.nvue'
+	import loadMore from '@/components/uni-official/uni-load-more/uni-load-more.vue'
+	export default {
+		components: {
+			tbcList,
+			None,
+			uniDrawer,
+			tbcSearch,
+			tbcFilterTabbar,
+			tbcFilterList,
+			tbcGoodsItemCol,
+			tbcGoodsItemRow,
+			loadMore
+		},
+
+		data() {
+			return {
+				keyword: '',
+				goodsList: [],
+				page: 1,
+				size: 10,
+				page: 1,
+				pageCount: 0,
+				filterList: [],
+				layout: 'col',
+				filterListCondition: {},
+				sort: '',
+				statusBarHeight: '',
+				showFilterPanel: false,
+				isInitComplete: false,
+				isLoading: false,
+				isRefreshing: false
+			}
+		},
+
+		computed: {
+
+			isShowNone() {
+				return this.isInitComplete && this.page > 1 && !this.goodsList.length
+			},
+
+			loadMoreStatus: function() {
+				if (this.isRefreshing || this.total <= -1) return ''
+				if (this.isLoading) return 'loading'
+				if (this.page - 1 >= this.pageCount) return 'nomore'
+				return 'more'
+			},
+
+
+			goodsGroup() {
+				let group = []
+				for (var i = 0; i < this.goodsList.length; i += 2) {
+					group.push(this.goodsList.slice(i, i + 2));
+				}
+				return group
+			}
+		},
+
+		onReady: function() {
+
+			this.statusBarHeight = uni.getSystemInfoSync().statusBarHeight
+
+			// #ifdef APP-NVUE
+			uni.$on('filter-change', (data) => {
+				this.filterListCondition = data
+				this.initGoodsList()
+			})
+			// #endif
+		},
+
+		onLoad: function(options) {
+			this.keyword = options.keyword || ''
+			this.getGoodsList()
+			this.getFilterList()
+		},
+
+
+
+		onPullDownRefresh: function() {
+			this.initGoodsList()
+		},
+
+		onReachBottom: function() {
+			this.getGoodsList()
+		},
+
+		methods: {
+
+			// 改变显示布局
+			toggleLayout() {
+				this.layout = this.layout == 'row' ? 'col' : 'row'
+			},
+
+			// 显示筛选
+			showFilter() {
+				// #ifdef APP-NVUE
+				const drawer = uni.getSubNVueById('goodsListFilter')
+				drawer.show('slide-in-right', 200);
+				// #endif
+				// #ifndef APP-NVUE
+				this.showFilterPanel = true
+				// #endif
+			},
+
+			closeDrawer() {
+				this.showFilterPanel = false
+			},
+
+			async onFilterChange(data) {
+				this.filterListCondition = data
+				this.initGoodsList()
+				this.closeDrawer()
+			},
+
+
+			async getFilterList() {
+				const res = await uni.$http.get('/goods/filter')
+				if (res.data.code !== 0) return
+				this.filterList = res.data.data.list
+				uni.$emit('filter-init', this.filterList);
+			},
+
+
+			async initGoodsList() {
+				this.isRefreshing = true
+				this.page = 1
+				this.getGoodsList()
+			},
+
+
+			stopPullDownRefresh() {
+				// #ifdef APP-NVUE
+				this.$refs.list.stopPullDownRefresh()
+				// #endif
+				uni.stopPullDownRefresh()
+			},
+
+			async getGoodsList() {
+				if (this.page > 1 && this.page - 1 >= this.pageCount) return
+				this.isLoading = true
+				const res = await uni.$http.get('/goods', {
+					page: this.page++,
+					size: this.size,
+					sort: this.sort,
+					keyword: this.keyword,
+					...this.filterListCondition,
+				})
+				this.isRefreshing = false
+				this.isLoading = false
+				this.isInitComplete = true
+				this.stopPullDownRefresh()
+				if (res.data.code !== 0) {
+					return uni.showToast({
+						title: res.data.message,
+						icon: 'none'
+					})
+				}
+				let data = res.data.data
+				this.pageCount = Math.ceil(data.total / this.size)
+				if (this.page <= 2) this.goodsList = []
+				this.goodsList = this.goodsList.concat(data.list)
+			},
+		}
+	}
+</script>

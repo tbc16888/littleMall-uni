@@ -1,0 +1,45 @@
+<template>
+	<view class="tbc-flex-col" style="flex-direction: column;width: 500rpx;background-color: #FFF;padding: 40rpx;border-radius: 10rpx;">
+		<view style="height: 44rpx;">
+			<text style="font-size: 34rpx;font-weight: bold;color: #333;">提示</text>
+		</view>
+		<view style="padding-top: 40rpx;padding-bottom:40rpx;">
+			<text style="font-size: 28rpx;">同步微信昵称和头像获得更好的体验？</text>
+		</view>
+		<view class="tbc-flex-row" style="flex-direction: row;">
+
+			<view class="tbc-flex-row" style="flex-direction: row;align-items: center;background-color:#ededed;height:70rpx;justify-content: center;border-radius:70rpx;flex:1;"
+			 @click="cancel">
+				<text style="font-size: 26rpx;color: #666;">不同步</text>
+			</view>
+
+			<view style="width: 20rpx;"></view>
+			<view class="tbc-flex-row" style="flex-direction: row;align-items: center;background-color:#db0018;height:70rpx;justify-content: center;border-radius:70rpx;flex:1">
+				<button open-type="getUserInfo" @getuserinfo="getUserInfo" style="font-size: 26rpx;color: #fff;background: none;width: auto;line-height: 2;font-weight: normal;width: 100%;">确定</button>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		methods: {
+			
+			cancel() {
+				console.log('cancel')
+				this.$emit('cancel')
+			},
+			
+			
+			async getUserInfo(e) {
+				const userInfo = JSON.parse(e.detail.rawData)
+				const res = await uni.$http.post('/user/profile', {
+					nick_name: userInfo.nickName,
+					avatar: userInfo.avatarUrl,
+					gender: userInfo.gender
+				})
+				this.$emit('success')
+			},
+		}
+	}
+</script>

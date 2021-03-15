@@ -1,0 +1,82 @@
+<template>
+	<view class="tbc-flex-col" style="flex-direction: column;border-radius: 16rpx;background-color: #FFFFFF;" @click="toGoodsDetail" :style="containerSizeStyle">
+
+		<view class="tbc-flex-col" style="flex-direction: column;align-items: center;margin-top: 15rpx;" :style="'width:' + width +'rpx'">
+			<image :src="goods.goods_image" :style="imageSizeStyle" style="border-top-left-radius: 16rpx;border-top-right-radius: 16rpx;"></image>
+		</view>
+
+
+		<view class="tbc-flex-col" style="flex-direction: column;flex:1;margin-top: 20rpx;padding: 15rpx;padding-top: 0;">
+			<view class="tbc-text-clamp-1" :style="titleSizeStyle">
+				<text style="font-size:30rpx;text-overflow: ellipsis;align-self: flex-start;lines: 1;">{{goods.goods_name}}</text>
+			</view>
+			
+			<view style="margin-top:10rpx;" v-if="goods.goods_short_name">
+				<text style="color:#999;font-size:22rpx;">{{goods.goods_short_name}} &nbsp;</text>
+			</view>
+
+			<view style="flex: 1;"></view>
+			<view class="tbc-flex-row" style="flex-direction: row;margin-top:20rpx;align-items:center">
+				<view class="tbc-flex-row" style="flex-direction:row;font-family:PingFang SC;font-weight: bold;flex: 1;align-items: flex-end;">
+					<text style="font-size:30rpx;color:#f30;padding-bottom: 0rpx;">¥</text>
+					<text style="font-size:36rpx;color:#f30;">{{goods.activity_price}}</text>
+				</view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		props: {
+			goods: {
+				type: Object,
+				default () {
+					return {}
+				}
+			},
+
+			imageSize: {
+				type: Number,
+				default() {
+					return 334
+				}
+			},
+
+			width: {
+				type: Number,
+				default: 750
+			},
+		},
+
+		data() {
+			return {
+
+			}
+		},
+
+		computed: {
+			
+			containerSizeStyle() {
+				return 'width: ' + (this.width) + 'rpx;'
+			},
+			
+			imageSizeStyle() {
+				let size = this.imageSize
+				return 'width: ' + size + 'rpx;height:' + size + 'rpx;'
+			},
+
+			titleSizeStyle() {
+				let size = this.winth - 40
+				return 'width: ' + (size) + 'rpx;'
+			}
+		},
+		methods: {
+			toGoodsDetail() {
+				uni.navigateTo({
+					url: "/pages/goods/detail?goods_id=" + this.goods.goods_id
+				})
+			}
+		}
+	}
+</script>

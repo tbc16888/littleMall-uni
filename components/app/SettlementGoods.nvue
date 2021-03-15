@@ -1,0 +1,127 @@
+<template>
+
+	<view class="tbc-flex-row" style="flex-direction: row;width:690rpx;align-self:flex-start;">
+
+		<!-- 商品图片 -->
+		<view style="margin-right:20rpx" :style="imageSizeStyle">
+			<image :src="goods.goods_image" style="border-radius:6rpx;width: 160rpx;height: 160rpx;" :style="imageSizeStyle">
+			</image>
+		</view>
+
+		<!-- 左边信息 -->
+		<view class="tbc-flex-col" style="flex-direction: column;flex: 1;">
+
+			<!-- #ifdef APP-NVUE -->
+			<view class="tbc-text-clamp-2" :style="titleSizeStyle" style="">
+				<text style="font-size:28rpx;text-overflow: ellipsis;lines:2;align-self:flex-start;line-height:32rpx">{{goods.goods_name}}</text>
+			</view>
+			<!-- #endif -->
+
+
+			<!-- #ifndef APP-NVUE -->
+			<view class="tbc-text-clamp-2" :style="titleSizeStyle" style="line-height: 1;">
+				<text style="font-size:28rpx;text-overflow: ellipsis;lines:2;align-self:flex-start;">{{goods.goods_name}}</text>
+			</view>
+			<!-- #endif -->
+
+			<view class="" :style="titleSizeStyle" style="margin-top:12rpx;">
+				<text style="color:#999;font-size:24rpx;margin-right:12rpx;font-family: PingFang SC;">{{goods.goods_sku_text}}</text>
+			</view>
+
+
+			<view class="tbc-rebate-box tbc-flex-row" style="height:40rpx;overflow:hidden;justify-items: center;flex-direction: row;align-items: center;"
+			 v-if="profit">
+				<view class="tbc-rebate-label" style="width:54rpx;background-color:#3c4148;">
+					<text style="color:#FFF;font-size:20rpx;font-family:PingFang-SC-Medium;text-align:center;">收益</text>
+				</view>
+				<view class="tbc-rebate-price" style="background-color:#fce0b9;padding-left:10rpx;padding-right: 10rpx;">
+					<text style="color:#333333;font-size:20rpx;font-family:PingFang SC;">¥{{profit}}</text>
+				</view>
+			</view>
+
+			<view style="flex: 1;"></view>
+			
+			<view style="height:12rpx;"></view>
+			<view class="tbc-flex-row" style="flex-direction: row;align-items: center;">
+				
+				<view class="tbc-flex-row" style="flex: 1;flex-direction: row;">
+				
+					<view class="tbc-flex-row" style="flex-direction: row;align-self: center;" v-if="goods.integral">
+						<text style="color:#FF3300;font-size:36rpx;font-family: PingFang SC;font-weight: bold;">{{goods.integral}}</text>
+						<text style="color:#FF3300;font-size:26rpx;font-family: PingFang SC;font-weight: bold;padding-top: 8rpx;">积分</text>
+						<text style="color:#FF3300;font-size:36rpx;font-family: PingFang SC;font-weight: bold;" v-if="goods.goods_price">+</text>
+					</view>
+				
+					<view class="tbc-flex-row" style="flex-direction: row;" v-if="goods.goods_price">
+						<text style="color:#FF3300;font-size:26rpx;font-family: PingFang SC;font-weight: bold;padding-top: 10rpx;">¥</text>
+						<text style="color:#FF3300;font-size:36rpx;font-family: PingFang SC;font-weight: bold;">{{goods.goods_price}}</text>
+					</view>
+				</view>
+				
+				<view style="margin-right: 20rpx;" v-if="!goods.is_invalid">
+					<!-- <stepper :value="goods.goods_number" @change="onGoodsNumberChange" ref="stepper"></stepper> -->
+					<text style="color:#333;font-size:26rpx;">x{{goods.goods_number}}</text>
+				</view>
+				
+			</view>
+		</view>
+	</view>
+</template>
+<script>
+	import Stepper from '@/components/tbc-components/stepper/index.nvue'
+	export default {
+
+		components: {
+			Stepper
+		},
+
+		props: {
+			goods: {
+				type: Object,
+				default () {
+					return {
+
+					}
+				}
+			},
+
+			profit: {
+				type: Number,
+				default () {
+					return 0
+				}
+			},
+
+			imageSize: {
+				type: Number,
+				default () {
+					return 160
+				}
+			},
+
+			width: {
+				type: Number,
+				default: 690
+			},
+		},
+
+		computed: {
+
+			imageSizeStyle() {
+				return 'width: ' + this.imageSize + 'rpx;height:' + this.imageSize + 'rpx;'
+			},
+
+			titleSizeStyle() {
+				return 'width: ' + (this.width - this.imageSize - 10 - 40) + 'rpx;'
+			}
+		},
+
+		methods: {
+			routerTo() {
+				uni.navigateTo({
+					url: '/pages/goods/goods-detail?goods_id=' + this.goods.goods_id
+				})
+			}
+		}
+	}
+</script>

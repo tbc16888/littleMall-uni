@@ -1,0 +1,210 @@
+<template>
+	<view>
+		<view class="tbc-page-background"></view>
+
+		<!-- 配送地址 -->
+		<view v-if="settlement.address && settlement.address.show">
+			<view style="background-color: #FFF;padding-top: 30rpx;padding-bottom: 30rpx;">
+				<deliver-address :address="settlement.address.field" />
+			</view>
+			<view style="height: 20rpx;width: 750rpx;"></view>
+		</view>
+
+		<!-- 商品列表-->
+		<view v-if="settlement.goods">
+			<view style="background-color: #FFF;">
+				<goods :goods="settlement.goods" />
+			</view>
+			<view style="height: 20rpx;width: 750rpx;"></view>
+		</view>
+
+		<!-- 优惠券 -->
+		<view v-if="settlement.coupon && settlement.coupon.show" @click="onCouponClick">
+			<view style="background-color: #FFF;padding-top: 30rpx;padding-bottom: 30rpx;">
+				<coupon @change="onCouponChange" :coupon="settlement.coupon.field" />
+			</view>
+		</view>
+
+		<!-- 积分 -->
+		<view v-if="settlement.integral && settlement.integral.show">
+			<view style="background-color: #FFF;padding-top: 30rpx;padding-bottom: 30rpx;">
+				<integral :integral="settlement.integral" @change="onIntegralChange" />
+			</view>
+			<view style="height: 20rpx;width: 750rpx;"></view>
+		</view>
+
+
+		
+		<view style="padding: 30rpx;border-radius:14rpx;background-color: #FFFFFF;">
+			<view class="tbc-flex-row" style="flex-direction: row;margin-top: 20rpx;align-items: center;" v-for="(item, index) in settlement.charges"
+			 :key="index">
+				<view style="flex: 1;">
+					<text style="font-size: 28rpx;">{{item.label}}</text>
+				</view>
+				<view>
+					<text style="font-size: 28rpx;">{{item.text}}</text>
+				</view>
+			</view>
+		</view>
+
+		<!-- 备注 -->
+		<view class="tbc-flex-col" style="">
+			<view style="height: 20rpx;width: 750rpx;"></view>
+			<view style="background-color: #FFF;padding-top: 30rpx;padding-bottom: 30rpx;">
+				<remark ref="remark"></remark>
+			</view>
+		</view><strong></strong>
+		
+		
+		<template v-if="settlement.submit">
+			<view style="height: 120rpx;"></view>
+			<view style="position: fixed;bottom: 0;height: 100rpx;width: 750rpx;background-color: #FFF;">
+				<submit :submit="settlement.submit" @submit="formSubmit"></submit>
+			</view>
+		</template>
+
+		<uni-popup ref="coupon" type="bottom">
+			<coupon-picker :usable="settlement.coupon && settlement.coupon.list" @close="$refs.coupon.close()" @change="onCouponChange"
+			 :current="settlement.coupon && settlement.coupon.form.user_coupon_id || ''" />
+		</uni-popup>
+	</view>
+</template>
+
+<script>
+	import uniPopup from '@/components/uni-official/uni-popup/uni-popup.vue'
+	import deliverAddress from './components/address.nvue'
+	import goods from './components/goods.nvue'
+	import coupon from './components/coupon.nvue'
+	import couponPicker from './components/coupon-picker.nvue'
+	import integral from './components/integral.nvue'
+	import submit from './components/submit.nvue'
+	import remark from './components/remark.nvue'
+	export default {
+
+		components: {
+			uniPopup,
+			deliverAddress,
+			goods,
+			coupon,
+			couponPicker,
+			integral,
+			submit,
+			remark
+		},
+
+		data() {
+			return {
+				initDone: false,
+				settlement: {},
+				form: {
+					user_coupon_id: '',
+					address_id: '',
+					integral: '',
+					cart_id: '',
+					delivery_time: '',
+					buyer_remark: '',
+				},
+			}
+		},
+
+		onLoad: function(options) {
+			this.form.cart_id = options.cart_id || ''
+		},
+
+		onShow: function() {
+			let address = uni.getStorageSync('settlement@address')
+			if (address) this.form.address_id = address.address_id
+			this.getsettlement()
+		},
+
+		onUnload: function() {
+			uni.$off('init');
+			uni.$off('change-delivery-time')
+		},
+
+		onPullDownRefresh: function() {
+			this.getsettlement()
+		},
+
+		methods: {
+
+			onCouponClick() {
+				this.$refs.coupon.open()
+			},
+
+			// 改变优惠券
+			onCouponChange(coupon) {
+				console.log('coupon', coupon)
+				this.form.user_coupon_id = coupon.user_coupon_id
+				this.getsettlement()
+			},
+
+			// 改变积分
+			onIntegralChange(data) {
+				this.form.integral = data.value
+				this.getsettlement()
+			},
+
+			// 改变配送时间
+			onDelivierTimeChange(data) {
+				this.form.delivery_time = [data[0].value, data[1].value].join(',')
+				this.getsettlement()
+			},
+
+
+			setRemark(data) {
+				this.remark = data
+			},
+
+			// 获取结算信息
+			async getsettlement() {
+				const res = await uni.$http.get('/settlement', this.form)
+				this.initDone = true
+				uni.stopPullDownRefresh()
+				if (res.data.code !== 0) {
+					return uni.showToast({
+						title: res.data.message,
+						icon: 'none'
+					})
+				}
+				this.settlement = res.data.data
+				// let list = res.data.data || []
+				// let settlement = []
+				// list.forEach(item => settlement[item.type] = item.data)
+				// this.settlement = settlement
+				// uni.$emit('init', this.settlement.delivery_time.list);
+			},
+
+			async formSubmit() {
+				let form = this.form
+				form.buyer_remark = this.remark
+				for (let i in this.settlement) form = { ...form,
+					...this.settlement[i].form
+				}
+				let cartIdList = []
+				this.settlement.goods.list.forEach(item => {
+					cartIdList.push(item.cart_id)
+				})
+				form.cart_id = cartIdList.join(',')
+				console.log(form)
+				form.buyer_remark = this.$refs.remark.getFormData()
+				// return 
+				const res = await uni.$http.post('/settlement/submit', form)
+				if (res.data.code !== 0) {
+					return uni.showToast({
+						title: res.data.message,
+						icon: 'none'
+					})
+				}
+				uni.redirectTo({
+					url: "/pages/order/list"
+				})
+			},
+
+
+			hideKeyboard() {
+				uni.hideKeyboard()
+			}
+		}
+	}
+</script>

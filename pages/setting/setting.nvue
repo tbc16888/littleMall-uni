@@ -1,0 +1,108 @@
+<template>
+	<view>
+		<view class="tbc-page-background"></view>
+
+		<view class="tbc-tabbar-container" v-for="(tabBar, idx) in itemList" :key="idx">
+			<view style="height: 10px;width: 100%;"></view>
+			<view class="tbc-tabbar-wrapper" style="background-color: #FFF;">
+				<list-cell :rows="tabBar" @click="onCellClick" />
+			</view>
+		</view>
+
+		<view class="tbc-tabbar-container" v-if="token">
+			<view style="height: 10px;width: 100%;"></view>
+			<view class="tbc-flex-row" @click="logout" style="flex-direction: row;background-color: #FFF;align-items: center;justify-content: center;height: 90rpx;">
+				<text style="color: #FF0000;font-size: 32rpx;">退出登录</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	import ListCell from '@/components/tbc-components/tbc-list-cell/index.nvue'
+
+	export default {
+
+		components: {
+			ListCell
+		},
+
+		data() {
+			return {
+				token: '',
+				itemList: [
+					[{
+						label: '清除缓存',
+						arrow: true,
+						code: '',
+						text: '0'
+					}],
+					[{
+						label: '消息通知',
+						note: '开启后，会根据您的当前位置提醒配送小区，建议开启',
+						type: 'switch'
+					}],
+					[{
+						label: '问题反馈',
+						page: '/pages/setting/feedback'
+					}, {
+						label: '关于我们',
+						text: '版本1.0.0',
+						page: '/pages/setting/about'
+					}]
+				],
+			}
+		},
+
+		onShow: function() {
+			const res = uni.getStorageInfoSync();
+			let size = res.currentSize
+			let sizeFormat = size + 'KB'
+			if (size > 1024) sizeFormat = size / 1024 + 'MB'
+			this.itemList[0][0].text = sizeFormat
+			this.token = uni.getStorageSync('login@token')
+		},
+
+		methods: {
+
+			onCellClick({
+				item
+			}) {
+				if (item.label == '清除缓存') {
+					uni.showModal({
+						title: '提示',
+						content: "确定清空本地的缓存数据？",
+						complete: function(res) {
+							if (res.cancel) return
+							uni.removeStorageSync('appStartTime')
+							uni.clearStorageSync();
+							this.itemList[0][0].text = 1
+							return uni.showToast({
+								title: "清除成功"
+							})
+						}
+					})
+				}
+				if (item.page) {
+					uni.navigateTo({
+						url: item.page
+					})
+				}
+			},
+
+			logout() {
+				let that = this
+				uni.showModal({
+					title: '提示',
+					content: '确定要退出系统吗？',
+					success: function(res) {
+						if (res.cancel) return
+						that.$store.dispatch('logout')
+						uni.removeStorageSync('login@token')
+						that.token = ''
+					}
+				});
+			}
+		}
+	}
+</script>

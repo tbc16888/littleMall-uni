@@ -1,0 +1,27 @@
+<template>
+
+	<view class="tbc-flex-col">
+		<view class="tbc-flex-row" style="flex-direction: row;padding-left: 30rpx;height:80rpx;align-items: center;border-bottom-width: 1px;border-style: solid;border-color: #F1F1F1;">
+			<text style="color: #333333;font-size: 32rpx;font-weight: bold;">休闲食品</text>
+		</view>
+		<view class="tbc-flex-col" style="flex-direction: column;">
+			<view class="tbc-flex-row" style="flex-direction: row;padding-left: 30rpx;height:80rpx;align-items: center;" v-for="i in 10"
+			 :key="i">
+				<text style="color: #333333;font-size: 26rpx;">品牌坚果</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		props: {
+			categoryies: {
+				type: Array,
+				default() {
+					return []
+				}
+			}
+		}
+	}
+</script>

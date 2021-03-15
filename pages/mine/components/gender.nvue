@@ -1,0 +1,42 @@
+<template>
+	<uni-popup ref="gender" type="bottom" :mask-click="true">
+		<view class="tbc-tabbar-wrapper" style="background-color: #FFF;">
+			<list-cell :rows="tabBarList" @click="onCellClick"/>
+		</view>
+	</uni-popup>
+</template>
+
+<script>
+	import UniPopup from '@/components/uni-official/uni-popup/uni-popup.vue'
+	import ListCell from '@/components/tbc-components/tbc-list-cell/index.nvue'
+	export default {
+
+		components: {
+			UniPopup,
+			ListCell
+		},
+
+		data() {
+			return {
+				tabBarList: [
+					{label: '男', value: 1},
+					{label: '女', value: 2}
+				],
+				checked: 1
+			}
+		},
+
+		methods: {
+
+			show(value) {
+				this.checked = value
+				this.$refs.gender.open()
+			},
+			
+			onCellClick(item) {
+				this.$emit('change', item.item.value)
+				this.$refs.gender.close()
+			}
+		}
+	}
+</script>

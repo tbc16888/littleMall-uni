@@ -1,0 +1,169 @@
+<template>
+	<view>
+		<view class="tbc-page-background"></view>
+		<view style="position: fixed;top: 0;">
+			<!-- #ifdef APP-NVUE || H5 -->
+			<view :style="'height:'+statusBarHeight+'px'"></view>
+			<!-- #endif -->
+			<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;align-items: center;background-color: #FFF;">
+				<view class="tbc-flex-row" style="flex-direction: row;height:100rpx;width: 690rpx;align-items: center;">
+					<view class="tbc-flex-row" style="flex-direction: row;background-color: #F5F5F5;height: 60rpx;flex: 1;border-radius: 30rpx;align-items: center;margin-left: 10rpx;">
+						<view style="margin-left: 24rpx;margin-right: 20rpx;">
+							<icon type="search" size='14' color='#999'></icon>
+						</view>
+						<view style="flex: 1;">
+							<swiper vertical autoplay circular interval="8000" class="tbc-flex-row" style="flex-direction:row;height: 60rpx;">
+								<swiper-item v-for="(item, index) in ['关键词搜索']" :key="index" style="flex: 1;flex-direction: row;align-items: center;font-size: auto;" @click="toSearch">
+									<text style="font-size: 26rpx;color: #666;">{{item}}</text>
+								</swiper-item>
+							</swiper>
+						</view>
+					</view>
+				</view>
+			</view>
+		</view>
+
+		<view style="position: relative;top: 0;bottom: 0;width: 750rpx;"></view>
+		<!-- 左边顶级分类 -->
+		<scroll-view style="width: 210rpx;position: fixed;top: 0;bottom: 0;background-color: #F5F5F5;" scroll-y
+			show-scrollbar="false" :style="top">
+			<view class="tbc-flex-row"
+				style="flex-direction: row;align-items:center;justify-content:center;position:relative;padding: 30rpx;"
+				v-for="(item, index) in categories" :key="item.cat_name" @click="tapTopCategory(index)">
+				<view style="position: absolute;top: 0;right: 0;bottom: 0;left: 0;background-color: #FFF;"
+					v-if="index === topNavIndex"></view>
+				<view
+					style="position: absolute;width: 6rpx;height: 40rpx;background-color: #F30;left: 0;border-radius: 6rpx;"
+					v-if="index === topNavIndex"></view>
+				<text style="font-size: 28rpx;color: #333;">{{item.cat_name}}</text>
+			</view>
+		</scroll-view>
+		<!-- 左边顶级分类 结束 -->
+
+		<!-- 右边下级分类 -->
+		<scroll-view style="position: fixed;top: 0;bottom: 0;background-color: #FFF;right: 0;left: 210rpx;" scroll-y :style="top"
+			show-scrollbar="false">
+			<view class="tbc-flex-col" style="flex-direction: column;margin-bottom: 20rpx;"
+				v-for="(second, index) in categories[topNavIndex].children" v-if="second.children.length" :key="index">
+				<view style="width:550rpx;border-radius:16rpx;background-color: #FFF;">
+					<view class="tbc-flex-row" style="flex-direction: row;height: 90rpx;align-items: center;">
+						<text style="font-size: 30rpx;margin-left:30rpx;">{{second.cat_name}}</text>
+					</view>
+
+					<view class="tbc-flex-row" style="flex-direction: row;flex-wrap: wrap;">
+						<view class="tbc-flex-col"
+							style="flex-direction: column;align-items: center;width: 180rpx;margin-bottom: 20rpx;"
+							v-for="(three, ti) in second.children" :key="ti" @click="onTabBarClick(three)">
+							<view class="tbc-flex-row"
+								style="width:120rpx;height:120rpx;align-items: center;justify-content: center;border-radius: 10rpx;">
+								<image :src="three.icon" style="width: 100rpx;height: 100rpx;"></image>
+							</view>
+							<text style="font-size: 24rpx;margin-top:16rpx;color: #444;">{{three.cat_name}}</text>
+						</view>
+					</view>
+				</view>
+			</view>
+		</scroll-view>
+		<!-- 右边下级分类 结束 -->
+	</view>
+</template>
+
+<script>
+	import tbcHeader from './components/header.nvue'
+	import tbcSearch from '@/components/tbc-components-layout/search.nvue'
+	export default {
+
+		components: {
+			tbcHeader,
+			tbcSearch
+		},
+
+		data() {
+			return {
+				categories: [{
+					children: []
+				}],
+				topNavIndex: 0,
+				subNavIndex: 0,
+				optionCatId: 0,
+				current: null,
+				catId: 0,
+				goodsList: []
+			}
+		},
+		computed: {
+			statusBarHeight() {
+				return uni.getSystemInfoSync().statusBarHeight
+			},
+			
+			top() {
+				let height = uni.upx2px(100)
+				// #ifdef APP-NVUE || H5
+				height += this.statusBarHeight
+				// #endif 
+				return 'top:' + height + 'px'
+			},
+		},
+
+		onLoad: function() {
+			this.getCategories()
+		},
+
+		onShow: function() {
+
+		},
+
+		methods: {
+
+			async getCategories() {
+				const res = await uni.$http.get('/category', {
+					parent_id: this.catId || ''
+				})
+				if (res.data.code !== 0) return
+				let data = res.data.data
+				if (this.catId) {
+					this.categories[this.topNavIndex].children = data.list
+				} else {
+					let rows = []
+					this.categories = data.list
+				}
+			},
+
+			detectChecked() {
+				if (!this.optionCatId) return
+				for (let i in this.categories) {
+					if (this.categories[i].cat_id == this.optionCatId) {
+						this.tapTopCategory(i)
+						return
+					}
+				}
+			},
+
+			parseQueryString(data) {
+				let params = data.split('&'),
+					options = {}
+				for (let i = 0; i < params.length; i++) {
+					let query = params[i].split('=')
+					options[query[0]] = query[1]
+				}
+				return options
+			},
+
+			// 点击顶部分类
+			tapTopCategory(index) {
+				this.topNavIndex = index
+				this.subNavIndex = 0
+				if (!this.categories[this.topNavIndex].children.length) {
+					this.catId = this.categories[this.topNavIndex].cat_id
+					this.getCategories()
+				}
+			},
+
+			onTabBarClick(item) {
+				uni.navigateTo({
+					url: "/pages/goods/list?keyword=" + item.cat_name
+				})
+			}
+		}
+	}
+</script>

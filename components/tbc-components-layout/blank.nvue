@@ -1,0 +1,32 @@
+<template>
+	<view class="tbc-flex-row" style="flex-direction: row;" :style="outerStyle">
+	</view>
+</template>
+
+<script>
+	export default {
+		props: {
+			module: {
+				type: Object,
+				default () {
+					return {
+						list: []
+					}
+				}
+			}
+		},
+
+		computed: {
+
+			outerStyle() {
+				let style = []
+				let config = this.module.config.outer || {}
+				if (config.style) style.push(outer.style)
+				if (config.width) style.push('width: ' + config.width + 'rpx')
+				if (config.height) style.push('height: ' + config.height + 'rpx')
+				if (config.background) style.push('background-color:' + config.background)
+				return style.join(";")
+			},
+		}
+	}
+</script>

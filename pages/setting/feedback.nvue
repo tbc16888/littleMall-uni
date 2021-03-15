@@ -1,0 +1,76 @@
+<template>
+	<view>
+
+		<view class="tbc-page-background"></view>
+
+		<view class="tbc-flex-col" style="width: 750rpx;background-color: #FFF;align-items: center;flex-direction: column;">
+			<view class="tbc-flex-col" style="flex-direction: column;width: 690rpx;">
+				<textarea style="font-size: 28rpx;color: #333;width: 690rpx;padding-top: 10px;padding-bottom: 10px;height: 200rpx;" placeholder="请详细描述您的问题或者建议,以便我们为您提供更好的帮助"
+				 placeholder-style="color:#999;" :maxlength="200" v-model="form.desc"></textarea>
+			</view>
+
+			<view style="height: 20rpx;"></view>
+			<view class="tbc-flex-row" style="flex-direction: row;flex-wrap: wrap;width: 690rpx;">
+				<view class="tbc-flex-col" style="width: 120rpx;height: 120rpx;flex-direction: column;align-items: center;justify-content: center;border-width: 1px;border-style: solid;border-color: #DDD;border-radius: 16rpx;margin-bottom: 10rpx;margin-top:10rpx;position:relative;">
+
+					<view style="width:17px;height: 1px;background-color: #DDD;"></view>
+					<view style="width: 1px;height:17px;background-color: #DDD;position: absolute;"></view>
+
+					<!-- <view class="tbc-flex-col" style="width: 120rpx;height: 40rpx;position:absolute;bottom: 0;background-color: #242629;text-align: center;border-bottom-left-radius: 16rpx;border-bottom-right-radius: 16rpx;flex-direction: column;align-items: center;justify-content: center;">
+						<text style="color: #fff;font-size: 12px;">封面</text>
+					</view> -->
+
+					<!-- <view style="width: 30rpx;height:30rpx;position: absolute;right: -15rpx;top: -15rpx;">
+						<image src="/static/icon/close_black.png" style="width: 30rpx;height: 30rpx;"></image>
+					</view> -->
+				</view>
+			</view>
+			<view style="height: 20rpx;"></view>
+		</view>
+
+		<view style="height: 20rpx;"></view>
+		<view class="tbc-flex-col" style="width: 750rpx;background-color: #FFF;align-items: center;flex-direction: column;">
+			<view style="flex-direction: row;height:100rpx;align-items: center;width: 690rpx;">
+				<text style="font-size: 28rpx;color: #333;">联系方式</text>
+			</view>
+
+			<view style="width: 690rpx;padding-bottom: 20rpx;">
+				<input type="text" style="font-size: 28rpx;color: #666;" placeholder="请输入你的电话，方便我们与你联系" :maxlength="200" v-model="form.contact_number"></textarea>
+			</view>
+		</view>
+
+
+		<view style="position: fixed;bottom: 0;">
+			<view class="tbc-flex-row" @click="formSubmit" style="flex-direction: row;width: 750rpx;
+			background-color: #DD524D;align-items: center;justify-content: center;height: 100rpx;">
+				<text style="color: #FFF;">提交</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+
+		data() {
+			return {
+				form: {
+					desc: '',
+					contact_number: ''
+				}
+			}
+		},
+
+		methods: {
+
+			async formSubmit() {
+				const res = await uni.$http.post('/feedback/add', this.form)
+				uni.showToast({
+					title: res.data.message,
+					icon: res.data.code !== 0 ? 'none' : 'success'
+				})
+				if (res.data.code === 0) uni.navigateBack()
+			}
+		}
+	}
+</script>

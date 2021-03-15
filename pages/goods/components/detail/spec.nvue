@@ -1,0 +1,30 @@
+<template>
+	<view class="tbc-flex-row" style="flex-direction: row;padding-bottom: 20rpx;" v-if="images.length">
+		<view style="height: 60rpx;width: 60rpx;margin-right: 10rpx;border-radius: 10rpx;" v-for="(image, i) in images" :key="i"
+		 v-if="i < 5">
+			<image :src="image" style="height: 60rpx;width: 60rpx;border-radius: 10rpx;"></image>
+		</view>
+		<view class="tbc-flex-row" style="height: 60rpx;margin-right: 10rpx;background-color: #EEE;border-radius: 10rpx;padding-left:20rpx;padding-right:20rpx;flex-direction: row;align-items: center;"
+		 v-if="images.length > 5">
+			<text style="font-size: 24rpx;color: #999;justify-content: center;">共{{images.length}}{{spec.list[0].label}}可选</text>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		props: {
+			spec: {
+				type: Object,
+				default () {
+					return {}
+				}
+			}
+		},
+		computed: {
+			images() {
+				return this.spec.field.images || []
+			}
+		}
+	}
+</script>

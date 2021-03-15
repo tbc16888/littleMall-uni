@@ -1,0 +1,102 @@
+<template>
+	<view style="position: fixed;bottom: 0;width: 750rpx;" :style="'top:' +  top">
+
+		<list style="position: fixed;bottom: 0;width: 750rpx;" show-scrollbar="false" enableBackToTop="true" :style="'top:' +  top"
+		 scroll-y @loadmore="loading" v-if="columnCount == 1">
+			<refresh @refresh="refresh()" @pullingdown="onPullingDown" :display="isRefreshing ? 'show' : 'hide'" v-if="enableRefresh">
+				<div class="tbc-flex-row" style="flex-direction: row;align-items: center;justify-content: center;width: 750rpx;height: 100rpx;">
+					<loading-indicator style="width:30px;height:30px;margin-right:5px;color:#666;" :animating="true"></loading-indicator>
+					<text style="font-size:30rpx;color: #666;">{{refreshText}}</text>
+				</div>
+			</refresh>
+			<slot></slot>
+		</list>
+		<waterfall style="position: fixed;bottom: 0;width: 750rpx;background-color: #555555;" show-scrollbar="false" enableBackToTop="true" :style="'top:' +  top" 
+		 :column-count="columnCount" :column-gap="0" scroll-y @loadmore="loading" v-if="columnCount > 1">
+			<refresh @refresh="refresh()" @pullingdown="onPullingDown" :display="isRefreshing ? 'show' : 'hide'" v-if="enableRefresh">
+				<div class="tbc-flex-row" style="flex-direction: row;align-items: center;justify-content: center;width: 750rpx;height: 100rpx;">
+					<loading-indicator style="width:30px;height:30px;margin-right:5px;color:#666;" :animating="true"></loading-indicator>
+					<text style="font-size:30rpx;color: #666;">{{refreshText}}</text>
+				</div>
+			</refresh>
+			<slot></slot>
+		</waterfall>
+	</view>
+</template>
+<script>
+	export default {
+		props: {
+			top: {
+				type: [String, Number],
+				default () {
+					return 0
+				}
+			},
+
+			columnCount: {
+				type: [String, Number],
+				default: 1,
+			}
+		},
+
+		data() {
+			return {
+				isRefreshing: false,
+				pulling: false,
+				isCanRefresh: false,
+				refreshText: '下拉刷新',
+				isLoading: false,
+				refreshIcon: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAMAAABg3Am1AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAB5QTFRFcHBw3Nzct7e39vb2ycnJioqK7e3tpqam29vb////D8oK7wAAAAp0Uk5T////////////ALLMLM8AAABxSURBVHja7JVBDoAgDASrjqj//7CJBi90iyYeOHTPMwmFZrHjYyyFYYUy1bwUZqtJIYVxhf1a6u0R7iUvWsCcrEtwJHp8MwMdvh2amHduiZD3rpWId9+BgPd7Cc2LIkPyqvlQvKxKBJ//Qwq/CacAAwDUv0a0YuKhzgAAAABJRU5ErkJggg==",
+				refreshTimer: 0,
+				timer: null,
+				timeout: 5,
+				showNone: true,
+				enableRefresh: true
+			}
+		},
+
+		methods: {
+			// 下拉
+			onPullingDown(e) {
+				if (this.isRefreshing || this.pulling) {
+					return;
+				}
+				if (Math.abs(e.pullingDistance) > Math.abs(e.viewHeight)) {
+					this.isCanRefresh = true;
+					this.refreshText = "释放刷新";
+				} else {
+					this.isCanRefresh = false;
+					this.refreshText = "下拉刷新";
+				}
+			},
+
+			stopPullDownRefresh() {
+				console.log('stopPullDownRefresh')
+				let diff = new Date().getTime() - this.refreshTimer
+				let timer = diff < 500 ? 500 - diff : 20
+				clearTimeout(this.timer)
+				this.refreshText = "刷新成功";
+				this.isRefreshing = false
+				this.pulling = false
+				this.isLoading = false
+			},
+
+			loading() {
+				console.log('loading')
+				this.$emit('loading')
+			},
+
+			refresh() {
+				this.refreshText = "正在刷新";
+				this.refreshTimer = new Date().getTime()
+				console.log('refresh')
+				this.$emit('refresh')
+				this.isRefreshing = true
+				clearTimeout(this.timer)
+				this.timer = setTimeout(() => {
+					this.stopPullDownRefresh()
+				}, this.timeout * 1000)
+			},
+		}
+	}
+</script>

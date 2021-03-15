@@ -1,0 +1,56 @@
+<template>
+	<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;position: relative;align-items: center;" :style="'height:' + windowHeight">
+		<swiper :autoplay="false" :duration="300" style="width: 750rpx;" :style="'height:' + windowHeight" @change="onSwiperChange">
+			<swiper-item v-for="(item, index) in [1, 2, 3, 4]" :key="index" style="background-color: #007AFF;">
+			{{item}}
+			<view style="position:absolute;top:80rpx;right: 50rpx;padding-left: 30rpx;padding-right:30rpx;border-width: 1px;border-color: #333333;border-style: solid;border-radius: 50rpx;height: 50rpx;align-items: center;justify-content: center;" @click="success">
+				<text style="color: #333333;font-size:14px;">跳过</text>
+			</view>
+			
+			</swiper-item>
+		</swiper>
+		
+		
+		
+		<view class="tbc-flex-row" style="position: absolute;bottom: 40px;flex-direction:row;align-items: center;justify-content: center;">
+			<view style="width:10px;height: 2px;margin-left: 2px;margin-right: 2px;" v-for="i in  [1, 2, 3, 4].length" :key="i"
+			 :style="i == activeIndex + 1 ? activeBackground:'background-color: rgba(0, 0, 0, .4)'"></view>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				windowHeight: '100%',
+				activeIndex: 0
+			}
+		},
+		computed: {
+			activeBackground() {
+				return 'background-color: rgba(255, 255, 255, .6)'
+			}
+		},
+		
+		created: function() {
+			let info = uni.getSystemInfoSync()
+			this.windowHeight = info.windowHeight + 'px'
+		},
+		
+		methods: {
+			onSwiperChange(e) {
+				let index = e.detail.current
+				this.activeIndex = index
+			},
+			
+			success() {
+				this.$emit('success')
+			}
+		}
+	}
+</script>
+
+<style>
+
+</style>

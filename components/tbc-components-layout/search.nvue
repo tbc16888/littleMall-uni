@@ -1,0 +1,95 @@
+<template>
+	<view class="tbc-flex-col">
+		<view class="tbc-flex-row" style="flex-direction: row;align-items: center;justify-content: center;"
+			:style="outerStyle">
+			<view class="tbc-flex-row" style="flex-direction: row;align-items: center" :style="containerStyle">
+				<!-- <div style="width: 10px"></div>
+				<div style="width: 18px;height: 15px;background: url('https://st.360buyimg.com/so/images/search/jd-sprites.png?__inline=') -80px 0 no-repeat;background-size: 200px;"></div>
+				<div style="width: 10px"></div>
+				<div style="flex: 1;">
+					<input type="text" placeholder="搜索" style="outline: 0;border: 0;width: 100%;height: 100%;background: none;font-weight: bold;" :style="fontStyle"/>
+				</div> -->
+				<view class="tbc-flex-row"
+					style="width: 80rpx;flex-direction: column;align-items: center;justify-content: center;">
+					<icon type="search" size='14' color='#999'></icon>
+				</view>
+
+				<view style="flex: 1;">
+					<swiper vertical autoplay circular interval="8000" class="tbc-flex-row"
+						style="flex-direction:row;height: 60rpx;align-items: center;justify-content: center;">
+						<swiper-item v-for="(item, index) in keywords" :key="index" @click="onClick()"
+							style="flex: 1;flex-direction: row;align-items: center;" class="tbc-flex-row">
+							<text style="font-size: 26rpx;color: #666;">{{item}}</text>
+						</swiper-item>
+					</swiper>
+				</view>
+			</view>
+		</view>
+	</view>
+
+</template>
+
+<script>
+	import common from './mixins/common.js'
+	export default {
+		props: {
+			module: {
+				type: Object,
+				default () {
+					return {
+
+					}
+				}
+			}
+		},
+		computed: {
+
+			keywords() {
+				let config = this.module.config.font || {}
+				config.text = config.text || '搜索'
+				return config.text.split('、')
+			},
+
+			outerStyle() {
+				let style = []
+				let config = this.module.config.outer || {}
+				if (config.style) style.push(outer.style)
+				if (config.width) style.push('width: ' + config.width + 'rpx')
+				if (config.height) style.push('height: ' + config.height + 'rpx')
+				if (config.marginTop) style.push('margin-top:' + config.marginTop + 'rpx')
+				if (config.marginBottom) style.push('margin-top:' + config.marginBottom + 'rpx')
+				if (config.background) style.push('background-color:' + config.background)
+				if (config.paddingTop) style.push('padding-top:' + config.paddingTop + 'rpx')
+				if (config.paddingBottom) style.push('padding-bottom:' + config.paddingBottom + 'rpx')
+				return style.join(";")
+			},
+
+			containerStyle() {
+				let style = []
+				let config = this.module.config.container || {}
+				if (config.style) style.push(container.style)
+				if (config.width) style.push('width: ' + config.width + 'rpx')
+				if (config.height) style.push('height: ' + config.height + 'rpx')
+				if (config.background) style.push('background:' + config.background)
+				if (config.borderRadius) style.push('border-radius:' + config.borderRadius + 'rpx')
+				return style.join(";")
+			},
+
+			fontStyle() {
+				let style = []
+				let config = this.module.config.font || {}
+				if (config.fontSize) style.push('font-size: ' + config.fontSize + 'rpx')
+				if (config.fontColor) style.push('color: ' + config.fontColor)
+				return style.join(";")
+			}
+		},
+
+		methods: {
+			onClick() {
+				uni.navigateTo({
+					url: "/pages/search/search"
+				})
+			},
+		}
+	}
+</script>

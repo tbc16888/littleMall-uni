@@ -1,0 +1,78 @@
+<template>
+	<view class="tbc-flex-col" style="width: 750rpx;">
+		<view class="tbc-flex-col" style="width: 750rpx;align-items: center;">
+			<view class="tbc-flex-row" style="width: 243rpx;background-color: #3F536E;height: 243rpx;align-items: center;justify-content: center;">
+			</view>
+		</view>
+		
+		<view class="tbc-flex-col" style="width: 750rpx;align-items: center;margin-top: 160rpx;">
+			<button class="tbc-flex-row " style="width: 660rpx;background-color: #00b324;height: 82rpx;border-radius: 82rpx;align-items: center;justify-content: center;border: 0;"
+			 open-type="getPhoneNumber" @getphonenumber="getPhoneNumber">
+				<text style="font-family:PingFang SC;color:#fff;font-weight: 24rpx;">微信一键登录</text>
+			</button>
+		</view>
+		
+		<uni-popup ref="sync">
+			<sync @success="back" @cancel="back"></sync>
+		</uni-popup>
+	</view>
+</template>
+
+<script>
+	import uniPopup from '@/components/uni-official/uni-popup/uni-popup.vue'
+	import sync from './sync.nvue'
+	export default {
+		
+		components: {
+			uniPopup,
+			sync
+		},
+		
+		data() {
+			return {
+				e: {}
+			}
+		},
+		
+		methods: {
+			back() {
+				console.log('asdas')
+				uni.navigateBack()
+			},
+			
+			getWxCode(e) {
+				let that = this
+				uni.login({
+					success(res) {
+						if (res.errMsg !== 'login:ok') return
+						that.wxCode = res.code
+						that.loginSubmit(e)
+					}
+				})
+			},
+			
+			// 微信小程序获取手机号授权
+			async getPhoneNumber(e) {
+				if (e.detail.errMsg !== 'getPhoneNumber:ok') return
+				this.getWxCode(e)
+			},
+			
+			async loginSubmit(e) {
+				const res = await uni.$http.post('/login/wxMiniProgram', {
+					iv: e.detail.iv,
+					encryptedData: e.detail.encryptedData,
+					code: this.wxCode
+				})
+				if (res.data.code !== 0) {
+					return uni.showToast({
+						title: res.data.message,
+						icon: 'none'
+					})
+				}
+				let data = res.data.data
+				this.$emit('success', data, data.is_sync_info ? false:true)
+				this.$refs.sync.open()
+			}
+		}
+	}
+</script>

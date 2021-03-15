@@ -1,0 +1,99 @@
+<template>
+	<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;" v-if="countdown.show">
+		<view class="tbc-flex-row" style="flex-direction: row;height:100rpx;position: relative;">
+			<!-- 背景图 -->
+			<image :src="countdown.style.background" v-if="countdown.style.background.indexOf('http') > -1" style="width: 750rpx;height: 100rpx;top: 0;left: 0;position: absolute;"></image>
+
+
+			<view class="tbc-flex-row" style="flex-direction: row;flex:1;padding-left:16rpx;align-items: center;">
+			</view>
+
+			<view class="tbc-flex-col" style="flex-direction: column;padding-left: 30rpx;padding-right: 30rpx;justify-content: center;align-items: center;">
+				<text style="font-size: 24rpx;font-family:PingFang SC;font-weight: bold;">距离结束仅剩</text>
+				<view class="tbc-flex-row" style="flex-direction: row;align-items: center;">
+					<view v-for="(item, index) in indicator" v-if="index < 3" class="tbc-flex-row" style="flex-direction: row;align-items: center;"
+					 :key="index">
+						<view class="tbc-flex-row" style="flex-direction: row;align-items: center;justify-content: center;background-color: #ff3c3f;text-align: center;border-radius:8rpx;margin: 8rpx;height: 40rpx;width: 40rpx;">
+							<text style="color:#FFF;font-size:22rpx;font-family:PingFang SC;">{{item.value}}</text>
+						</view>
+						<view v-if="index < indicator.length - 1">
+							<text style="font-size:24rpx;">{{item.label}}</text>
+						</view>
+					</view>
+				</view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	import countdown from '@/utils/countdown.js'
+	export default {
+		props: {
+			countdown: {
+				type: Object,
+				default () {
+					return {
+						show: 1,
+						field: {
+							start: 0
+
+						},
+						style: {
+							background: '#ff3c3f',
+							indicator: {
+								color: '',
+								background: '#ffeee9'
+							}
+						},
+					}
+				}
+			}
+		},
+
+		data() {
+			return {
+				indicator: []
+			}
+		},
+
+		computed: {
+			background() {
+				let style = []
+				let background = this.countdown.style.background
+				if (background.indexOf('http') > -1) {
+					style.push('background-image: url(' + background + ')')
+					style.push('background: url(' + background + ')')
+					style.push('background-size: 100%')
+				} else {
+					style.push('background-color:' + background)
+				}
+				return style.join(';')
+			}
+		},
+
+		created() {
+			this.startCoundown()
+		},
+
+		deactivated() {
+			this.clearInterval()
+		},
+
+		methods: {
+			startCoundown() {
+				this.clearInterval()
+				this.timer = countdown.start(this.countdown.field.start, (indicator) => {
+					indicator.forEach(item => item.label = ':')
+					this.indicator = countdown.zerofill(indicator)
+				}, () => {
+					this.$emit('timeout')
+				})
+			},
+
+			clearInterval() {
+				clearInterval(this.timer)
+			}
+		}
+	}
+</script>

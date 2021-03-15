@@ -1,0 +1,68 @@
+<template>
+	<view class="tbc-flex-col" style="flex-direction: column;background-color: #FFFFFF;">
+		<view class="tbc-flex-row" style="flex-direction: row;height: 90rpx;align-items: center;">
+			<text style="font-size:30rpx;padding-left: 30rpx;">商品详情</text>
+		</view>
+		<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;align-items: center;">
+			<view class="tbc-flex-col" style="width: 690rpx;" v-for="(item, index) in detail" :key="index">
+				<view v-if="item.type == 'text'" style="margin-top: 20rpx;margin-bottom: 20rpx;">
+					<text style="font-size: 26rpx;">{{item.value}}</text>
+				</view>
+				<image v-if="item.type == 'image'" :src="item.value" ref="image" mode="widthFix" @load="onImageLoaded" :data-index="index"
+				 style="width:690rpx;" :lazy-load="true"></image>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	//  #ifdef APP-NVUE
+	const animation = weex.requireModule('animation')
+	//  #endif
+
+	export default {
+		props: {
+			goods: {
+				type: Object,
+				default () {
+					return {}
+				}
+			},
+			detail: {
+				type: Array,
+				default () {
+					return []
+				}
+			}
+		},
+
+		data() {
+			return {
+				imageBaseWidth: uni.upx2px(690),
+				detail_mobile: []
+			}
+		},
+
+		methods: {
+			onImageLoaded(e) {
+				let index = e.target.dataset.index
+				let width = e.detail.width
+				let height = e.detail.height
+				let radix = this.imageBaseWidth
+				radix = radix > width ? 1 : radix / width
+
+				// #ifdef APP-NVUE
+				animation.transition(this.$refs.image[index], {
+					styles: {
+						width: width * radix + 'px',
+						height: height * radix + 'px',
+					},
+					duration: 0,
+					timingFunction: 'ease',
+					needLayout: true,
+				})
+				// #endif
+			}
+		}
+	}
+</script>

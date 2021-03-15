@@ -1,0 +1,36 @@
+<template>
+	<view class="tbc-flex-col" style="flex-direction: column;width:560rpx;height:822rpx;">
+
+		<view class="tbc-flex-col" style="width: 560rpx;height: 720rpx;background-image: url(/static/images/red-packet-background@2x.png);background-size: cover;background-repeat: no-repeat;position: relative;background-color: #FFF;border-radius: 10rpx;">
+
+
+
+
+
+
+		</view>
+
+
+		<view style="height: 30rpx;"></view>
+		<view class="tbc-flex-col" style="width: 560rpx;flex-direction: column;align-items: center;" @click="close">
+			<image src="/static/icon/close_white.png" style="width: 72rpx;height:72rpx;"></image>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		props: {
+
+		},
+
+		methods: {
+			close() {
+				uni.getCurrentSubNVue().hide('auto')
+			}
+		}
+	}
+</script>
+
+<style>
+</style>

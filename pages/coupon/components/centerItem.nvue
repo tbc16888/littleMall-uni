@@ -1,0 +1,67 @@
+<template>
+	<view class="tbc-flex-col" style="flex-direction: column;background-color: #FFF;box-shadow: 0rpx 2rpx 4rpx rgba(171,171,171,0.4);border-radius: 10rpx;width: 690rpx;align-items: center;">
+		
+		<!-- border-bottom-width: 1px;border-color: #EEE;border-style: dashed; -->
+		<view class="tbc-flex-row" style="flex-direction: row;padding:30rpx;align-items: center;">
+
+			<view class="tbc-flex-col" style="flex-direction: column;align-items: center;margin-right: 40rpx;">
+				<view class="tbc-flex-row" style="flex-direction: row;align-items: center;">
+					<text style="color:#F00;font-family:PingFang SC;font-size: 30rpx;padding-top:10rpx;">¥</text>
+					<text style="color:#F00;font-size:50rpx;font-weight:bold;">{{coupon.discount}}</text>
+				</view>
+				<text style="font-size:24rpx;color:#F00;">满{{coupon.minimum}}可用</text>
+			</view>
+
+			<view class="tbc-flex-col" style="flex-direction: column;flex: 1;">
+				<text style="font-size: 26rpx;">{{coupon.coupon_name}}</text>
+				<text style="font-size: 24rpx;color:#666;margin-top: 10rpx">{{coupon.effective_time}}</text>
+			</view>
+
+
+			<view class="tbc-flex-row" style="flex-direction: row;height:50rpx;align-items: center;justify-content: center;border-radius: 25rpx;padding-left: 20rpx;padding-right:20rpx;background-color:#F30;margin-left: 20rpx;"
+			 @click="receive" v-if="coupon.is_received == 0">
+				<text style="color: #FFF;font-size: 24rpx;">立即领取</text>
+			</view>
+			
+			<view class="tbc-flex-row" style="flex-direction: row;height:50rpx;align-items: center;justify-content: center;padding-left: 20rpx;padding-right:20rpx;;margin-left: 20rpx;border-color: #F30;border-width: 1px;border-style: solid;border-radius: 50rpx;" @click="click"
+			v-if="coupon.is_received == 1">
+				<text style="color: #F30;font-size: 24rpx;">立即使用</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		props: {
+			coupon: {
+				type: Object,
+				default () {
+					return {}
+				}
+			},
+
+			width: {
+				type: Number,
+				default: 690
+			},
+			
+		},
+
+		methods: {
+			
+			async receive() {
+				const res = await uni.$http.post('/user.coupon/receive', {
+					coupon_id: this.coupon.coupon_id
+				})
+				if (res.data.code !== 0) return uni.showToast({
+					message: res.data.mesasge,
+					icon: 'none'
+				})
+				this.coupon.is_received = 1
+			},
+			
+			
+		}
+	}
+</script>

@@ -1,0 +1,142 @@
+<template>
+	<view>
+		<view class="tbc-page-background"></view>
+		<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;position: relative;">
+			<view style="height: 20px;width: 750rpx;" :style="'height:'+statusBarHeight+'px'"></view>
+			<template v-for="(module, index) in moduleList">
+				<tbc-background :module="module" v-if="module.module == 'background'" :key="index" />
+			</template>
+			<template v-for="(module, index) in moduleList">
+				<tbc-blank :module="module" v-if="module.module == 'blank'" :key="index" />
+				<tbc-search :module="module" v-if="module.module == 'search'" :key="index" />
+				<tbc-keyword :module="module" v-if="module.module == 'keyword'" :key="index" />
+				<tbc-carousel :module="module" v-if="module.module == 'carousel'" :key="index" />
+				<tbc-image-group :module="module" v-if="module.module == 'image-group'" :key="index" />
+				<tbc-menu :module="module" v-if="module.module == 'menu'" :key="index" />
+			</template>
+		</view>
+
+		<view class="tbc-flex-col" style="width:750rpx;flex-direction: column;align-items: center;">
+			<view
+				style="width:750rpx;flex-direction: row;align-items: center;background-color: #F5F5F5;flex-shrink: 0;flex-wrap: wrap;"
+				class="tbc-flex-row">
+				<view style="width: 375rpx;flex-direction: column;align-items: center;margin-top: 20rpx;"
+					class="tbc-flex-col" v-for="goods in goodsList" :key="goods.goods_id">
+					<app-goods-item-col :goods="goods" :width="355"></app-goods-item-col>
+				</view>
+			</view>
+		</view>
+		<view class="tbc-flex-col"
+			style="width:750rpx;flex-direction: column;align-items: center;background-color: #F5F5F5;">
+			<load-more :status="loadMoreStatus" :contentText="{
+				contentdown: '',
+				contentrefresh: '正在加载...',
+				contentnomore: '已全部加载'
+			}"></load-more>
+		</view>
+	</view>
+</template>
+
+<script>
+	import tbcBlank from '@/components/tbc-components-layout/blank.nvue'
+	import tbcCarousel from '@/components/tbc-components-layout/carousel.nvue'
+	import tbcMenu from '@/components/tbc-components-layout/menu.nvue'
+	import tbcImageGroup from '@/components/tbc-components-layout/imageGroup.nvue'
+	import tbcBackground from '@/components/tbc-components-layout/background.nvue'
+	import tbcSearch from '@/components/tbc-components-layout/search.nvue'
+	import tbcKeyword from '@/components/tbc-components-layout/keyword.nvue'
+	import appGoodsItemCol from '@/components/app/GoodsItemCol.nvue'
+	import loadMore from '@/components/uni-official/uni-load-more/uni-load-more.vue'
+	export default {
+
+		components: {
+			tbcBlank,
+			tbcCarousel,
+			tbcMenu,
+			tbcImageGroup,
+			tbcBackground,
+			tbcSearch,
+			tbcKeyword,
+			appGoodsItemCol,
+			loadMore
+		},
+
+
+		data() {
+			return {
+				moduleList: [],
+				goodsList: [],
+				statusBarHeight: 0,
+				size: 10,
+				page: 1,
+				pageCount: 0,
+				isLoading: false,
+			}
+		},
+
+		computed: {
+			loadMoreStatus: function() {
+				if (this.isRefreshing || this.total <= -1) return ''
+				if (this.isLoading) return 'loading'
+				if (this.page - 1 >= this.pageCount) return 'nomore'
+				return 'more'
+			},
+		},
+
+		onReady: function() {
+			this.statusBarHeight = uni.getSystemInfoSync().statusBarHeight
+			uni.setNavigationBarColor({
+				backgroundColor: '#007AFF'
+			})
+		},
+
+		created: function() {
+			this.getHomeLayout()
+			this.getGoodsList()
+		},
+
+		onPullDownRefresh: function() {
+			this.getHomeLayout()
+			this.page = 1
+			this.getGoodsList()
+			uni.stopPullDownRefresh()
+		},
+
+		onReachBottom: function() {
+			this.getGoodsList()
+		},
+
+		methods: {
+			// 获取首页模块
+			async getHomeLayout() {
+				let res = await uni.$http.get('/app.layout', {
+					url: '/pages/tabbar/index/index'
+				})
+				if (res.data.code !== 0) return
+				this.moduleList = res.data.data.list
+				let height = 0
+				this.moduleList.forEach(item => {
+					if (item.config.outer && item.config.outer.height) height += item.config.outer.height
+				})
+				this._headHeight = uni.upx2px(height + 140)
+			},
+
+			async getGoodsList() {
+				console.log('getGoodsList')
+				if (this.page > 1 && this.page - 1 >= this.pageCount) return
+				this.isLoading = true
+				const res = await uni.$http.get('/goods', {
+					page: this.page++,
+					size: this.size,
+				})
+				this.isLoading = false
+				uni.stopPullDownRefresh()
+				if (res.data.code !== 0) return
+				let data = res.data.data
+				this.pageCount = Math.ceil(data.total / this.size)
+				if (this.page <= 2) this.goodsList = []
+				this.goodsList = this.goodsList.concat(data.list)
+			},
+		}
+	}
+</script>

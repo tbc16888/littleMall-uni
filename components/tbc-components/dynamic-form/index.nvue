@@ -1,0 +1,136 @@
+<template>
+	<view class="tbc-flex-col" style="width: 750rpx;">
+
+		<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;align-items: center;"
+			v-for="(item, index) in dynamicForm" :key="index" v-if="item.type !== 'hidden'">
+
+			<view class="tbc-flex-row" @click="onItemClick(item, index)"
+				style="flex-direction: row;padding-top: 30rpx;padding-bottom: 30rpx;width: 690rpx;">
+				<view style="width: 140rpx;margin-right: 40rpx;" class="tbc-flex-col"
+					:style="item.labelStyle || ''">
+					<text style="font-size:30rpx;color: #333;">{{item.label}}</text>
+					<text style="font-size:24rpx;color: #999;margin-top: 6rpx;" v-if="item.note">{{item.note}}</text>
+				</view>
+				<view class="tbc-flex-row" style="flex: 1;flex-direction: row;">
+					<!-- 输入框 -->
+					<!-- <input :type="item.type" v-model="item.value" :placeholder="item.placeholder"
+						style="font-size: 30rpx;flex: 1;color: #333;border: 0;"
+						v-if="['input', 'tel', 'number'].indexOf(item.type) > -1" @confirm="hideKeyboard" /> -->
+					<input type="input" v-model="item.value" :placeholder="item.placeholder"
+						style="font-size: 30rpx;flex: 1;color: #333;border: 0;" v-if="['input'].indexOf(item.type) > -1"
+						@confirm="hideKeyboard" />
+					<input type="tel" v-model="item.value" :placeholder="item.placeholder"
+						style="font-size: 30rpx;flex: 1;color: #333;border: 0;" v-if="['tel'].indexOf(item.type) > -1"
+						@confirm="hideKeyboard" />
+					<input type="number" v-model="item.value" :placeholder="item.placeholder"
+						style="font-size: 30rpx;flex: 1;color: #333;border: 0;"
+						v-if="['number'].indexOf(item.type) > -1" @confirm="hideKeyboard" />
+
+					<!-- 页面和选择框 -->
+					<text style="font-size:30rpx;color: #333;"
+						v-if="['page'].indexOf(item.type) > -1 && item.value">{{item.value}}</text>
+					<text style="font-size:30rpx;color: #333;"
+						v-if="['selector'].indexOf(item.type) > -1 && item.value.length">{{item.placeholder}}</text>
+					<text style="font-size:30rpx;color: #999;"
+						v-if="['page', 'selector'].indexOf(item.type) > -1 && !item.value.length">{{item.placeholder}}</text>
+
+
+					<view class="tbc-flex-row" style="flex-direction: row;justify-content: flex-end;flex: 1;align-items: center;"
+						v-if="item.type == 'switch'">
+						<switch :color="item.color" @change="onSwitchChange($event, index)" :checked="(Boolean)(item.value)" />
+					</view>
+				</view>
+
+
+				<view class="tbc-flex-row"
+					style="flex-direction:row;align-items: center;justify-content: center;margin-left:5px;width: 34rpx;"
+					v-if="item.page || item.arrow">
+					<image src="/static/icon/arrow_right.png" style="width: 34rpx;height: 34rpx;"></image>
+				</view>
+
+			</view>
+
+
+			<view style="height: 1px;background-color: #F7F7F7;width: 750rpx;" v-if="index < dynamicForm.length - 1" />
+
+			<async-selector :api="item.api" :ref="item.field" @select="onAsyncSelected" v-if="item.type  == 'selector' "
+				:index="index" :level="item.level || 10" :leaf="item.leaf||'leaf'" />
+
+		</view>
+	</view>
+</template>
+
+<script>
+	import asyncSelector from '@/components/tbc-components/async-selector/index.nvue'
+	export default {
+		components: {
+			asyncSelector
+		},
+
+		data() {
+			return {
+				dynamicForm: []
+			}
+		},
+
+		methods: {
+
+			init(dynamcForm) {
+				this.dynamicForm = dynamcForm
+				setTimeout(() => {
+					this.initSelector()
+				}, 50) 
+			},
+
+			getFormData() {
+				let form = {}
+				this.dynamicForm.forEach(item => {
+					form[item.field] = item.value
+				})
+				return JSON.parse(JSON.stringify(form))
+			},
+
+			initSelector() {
+				this.dynamicForm.forEach((item) => {
+					if (item.type === 'selector') {
+						this.$refs[item.field] && this.$refs[item.field][0].setSelected(item.init)
+					}
+				})
+			},
+		
+			showAsyncSelector(index) {
+				if (this.dynamicForm[index].disabled) return
+				this.current = index
+				this.$refs[this.dynamicForm[index].field][0].open()
+			},
+
+			onItemClick(item, index) {
+				if (item.page) {
+					return uni.navigateTo({
+						url: item.page
+					})
+				}
+				if (item.type === 'selector') {
+					this.hideKeyboard()
+					return this.showAsyncSelector(index)
+				}
+			},
+
+
+			onAsyncSelected(data) {
+				let index = data.index
+				this.dynamicForm[index].placeholder = data.label.join(" ")
+				this.dynamicForm[index].value = data.value
+				this.$forceUpdate()
+			},
+
+			hideKeyboard() {
+				uni.hideKeyboard()
+			},
+
+			onSwitchChange(e, index) {
+				this.dynamicForm[index].value = (Number)(e.detail.value)
+			}
+		}
+	}
+</script>

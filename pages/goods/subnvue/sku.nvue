@@ -1,0 +1,40 @@
+<template>
+    <div style="background-color: #FFFFFF;border-top-left-radius: 16rpx;border-top-right-radius:16rpx;">
+		<sku @close="close" ref="sku"></sku>
+    </div>
+</template>
+
+<script>
+	import sku from '../components/detail/sku.nvue'
+    export default {
+		components: {
+			sku
+		},
+		
+		data() {
+			return {
+			}
+		},
+	
+		created() {
+			
+			uni.$on('sku', (data) => {
+				if (this.$refs.sku){
+					this.$refs.sku.skuInitialization(data.sku.list, data.spec.list, data.basic.field)
+					this.$refs.sku.setOperation(data.operation.list)
+				}
+			})
+			// 后续改vuex
+			uni.$on('setButtonCode', (buttonCode) => {
+				this.$refs.sku && this.$refs.sku.open(buttonCode)
+			})
+		},
+		
+        methods: {
+			
+            close() {
+                uni.getCurrentSubNVue().hide('auto')
+            }
+        }
+    }
+</script>

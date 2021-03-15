@@ -1,0 +1,137 @@
+<template>
+	<view class="tbc-flex-row" style="flex-direction: row;width: 750rpx;justify-content: center;">
+		<view class="tbc-flex-row" style="flex-direction: row;justify-content: flex-end;align-items: center;width: 690rpx;">
+			<view style="height:60rpx;padding-left:30rpx;padding-right:30rpx;margin-left:20rpx;justify-content:center;" v-if="buttons.length > 3">
+				<text style="font-size:28rpx;color:#333;line-height:24rpx;">更多</text>
+			</view>
+
+			<view style="height:60rpx;border-color:#999;border-width:0.5px;border-radius:60rpx;border-style:solid;padding-left:30rpx;padding-right:30rpx;margin-left:20rpx;justify-content:center;"
+			 :style="{'background-color': item.background || '#fff', 'border-color': item.border || '#999'}" v-for="(item, index) in buttons"
+			 :key="index" @click.stop="onItemClick(index)">
+				<text style="font-size:26rpx;color:#333;line-height:24rpx;" :style="{'color': item.color || '#333'}">{{item.label}}</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		props: {
+			order: {
+				type: Object,
+				default () {
+					return {}
+				}
+			},
+
+			operation: {
+				type: Object,
+				default () {
+					return {}
+				}
+			},
+			
+			index: {
+				type: Number,
+				default: -1
+			}
+		},
+		computed: {
+			buttons() {
+				return this.operation.list || []
+			}
+		},
+
+		methods: {
+
+			onItemClick(index) {
+				let item = this.buttons[index]
+				let name = item.code
+				let action = 'order' + name.substring(0, 1).toUpperCase() + name.substring(1)
+				console.log(action)
+				this[action](this.order, async () => {
+					// const res = await uni.$http.get('/order/detail', {
+					// 	order_sn: this.order.order_sn
+					// })
+				})
+			},
+
+
+			// 取消订单
+			orderCancel(order, callback) {
+				this._doConfirmAndRequest('确定要取消吗？', '/order/cancel', order, function() {
+					callback && callback(order)
+				})
+			},
+
+			// 申请退款
+			orderRefund(order, callback) {
+				this._doConfirmAndRequest('确定要申请退款吗？', '/order/refund', order, function() {
+					callback && callback(order)
+				})
+			},
+
+			// 确认收货
+			orderConfirm(order, callback) {
+				this._doConfirmAndRequest('确定是否收到货品？', '/order/complete', order, function() {
+					callback && callback(order)
+				})
+			},
+
+			// 删除订单
+			orderDelete(order, success) {
+				this._doConfirmAndRequest('确定要删除吗？', '/order/delete', order, function() {
+					success && success()
+				})
+			},
+
+			orderLogistics(order, success) {
+				uni.navigateTo({
+					url: '/pages/order/logistics?order_sn=' + order.order_sn
+				})
+			},
+
+			orderComment(order, success) {
+				uni.navigateTo({
+					url: '/pages/mall/order/comment?order_sn=' + order.order_sn
+				});
+			},
+
+
+			// 提示并请求
+			_doConfirmAndRequest(content, api, order, success) {
+				let _this = this
+				uni.showModal({
+					title: '提示',
+					content,
+					success: function(action) {
+						if (action.cancel) return ;
+						uni.$http.post(api, {
+							order_sn: order.order_sn
+						}).then(res => {
+							uni.showToast({
+								title: res.data.message,
+								icon: (res.data.code === 0 ? 'success' : 'none')
+							})
+							if (res.data.code !== 0) return
+							_this.operationSuccess()
+						})
+					}
+				})
+			},
+
+
+			operationSuccess() {
+				this.$emit('success', this.index)
+			},
+
+			// 
+			orderPayment() {
+				this.$emit('payment', this.order)
+				// uni.navigateTo({
+				// 	url: '/pages/mall/order/payment?order_sn=' + this.order.order_sn
+				// });
+			},
+		}
+	}
+</script>

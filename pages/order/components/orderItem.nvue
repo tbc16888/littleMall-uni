@@ -1,0 +1,69 @@
+<template>
+	<view class="tbc-flex-col" style="width: 750rpx;background-color: #FFF;align-items: center;">
+
+		<view class="tbc-flex-row" style="flex-direction: row;align-items: center;width: 690rpx;height: 90rpx;" @click.stop="toDetail(item.basic.data.field)">
+			<text style="font-size: 26rpx;flex: 1;">{{item.basic.data.field.order_sn}}</text>
+			<text style="font-size: 26rpx;">{{item.status.data.field.text}}</text>
+		</view>
+
+		<view style="height: 1px;width: 750rpx;background-color: #F7F7F7;"></view>
+
+
+		<view class="tbc-flex-col" style="flex-direction: column;padding-top: 30rpx;" @click.stop="toDetail(item.basic)">
+			<view class="tbc-flex-col" v-for="(goods, idx) in item.goods.data.list" :key="idx">
+				<order-goods1 :goods="goods" />
+				<view style="height: 20rpx;"></view>
+			</view>
+		</view>
+
+		<view style="height: 20rpx;"></view>
+		<template v-if="item.operation.data.list.length">
+			<view style="height: 1px;width: 750rpx;background-color: #F7F7F7;"></view>
+			<view style="padding-top: 20rpx;padding-bottom: 20rpx;">
+				<operation :operation="item.operation.data" @payment="onPaymentClick" @success="getOrderInfo" :order="item.basic.data.field"/>
+			</view>
+		</template>
+	</view>
+</template>
+
+<script>
+	import orderGoods1 from '@/components/app/OrderGoods.nvue'
+	import orderGoods2 from '@/components/app/OrderGoods2.nvue'
+	import operation from './operation.nvue'
+	export default {
+		props: {
+			item: {
+				type: Object,
+				default () {
+					return {
+
+					}
+				}
+			}
+		},
+
+		components: {
+			orderGoods1,
+			orderGoods2,
+			operation
+		},
+
+		methods: {
+
+			toDetail() {
+				let order = this.item.basic.data.field
+				uni.navigateTo({
+					url: "/pages/order/detail?order_sn=" + order.order_sn
+				})
+			},
+
+			async getOrderInfo() {
+				this.$emit('refresh', this.item)
+			},
+
+			onPaymentClick() {
+				this.$emit('payment', this.item)
+			}
+		}
+	}
+</script>

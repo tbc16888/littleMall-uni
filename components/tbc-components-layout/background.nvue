@@ -1,0 +1,51 @@
+<template>
+	<view style="position: absolute;top: 0;left: 0;right: 0;bottom: 0;z-index:-1" :style="outerStyle">
+
+	</view>
+</template>
+
+<script>
+	export default {
+		props: {
+			module: {
+				type: Object,
+				default () {
+					return {
+						list: []
+					}
+				}
+			}
+		},
+
+		computed: {
+
+			outerStyle() {
+				let style = []
+				let config = this.module.config.background || {}
+				// #ifdef H5 
+				// style.push('position:fixed')
+				// #endif
+				if (config.top !== '') style.push('top:' + config.top + 'rpx')
+				if (config.bottom !== '') style.push('bottom:' + config.bottom + 'rpx')
+				if (config.left !== '') style.push('left:' + config.left + 'rpx')
+				if (config.right !== '') style.push('right:' + config.right + 'rpx')
+				if (config.style) style.push(outer.style)
+				if (config.width) style.push('width: ' + config.width + 'rpx')
+				if (config.height) style.push('height: ' + config.height + 'rpx')
+				if (config.background && !config.background2) style.push('background:' + config.background)
+				if (config.background2) {
+					style.push('background-image: linear-gradient(' + config.direction + ', ' + config.background + ', ' + config.background2 +
+						')')
+				}
+				if (config.borderBottomLeftRadius) {
+					style.push('border-bottom-left-radius:' + config.borderBottomLeftRadius + 'rpx')
+				}
+				if (config.borderBottomRightRadius) {
+					style.push('border-bottom-right-radius:' + config.borderBottomRightRadius + 'rpx')
+				}
+				this.style = style.join(';')
+				return style.join(";")
+			},
+		}
+	}
+</script>

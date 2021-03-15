@@ -1,0 +1,128 @@
+<template>
+	<view class="tbc-flex-row" style="flex-direction: row;width: 750rpx;align-items: center;height: 100rpx;">
+		<view class="tbc-flex-col"
+			style="flex-direction: column;align-items: center;width:90rpx;height: 100rpx;justify-content: center;"
+			v-for="(item, index) in smallButtons" :key="index" @click="onSmallButtonClick(item, index)">
+			<view>
+				<image :src="item.activeIcon" style="width:40rpx;height: 40rpx;" v-if="item.isActive"></image>
+				<image :src="item.icon" style="width:40rpx;height: 40rpx;" v-if="!item.isActive"></image>
+			</view>
+			<text style="font-size: 22rpx;margin-top:6rpx;color: #323233;">{{item.label}}</text>
+		</view>
+
+
+		<view style="width: 10rpx;"></view>
+		<view class="tbc-flex-row" style="flex-direction: row;flex: 1;">
+			<view class="tbc-flex-row" style="height:40px;align-items: center;justify-content: center;flex: 1;"
+				:style="item.style" v-for="(item, index) in buttons" :key="index" @click="onButtonClick(item)">
+				<view class="tbc-flex-col" style="flex-direction: column;">
+					<text style="color: #fff;font-size:24rpx;font-family: PingFang SC;">{{item.text}}</text>
+					<text style="color: #fff;font-size:22rpx;font-family: PingFang SC;"
+						v-if="item.note">{{item.note}}</text>
+				</view>
+			</view>
+		</view>
+
+
+
+		<!-- <view class="tbc-flex-row" style="flex-direction: row;flex: 1" v-if="false">
+			<view class="tbc-flex-row" style="height:40px;align-items: center;justify-content: center;flex: 1;border-top-left-radius:40px;border-bottom-left-radius:40px;background-color: linear-gradient(to right, #ffd01e, #ff8917);background-image: linear-gradient(to right, #ffd01e, #ff8917);"
+			 @click="onButtonClick(0)">
+				<view class="tbc-flex-col" style="flex-direction: column;">
+					<text style="color: #fff;font-size:26rpx;">加入购物车</text>
+				</view>
+			</view>
+
+			<view class="tbc-flex-row" style="height:40px;align-items: center;justify-content: center;flex: 1;border-top-right-radius:40px;border-bottom-right-radius:40px;background-color: linear-gradient(to right, #ff6034, #ee0a24);background-image: linear-gradient(to right, #ff6034, #ee0a24);"
+			 @click="onButtonClick(1)">
+				<view class="tbc-flex-col" style="flex-direction: column;">
+					<text style="color: #fff;font-size:26rpx;">立即购买</text>
+				</view>
+			</view>
+		</view> -->
+		<view style="width: 10rpx;"></view>
+	</view>
+</template>
+
+<script>
+	import operation from './mixins/operation.js'
+	export default {
+		props: {
+			operation: {
+				type: Object,
+				default () {
+					return {}
+				}
+			},
+
+			goods: {
+				type: Object,
+				default () {
+					return {
+						is_collect: 0
+					}
+				}
+			}
+		},
+		
+		mixins: [operation],
+		
+		data() {
+			return {
+				smallButtons: [{
+					label: '客服',
+					icon: '/static/icon/service.png',
+					code: 'service',
+				}, {
+					label: '收藏',
+					icon: '/static/icon/like.png',
+					activeIcon: '/static/icon/like_fill.png',
+					code: 'collect',
+					isActive: 0
+				}, {
+					label: '购物车',
+					icon: '/static/icon/cart.png',
+					code: 'cart'
+				}]
+			}
+		},
+
+		computed: {
+
+			buttons() {
+				let buttons = this.operation.list || []
+				this.smallButtons.forEach(item => {
+					if (item.code === 'collect') {
+						item.isActive = this.goods.is_collect
+					}
+				})
+				return this.buttonsFormat(buttons)
+			}
+		},
+
+		methods: {
+
+			async onSmallButtonClick(item, index) {
+				if (item.code === 'collect') {
+					const api = item.isActive ? 'delete' : 'add'
+					const res = await uni.$http.post('/goods.collect/' + api, {
+						goods_id: this.goods.goods_id
+					})
+					if (res.data.code !== 0) {
+						return uni.showToast({
+							title: res.data.message,
+							icon: 'none'
+						})
+					}
+					item.isActive = item.isActive ? 0 : 1
+				}
+			},
+
+			onButtonClick(item) {
+				this.$emit('click', {
+					code: item.code
+				})
+			}
+		}
+	}
+</script>

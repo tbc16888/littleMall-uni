@@ -1,0 +1,65 @@
+<template>
+	<view class="tbc-flex-row" style="flex-direction: row;position: relative;" :style="outerStyle">
+
+		<image :src="item.image" :style="'width:' + item.width + 'rpx;height:' + item.height + 'rpx'" :key="index"
+			v-for="(item, index) in module.data" @click="toLink(item)"></image>
+		<!-- <image :src="item.image" :style="['width:' + item.width + 'rpx', 'height: ' + item.height + 'rpx']" :key="index" v-for="(item, index) in module.data"></image> -->
+
+	</view>
+</template>
+
+<script>
+	import common from './mixins/common.js'
+	export default {
+		props: {
+			module: {
+				type: Object,
+				default () {
+					return {
+						list: []
+					}
+				}
+			}
+		},
+
+		mixins: [common],
+
+		data() {
+			return {
+
+			}
+		},
+
+		computed: {
+
+
+
+			outerStyle() {
+				let style = []
+				let config = this.module.config.outer || {}
+				if (config.style) style.push(module.style)
+				if (config.width) style.push('width:' + config.width + 'rpx')
+				if (config.height) style.push('height:' + config.height + 'rpx')
+				if (config.marginTop) style.push('margin-top:' + config.marginTop + 'rpx')
+				if (config.marginBottom) style.push('margin-top:' + config.marginBottom + 'rpx')
+				if (config.background) style.push('background-color:' + config.background)
+				if (config.paddingTop) style.push('padding-top:' + config.paddingTop + 'rpx')
+				if (config.paddingBottom) style.push('padding-bottom:' + config.paddingBottom + 'rpx')
+				if (config.alignItems) style.push('align-items:' + config.alignItems)
+				if (config.justifyContent) style.push('justify-content:' + config.justifyContent)
+				return style.join(";")
+			},
+
+			containerStyle() {
+				let style = []
+				let config = this.module.config.container || {}
+				if (config.width) style.push('width: ' + config.width + 'rpx')
+				if (config.height) style.push('height: ' + config.height + 'rpx')
+				if (config.borderRadius) style.push('border-radius: ' + config.borderRadius + 'rpx')
+				return style.join(";")
+			},
+		},
+
+		methods: {}
+	}
+</script>

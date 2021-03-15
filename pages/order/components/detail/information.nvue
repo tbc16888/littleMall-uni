@@ -1,0 +1,26 @@
+<template>
+	<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;align-items: center;">
+		<view class="tbc-flex-row" style="flex-direction: row;margin-top:8rpx;width: 690rpx;" v-for="(item, index) in info.list"
+		 :key="index">
+			<view style="margin-right:20rpx;">
+				<text style="font-size: 28rpx;color: #666666;">{{item.label}}:</text>
+			</view>
+			<view style="flex: 1;">
+				<text style="font-size: 28rpx;color: #666666;">{{item.text}}</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		props: {
+			info: {
+				type: Object,
+				default () {
+					return {}
+				}
+			}
+		}
+	}
+</script>

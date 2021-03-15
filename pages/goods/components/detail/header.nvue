@@ -1,0 +1,64 @@
+<template>
+	<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;">
+		<view class="tbc-flex-col" style="flex-direction: column;background-color: #FFFFFF;padding: 30rpx;">
+			<view>
+				<text style="font-size: 34rpx;font-weight: 700;color: #262626;">{{goods.goods_name}}</text>
+			</view>
+			<view style="margin-top: 20rpx;" v-if="goods.goods_short_name">
+				<text style="color: #666666;font-size: 30rpx;">{{goods.goods_short_name}}</text>
+			</view>
+
+			<view class="tbc-flex-row" style="flex-direction: row;align-items: center;margin-top: 20rpx;justify-content: center;">
+				<view class="tbc-flex-row" style="flex-direction: row;flex: 1;align-items: center;" v-if="!goods.is_sale">
+					<text style="color: #666;font-weight: bold;font-size: 30rpx;">已下架</text>
+				</view>
+				<view class="tbc-flex-row" style="flex-direction: row;flex: 1;align-items: center;" v-if="goods.is_sale">
+
+					<template v-if="goods.final_price">
+						<template v-if="goods.integral">
+							<text style="color: #ff3c3f;font-family:PingFang SC;font-weight: bold;font-size: 46rpx;">{{goods.integral}}</text>
+							<text style="color: #ff3c3f;font-family:PingFang SC;font-size: 30rpx;font-weight: bold;">积分 +</text>
+						</template>
+						<text style="color: #ff3c3f;font-family:PingFang SC;font-weight: bold;font-size: 30rpx;padding-top: 6rpx;">￥</text>
+						<text style="color: #ff3c3f;font-family:PingFang SC;font-weight: bold;font-size: 46rpx;">{{goods.final_price}}</text>
+					</template>
+
+					<template v-if="!goods.final_price && goods.integral">
+						<text style="color: #ff3c3f;font-family:PingFang SC;font-weight: bold;font-size: 46rpx;">{{goods.integral}}</text>
+						<text style="color: #ff3c3f;font-family:PingFang SC;font-size: 30rpx;font-weight: bold;">积分</text>
+					</template>
+
+
+					<text style="color: #999999;font-size:28rpx;font-family:PingFang SC;font-weight: bold;;text-decoration: line-through;margin-left: 10rpx;" v-if="goods.reference_price">¥{{goods.reference_price}}</text>
+
+					<!-- 	<view class="tbc-flex-row" style="flex-direction: row;margin-left: 30rpx;">
+						<view class="tbc-flex-row" style="flex-direction: row;border-color: #FFA000;border-width: 1px;border-radius:8rpx;background-color: #FFF5E5;width:auto;padding-left:10rpx;padding-right:10rpx;height:40rpx;align-items: center;">
+							<text style="color:#FFA000;font-size:24rpx;font-family:PingFang-SC-Medium">1人团</text>
+						</view>
+					</view> -->
+				</view>
+
+				<view v-if="goods.sales_volume">
+					<text style="color:#999;font-size:26rpx;font-family:PingFang SC">已售{{goods.sales_volume}}件</text>
+				</view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		props: {
+			goods: {
+				type: Object,
+				default () {
+					return {}
+				}
+			}
+		},
+	}
+</script>
+
+<style>
+
+</style>

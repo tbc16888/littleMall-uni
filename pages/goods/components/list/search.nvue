@@ -1,0 +1,67 @@
+<template>
+	<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;align-items: center;background-color: #FFF;">
+		<view class="tbc-flex-row" style="flex-direction: row;height:100rpx;width: 690rpx;align-items: center;">
+			<!-- #ifdef H5 || APP-PLUS -->
+			<view class="tbc-flex-col" style="width:44rpx;height:50rpx;align-items: center;justify-content: center;margin-right: 10rpx;"
+			 @click="navigateBack()">
+				<image src="/static/icon/arrow-left.png" style="width: 44rpx;height: 44rpx;"></image>
+			</view>
+			<!-- #endif -->
+
+			<view class="tbc-flex-row" style="flex-direction: row;background-color: #F5F5F5;height: 60rpx;flex: 1;border-radius: 30rpx;align-items: center;margin-left: 10rpx;">
+				<view style="margin-left: 24rpx;margin-right: 20rpx;">
+					<icon type="search" size='14' color='#999'></icon>
+				</view>
+				<view style="flex: 1;">
+					<swiper vertical autoplay circular interval="8000" class="tbc-flex-row" style="flex-direction:row;height: 60rpx;">
+						<swiper-item v-for="(item, index) in [this.keyword]" :key="index" style="flex: 1;flex-direction: row;align-items: center;font-size: auto;" @click="toSearch">
+							<text style="font-size: 26rpx;color: #666;">{{item}}</text>
+						</swiper-item>
+					</swiper>
+				</view>
+			</view>
+			<view class="tbc-flex-col" style="width:80rpx;height:50rpx;margin-left:10rpx;margin-right: 10rpx;align-items: center;justify-content: center;"
+			 @click="changeLayout()">
+				<image src="/static/icon/layout-row.png" style="width: 40rpx;height: 40rpx;" v-if="layout == 'row'"></image>
+				<image src="/static/icon/layout-col.png" style="width: 40rpx;height: 40rpx;" v-if="layout == 'col'"></image>
+			</view>
+		</view>
+	</view>
+</template>
+<script>
+	export default {
+		props: {
+			keyword: {
+				type: String,
+				default: ''
+			},
+
+			layout: {
+				type: String,
+				default: ''
+			}
+		},
+
+		data() {
+			return {
+				// layout: 'col'
+			}
+		},
+
+		methods: {
+			navigateBack() {
+				uni.navigateBack()
+			},
+
+			toSearch() {
+				uni.redirectTo({
+					url: "/pages/search/search"
+				})
+			},
+
+			changeLayout() {
+				this.$emit('changeLayout', this.layout == 'row' ? 'col' : 'row')
+			}
+		}
+	}
+</script>

@@ -1,0 +1,149 @@
+<template>
+	<view>
+		<view class="tbc-page-background"></view>
+
+		<view class="tbc-tabbar-container" @click="onAvatarClick()">
+			<view class="" style="background-color: #FFF;">
+				<list-cell :rows="[{label: '头像',  arrow: 1}]">
+					<view class="tbc-flex-row" style="flex-direction: row;">
+						<view style="flex:1"></view>
+						<image :src="loginUserInfo.avatar" style="width: 108rpx;height: 108rpx;border-radius: 108rpx;"></image>
+					</view>
+				</list-cell>
+			</view>
+		</view>
+
+		<view class="tbc-tabbar-container" v-for="(tabBar, idx) in setItemList" :key="idx">
+			<view style="height: 20rpx;"></view>
+			<view class="" style="background-color: #FFF;">
+				<list-cell :rows="tabBar" @click="onCellClick" />
+			</view>
+		</view>
+
+		<gender ref="gender" @change="changeGender"></gender>
+		<qr-code-dialog ref="qrCode"></qr-code-dialog>
+		<uploader ref="upload" @success="onUploadSuccess" />
+	</view>
+</template>
+
+<script>
+	import ListCell from '@/components/tbc-components/tbc-list-cell/index.nvue'
+	import Gender from './components/gender.nvue'
+	import QrCodeDialog from './components/qr-code-dialog.nvue'
+	import Uploader from '@/components/tbc-components/uploader/index.nvue'
+	import {
+		mapGetters
+	} from 'vuex'
+	export default {
+
+		components: {
+			ListCell,
+			Uploader,
+			Gender,
+			QrCodeDialog
+		},
+
+
+		data() {
+			return {
+				form: {},
+				avatar: '',
+				setItemList: [
+					[{
+							label: '昵称',
+							text: '',
+							page: '/pages/mine/nickname',
+							field: 'nick_name'
+						},
+					],
+					[{
+						label: '我的二维码',
+						value: '/static/icon/qr.png',
+						type: 'image',
+						field: 'qr-code',
+						arrow: true,
+					}]
+				],
+				qrCodeText: '老哥，你好'
+			}
+		},
+
+		computed: {
+			...mapGetters(['loginUserInfo'])
+		},
+
+		onShow: function() {
+			this.init()
+		},
+
+		methods: {
+
+			init() {
+				this.setItemList.forEach(tabBar => {
+					tabBar.forEach(item => {
+						item.text = this.loginUserInfo[item.field]
+						if (item.field == 'gender') {
+							item.text = item.text == 1 ? '男' : '女'
+						}
+					})
+				})
+			},
+
+			// 点击头像
+			onAvatarClick() {
+				this.$refs.upload.choice()
+			},
+
+			async onUploadSuccess(file) {
+				this.updateProfile({
+					avatar: file.file_url
+				})
+			},
+
+			// 点击其他单元格
+			onCellClick(data) {
+				let tab = data.item
+				if (tab.page) {
+					return uni.navigateTo({
+						url: tab.page
+					})
+				}
+				if (tab.field == 'qr-code') {
+					// #ifdef APP-NVUE
+					return uni.navigateTo({
+						url: '/pages/mine/qr-code'
+					})
+					// #endif
+					return this.$refs.qrCode.show('大家好！')
+				}
+				if (tab.field == 'gender') {
+					return this.$refs.gender.show(this.loginUserInfo.gender)
+				}
+			},
+
+			async changeGender(value) {
+				this.updateProfile({
+					gender: value
+				})
+			},
+
+			async updateProfile(form) {
+				const res = await uni.$http.post('/user/profile', form)
+				if (res.data.code !== 0) {
+					return uni.showToast({
+						title: res.data.mesasge,
+						icon: 'none'
+					})
+				}
+				for (let i in form) this.updateLoginUserInfo(i, form[i])
+			},
+
+			updateLoginUserInfo(field, value) {
+				let info = JSON.parse(JSON.stringify(this.loginUserInfo))
+				info[field] = value
+				this.$store.commit('setLoginUserInfo', info)
+				this.init()
+			},
+		}
+	}
+</script>

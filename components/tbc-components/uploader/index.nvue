@@ -1,0 +1,68 @@
+<template>
+	<view></view>
+</template>
+
+<script>
+	
+	export default {
+		data() {
+			return {
+				config: {}
+			}
+		},
+
+		methods: {
+			choice() {
+				let _this = this
+				
+				uni.chooseImage({
+					count: 1,
+					complete: function(res) {
+						if (res.errMsg !== 'chooseImage:ok') return
+						_this.start(res.tempFilePaths[0])
+						// _this.$emit('choice', {
+						// 	file_url: res.tempFilePaths[0]
+						// })
+					}
+				})
+			},
+
+			// 开始上传
+			async start(filePath) {
+				const res = await this.getUploadConfig()
+				if (res) this.uploadToQiNiuYun(filePath)
+			},
+
+
+
+			async getUploadConfig() {
+				const res = await uni.$http.get('/upload/config')
+				if (res.data.code !== 0) {
+					uni.showToast({
+						title: res.data.message,
+						icon: 'none'
+					})
+					return false
+				}
+				this.config = res.data.data
+				return true 
+			},
+
+			uploadToQiNiuYun(filePath) {
+				let _this = this
+				uni.uploadFile({
+					url: _this.config.upload_url,
+					filePath: filePath,
+					name: _this.config.upload_form_field,
+					formData: {
+						'token': _this.config.upload_token
+					},
+					success: (uploadFileRes) => {
+						let res = JSON.parse(uploadFileRes.data)
+						_this.$emit('success', res.data)
+					}
+				});
+			},
+		}
+	}
+</script>

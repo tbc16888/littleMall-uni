@@ -1,0 +1,36 @@
+<template>
+	<view class="tbc-flex-row" style="flex-direction: row;width: 750rpx;height: 90rpx;background-color: #FFF;">
+		<view class="tbc-flex-row" style="flex-direction: row;align-items: center;justify-content: center;flex: 1;position: relative;"
+		 v-for="(item, index) in list" :key="index" @click="onItemClick(index)">
+			<text style="color: #333333;font-size: 24rpx;font-family:PingFang SC;">{{item.label}}</text>
+			<view style="width: 60rpx;height: 6rpx;border-radius: 4rpx;background-color: #FF3300;position: absolute;bottom: 0;"
+			 v-if="index === current"></view>
+		</view>
+	</view>
+</template>
+<script>
+	export default {
+		props: {
+			
+			list: {
+				type: Array,
+				default () {
+					return {}
+				}
+			},
+			
+			current: {
+				type: Number,
+				default () {
+					return 0
+				}
+			}
+		},
+		
+		methods: {
+			onItemClick(index) {
+				if (index !== this.current) this.$emit('change', index)
+			}
+		}
+	}
+</script>

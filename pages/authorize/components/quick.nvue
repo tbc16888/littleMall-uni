@@ -1,0 +1,69 @@
+<template>
+	<!-- #ifdef APP-NVUE -->
+	<view class="tbc-flex-col" style="flex-direction: column;align-items: center;">
+		<view style="height: 120rpx;"></view>
+		<view class="tbc-flex-row" style="flex-direction: row;align-items: center;">
+			<text style="color: #666;font-size: 24rpx;font-family:PingFang SC;">其他登录方式</text>
+		</view>
+		<view style="height: 40rpx;"></view>
+		<view class="tbc-flex-row" style="flex-direction: row;align-items: center;justify-content: center;">
+			<view style="width: 80rpx;height: 80rpx;margin:0 10px" v-for="(item, index) in quickList" :key="index" @click="tapQuickLogin(item)">
+				<image :src="item.icon" style="width:80rpx;height: 80rpx;display: block;"></image>
+			</view>
+		</view>
+	</view>
+	<!-- #endif -->
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				quickList: [{
+						icon: '/static/app/wx.png',
+						code: 'weixin',
+						action: 'wx'
+					},
+					{
+						icon: '/static/app/sina.png',
+						code: 'sinaweibo',
+					},
+					{
+						icon: '/static/app/qq.png',
+						code: 'qq',
+						action: 'qq'
+					}
+				]
+			}
+		},
+
+		methods: {
+			tapQuickLogin(item) {
+				let that = this
+				uni.login({
+					provider: item.code,
+					success: async function(ret) {
+						console.log(ret)
+						if (ret.errMsg !== 'login:ok') {
+							return uni.showToast({
+								title: '授权失败',
+								icon: 'none'
+							})
+						}
+						const res = await uni.$http.post('/login/' + item.action, {
+							open_id: ret.authResult.openid,
+							union_id: ret.authResult.unionid || ''
+						})
+						if (res.data.code !== 0) {
+							return uni.showToast({
+								title: res.data.message,
+								icon: 'none'
+							})
+						}
+						that.$emit('success', res.data.data, true)
+					}
+				});
+			}
+		}
+	}
+</script>

@@ -1,0 +1,100 @@
+<template>
+	<view class="tbc-flex-col" style="flex-direction: column;position: relative;align-items: center;"
+		:style="outerStyle">
+		<swiper :autoplay="true" :interval="3000" :duration="300" :style="containerStyle" @change="onSwiperChange"
+			:circular="module.circular" :indicator-dots="false">
+			<swiper-item v-for="(item, index) in module.data" :key="index" style="containerStyle" @click="toLink(item)">
+				<image :src="item.image" class="image" :style="containerStyle" />
+			</swiper-item>
+		</swiper>
+
+
+
+
+		<!-- <view class="tbc-flex-row" style="position: absolute;bottom: 10px;flex-direction:row;align-items: center;justify-content: center;">
+			<view style="width:10px;height: 2px;margin-left: 2px;margin-right: 2px;" v-for="i in module.list.length" :key="i"
+			 :style="i == activeIndex + 1 ? activeBackground:'background-color: rgba(0, 0, 0, .4)'"></view>
+		</view> -->
+
+		<!-- <view class="tbc-flex-row" style="position: absolute;bottom: 10px;flex-direction:row;align-items: center;justify-content: center;">
+			<view style="width:10px;height:10px;margin-left: 2px;margin-right: 2px;" v-for="i in module.data.length" :key="i"
+			 :style="i == activeIndex + 1 ? activeBackground:'background-color: rgba(0, 0, 0, .4)'">
+				<text style="color: #FFF;font-size: 24rpx;">{{i}} / </text>
+			</view>
+		</view> -->
+
+		<view style="position: absolute;bottom: 20rpx;">
+			<view class="tbc-flex-row" style="flex-direction: row;align-items: center;">
+				<template v-for="(item, index) in module.data">
+					<view style="width:10px;height: 2px;margin-left: 2px;margin-right: 2px;"
+						:style="index == activeIndex ? dotActiveBackground:dotInactiveBackground" :key="index"></view>
+				</template>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	import common from './mixins/common.js'
+	export default {
+		props: {
+			module: {
+				type: Object,
+				default () {
+					return {
+						list: []
+					}
+				}
+			}
+		},
+		mixins: [common],
+
+		data() {
+			return {
+				activeIndex: 0
+			}
+		},
+		computed: {
+			dotActiveBackground() {
+				return 'background-color: rgba(255, 255, 255, .6)'
+			},
+
+			dotInactiveBackground() {
+				return 'background-color: rgba(0, 0, 0, .4)'
+			},
+			activeBackground() {
+				return 'background-color: rgba(255, 255, 255, .6)'
+			},
+
+			outerStyle() {
+				let style = []
+				let config = this.module.config.outer || {}
+				if (config.style) style.push(outer.style)
+				if (config.width) style.push('width: ' + config.width + 'rpx')
+				if (config.marginTop) style.push('margin-top:' + config.marginTop + 'rpx')
+				if (config.marginBottom) style.push('margin-top:' + config.marginBottom + 'rpx')
+				if (config.background) style.push('background-color:' + config.background)
+				if (config.paddingTop) style.push('padding-top:' + config.paddingTop + 'rpx')
+				if (config.paddingBottom) style.push('padding-bottom:' + config.paddingBottom + 'rpx')
+				return style.join(";")
+			},
+
+			containerStyle() {
+				let style = []
+				let config = this.module.config.container || {}
+				if (config.width) style.push('width: ' + config.width + 'rpx')
+				if (config.height) style.push('height: ' + config.height + 'rpx')
+				if (config.borderRadius) style.push('border-radius: ' + config.borderRadius + 'rpx')
+				return style.join(";")
+			},
+		},
+
+
+		methods: {
+			onSwiperChange(e) {
+				let index = e.detail.current
+				this.activeIndex = index
+			}
+		}
+	}
+</script>

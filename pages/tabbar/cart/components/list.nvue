@@ -1,0 +1,28 @@
+<template>
+	<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;">
+		<view class="tbc-flex-col" style="width: 750rpx;" v-for="(cart, index) in lists" :key="cart.cart_id">
+			<view style="padding-bottom:30rpx;padding-top: 30rpx;">
+				<item :cart="cart" :width="710" @refresh="getCartList" :invalid="true" />
+			</view>
+			<view style="height: 1px;width: 750rpx;background-color: #EEE;" v-if="index < lists.length - 1"></view>
+		</view>
+	</view>
+</template>
+
+<script>
+	import item from './item.nvue'
+	export default {
+		components: {
+			item
+		},
+
+		props: {
+			lists: {
+				type: Array,
+				default () {
+					return []
+				}
+			}
+		}
+	}
+</script>

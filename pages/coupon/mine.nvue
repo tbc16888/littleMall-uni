@@ -1,0 +1,138 @@
+<template>
+	<view>
+		<!-- #ifndef APP-PLUS -->
+		<view class="tbc-page-background"></view>
+		<view style="position: fixed;top: var(--window-top);width: 750rpx;z-index:9">
+			<tab-bar-list :list="tabBarList" :current="tabBarIndex" @change="onTabBarClick"></tab-bar-list>
+		</view>
+		<view style="height:108rpx;"></view>
+		<view class="tbc-flex-col" style="width: 750rpx;align-items: center;" v-for="(item, index) in dataList" :key="index">
+			<coupon-item :coupon="item" :index="index" />
+			<view style="height: 20rpx;"></view>
+		</view>
+		<none v-if="total > -1 && !dataList.length "></none>
+		<!-- #endif-->
+
+		<!-- #ifdef APP-PLUS-NVUE -->
+		<view style="position: fixed;top: 0;width: 750rpx;">
+			<tab-bar-list :list="tabBarList" :current="tabBarIndex" @change="onTabBarClick"></tab-bar-list>
+		</view>
+		<list style="position: fixed;top: 90rpx;width: 750rpx;bottom: 0;" show-scrollbar="false">
+			<cell>
+				<view style="height: 18rpx;"></view>
+			</cell>
+			<cell v-for="(item, index) in dataList" :key="index">
+				<view class="tbc-flex-col" style="width: 750rpx;align-items: center;">
+					<coupon-item :coupon="item" />
+					<view style="height: 20rpx;"></view>
+				</view>
+			</cell>
+			<cell>
+				<none v-if="total > -1 && !dataList.length "></none>
+			</cell>
+			<cell>
+				<view style="height: 110rpx;"></view>
+			</cell>
+		</list>
+		<!-- #endif-->
+		<view style="height: 110rpx;"></view>
+		<view style="position: fixed;bottom: 0;width: 750rpx;height: 100rpx;background-color: #FFF;box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);">
+			<view class="tbc-flex-row" style="align-items: center;justify-content: center;height: 100rpx;" @click="toCouponCenter">
+				<text style="font-size: 30rpx;">领更多好券</text>
+			</view>
+		</view>
+	</view>
+</template>
+<script>
+	import None from '@/components/app/None.nvue'
+	import coupon from './mixins/coupon.js'
+	import CouponItem from './components/couponItem.nvue'
+	import loadMore from '@/components/uni-official/uni-load-more/uni-load-more.vue'
+	import tabBarList from './components/tabBarList.nvue'
+	export default {
+
+		components: {
+			tabBarList,
+			CouponItem,
+			loadMore,
+			None
+		},
+
+		mixins: [coupon],
+
+		data() {
+			return {
+				tabBarIndex: 0,
+				tabBarList: [{
+						label: '未使用',
+						params: {
+							status: 1
+						}
+					},
+					{
+						label: '已使用',
+						params: {
+							status: 2
+						}
+					},
+					{
+						label: '已过期',
+						params: {
+							status: 3
+						}
+					},
+					{
+						label: '全部',
+						params: {}
+					},
+				],
+				total: -1,
+				page: 1,
+				dataList: []
+			}
+		},
+
+		onLoad: function() {
+			this.initDataList()
+		},
+
+		onPullDownRefresh: function() {
+			this.initDataList()
+		},
+
+		methods: {
+			toCouponCenter() {
+				uni.navigateTo({
+					url: '/pages/coupon/center'
+				})
+			},
+
+
+			onTabBarClick(index, item) {
+				if (this.tabBarIndex == index) return
+				this.tabBarIndex = index
+				this.orderList = []
+				this.initDataList()
+			},
+
+			async initDataList() {
+				this.page = 1
+				this.total = -1
+				this.getDataList()
+			},
+
+			async getDataList() {
+				const res = await uni.$http.get('/user.coupon', {
+					page: this.page++,
+					...this.tabBarList[this.tabBarIndex].params
+				})
+				uni.stopPullDownRefresh()
+				let data = res.data.data
+				data.list = this.couponFormat(data.list)
+				this.total = data.total
+				if (this.page <= 2) this.dataList = []
+				this.dataList = this.dataList.concat(data.list)
+			},
+		}
+	}
+</script>

@@ -1,0 +1,131 @@
+<template>
+	<view>
+		<!-- <view class="tbc-page-background"></view> -->
+
+		<view style="position: fixed;top: 0;z-index:9;background-color: #FFF;">
+
+			<view style="width: 750rpx;" :style="'height:' + statusBarHeight + 'px'"></view>
+
+
+			<view class="tbc-flex-row" style="flex-direction: row;height:100rpx;background-color: #FFF;width: 750rpx;align-items: center;">
+				<view style="width: 10px;"></view>
+				<view class="tbc-flex-row" style="flex-direction: row;background-color: #F1F1F1;flex: 1;border-radius: 30rpx;align-items: center;margin-left: 10rpx;height:60rpx;">
+					<view style="margin-left: 24rpx;margin-right: 20rpx;">
+						<icon type="search" size='14' color='#999'></icon>
+					</view>
+					<view style="flex: 1;">
+						<input type="text" placeholder="搜索" style="font-size: 26rpx;color: #666;" confirm-type="search" @confirm="formSubmit" />
+					</view>
+				</view>
+				<view style="width:80rpx;height: 60rpx;margin-left:10rpx;margin-right: 10rpx;align-items: center;justify-content: center;"
+				 @click="toBack">
+					<text style="font-size: 28rpx;color: #999;">取消</text>
+				</view>
+			</view>
+		</view>
+
+
+
+		<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;justify-content: center;align-items: center;background-color: #FFFFFF;">
+			<view style="width: 750rpx;" :style="'height:' + statusBarHeight + 'px'"></view>
+			<view style="height: 100rpx;"></view>
+
+			<view class="tbc-flex-col" style="flex-direction: column;width:690rpx;" v-for="(group, idx) in keywordGroupList"
+			 :key="idx">
+				<view class="tbc-flex-row" style="flex-direction: row;height: 90rpx;align-items: center;">
+					<text style="font-size: 28rpx;font-weight: bold;">{{group.label}}</text>
+				</view>
+				<view class="tbc-flex-row" style="flex-direction: row;flex-wrap: wrap;">
+					<view class="tbc-flex-row" style="border-width: 1px;border-color: #f7f7f7;border-style: solid;height: 60rpx;align-items: center;padding-left:30rpx;padding-right:30rpx;background-color: #f7f7f7;border-radius:30rpx;margin-right: 20rpx;align-items: center;justify-content: center;margin-bottom: 20rpx;border-width:0;border-style: solid;border-color: #007AFF;background-color: #F5F5F5;"
+					 v-for="(item, index) in group.list" :key="index" @click="clickKeyword(item)">
+						<text style="font-size: 26rpx;color: #444;">{{item}}</text>
+					</view>
+				</view>
+			</view>
+		</view>
+		<!-- <view style="height: 100rpx;" v-for="i in 20" :key="i">{{i}}</view> -->
+	</view>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				history: ['女装', '拼团', '狄安娜', '小米优品超级超级便宜的小米排插'],
+				hotKeyword: [],
+				storageKey: 'search@keyword',
+				keyword: '',
+				statusBarHeight: 0
+			}
+		},
+
+		computed: {
+
+			keywordGroupList() {
+				return [{
+					label: '历史搜索',
+					code: 'history',
+					list: this.history
+				}, {
+					label: '热门搜索',
+					code: 'hot',
+					list: this.hotKeyword
+				}]
+			}
+		},
+
+		onReady: function() {
+			// #ifndef MP-WEIXIN
+			this.statusBarHeight = uni.getSystemInfoSync().statusBarHeight
+			// #endif
+			console.log(this.statusBarHeight)
+		},
+
+		onLoad: function() {
+			this.getHotKeyword()
+		},
+		methods: {
+
+			toBack() {
+				uni.navigateBack()
+			},
+
+			formSubmit(e) {
+				let keyword = e.detail.value
+				if (!keyword) return
+				this.clickKeyword(e.detail.value)
+			},
+
+			clickKeyword(keyword) {
+				if (keyword) this.storageHistory(keyword)
+				this.keyword = keyword
+				uni.redirectTo({
+					url: "/pages/goods/list?keyword=" + keyword
+				})
+			},
+
+			storageHistory(keyword) {
+				let storage = uni.getStorageSync(this.storageKey)
+				if (!storage) storage = '[]'
+				storage = JSON.parse(storage);
+				this.historyKeyword = storage
+				if (!keyword) return
+				storage.push(keyword)
+				storage = [...new Set(storage)]
+				this.historyKeyword = storage
+				uni.setStorageSync(this.storageKey, JSON.stringify(storage))
+			},
+
+			clearHistory() {
+				uni.setStorageSync(this.storageKey, '[]')
+				this.history = []
+			},
+
+			async getHotKeyword() {
+				const res = await uni.$http.get('/basic/getHotKeyword')
+				if (res.data.code !== 0) return
+				this.hotKeyword = res.data.data.list
+			},
+		}
+	}
+</script>

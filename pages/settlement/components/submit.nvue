@@ -1,0 +1,61 @@
+<template>
+	<view class="tbc-flex-row" style="height: 100rpx;width: 750rpx;flex-direction: row;">
+		<view style="width: 30rpx;"></view>
+		<view class="tbc-flex-row" style="flex-direction: row;flex: 1;align-items: center;">
+			<view class="tbc-flex-row" style="flex-direction: row;">
+				<text style="color:#FF3300;font-size:30rpx;padding-top: 10rpx;font-family: PingFang SC;font-weight: bold;">¥</text>
+				<text style="color:#FF3300;font-size:40rpx;font-weight: bold;">{{field.order_amount}}</text>
+			</view>
+			<view class="tbc-flex-row" style="flex-direction: row;" v-if="field.integral">
+				<text style="font-size:30rpx;margin-left: 10rpx;">+</text>
+				<text style="font-size:30rpx;">{{field.integral}}</text>
+				<text style="font-size:30rpx;">积分</text>
+			</view>
+		</view>
+
+		<view class="tbc-flex-row" style="flex-direction: row;align-items: center;width: 250rpx;justify-content: center;"
+		 :style="buttonStyle" @click="formSubmit">
+			<text style="font-size: 30rpx;color: #FFF;font-weight: bold;">{{field.text || '提交订单'}}</text>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		props: {
+			submit: {
+				type: Object,
+				default () {
+					return {
+						field: {
+							order_amount: '',
+							text: '提交订单'
+						},
+						style: {
+							background: '#d81e06'
+						}
+					}
+				}
+			}
+		},
+
+		computed: {
+
+			field() {
+				return this.submit.field || {}
+			},
+
+			buttonStyle() {
+				let style = []
+				style.push('background-color:' + this.submit.style.background)
+				return style.join(';')
+			}
+		},
+
+		methods: {
+			formSubmit() {
+				this.$emit('submit')
+			}
+		}
+	}
+</script>

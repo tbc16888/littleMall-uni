@@ -1,0 +1,77 @@
+<template>
+	<view>
+		<view class="tbc-page-background"></view>
+		<view style="height: 20rpx;"></view>
+		<view class="tbc-flex-col" style="width: 750rpx;align-items: center;" v-for="(item, index) in dataList" :key="index">
+			<coupon-item :coupon="item" :index="index" />
+			<view style="height: 20rpx;"></view>
+		</view>
+		<none v-if="total > -1 && !dataList.length"></none>
+	</view>
+</template>
+<script>
+	import None from '@/components/app/None.nvue'
+	import CouponItem from './components/centerItem.nvue'
+	import loadMore from '@/components/uni-official/uni-load-more/uni-load-more.vue'
+	import coupon from './mixins/coupon.js'
+	import tabBarList from './components/tabBarList.nvue'
+	export default {
+
+		components: {
+			tabBarList,
+			CouponItem,
+			loadMore,
+			None
+		},
+		
+		mixins: [coupon],
+
+		data() {
+			return {
+				tabBarIndex: 0,
+				tabBarList: [],
+				total: -1,
+				page: 1,
+				dataList: []
+			}
+		},
+
+		onLoad: function() {
+			console.log('sds')
+			this.initDataList()
+		},
+
+		onPullDownRefresh: function() {
+			this.initDataList()
+		},
+
+		methods: {
+
+
+			onTabBarClick(index, item) {
+				if (this.tabBarIndex == index) return
+				this.tabBarIndex = index
+				this.orderList = []
+				this.initDataList()
+			},
+
+			async initDataList() {
+				this.page = 1
+				this.total = -1
+				this.getDataList()
+			},
+
+			async getDataList() {
+				const res = await uni.$http.get('/coupon', {
+					page: this.page++
+				})
+				uni.stopPullDownRefresh()
+				let data = res.data.data
+				data.list = this.couponFormat(data.list)
+				this.total = data.total
+				if (this.page <= 2) this.dataList = []
+				this.dataList = this.dataList.concat(data.list)
+			},
+		}
+	}
+</script>

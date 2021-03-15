@@ -1,0 +1,44 @@
+<template>
+	<view class="tbc-page-container" style="background-color: #FFF;">
+		<app-guide v-if="showAppGuide" @success="jumpToPage"></app-guide>
+	</view>
+</template>
+
+<script>
+	import AppGuide from '@/components/app/AppGuide.nvue'
+	export default {
+
+		components: {
+			AppGuide
+		},
+
+		data() {
+			return {
+				showAppGuide: false
+			}
+		},
+
+		onLoad() {
+			this.checkAppGuide()
+		},
+
+		methods: {
+
+			checkAppGuide() {
+				try {
+					if (uni.getStorageSync('lastStartTime')) return this.jumpToPage()
+					this.showAppGuide = true
+				} catch (e) {
+					this.jumpToPage()
+				}
+			},
+
+			jumpToPage() {
+				uni.setStorageSync('lastStartTime', (new Date()).getTime())
+				uni.reLaunch({
+					url: "/pages/tabbar/index/index"
+				})
+			}
+		},
+	}
+</script>

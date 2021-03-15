@@ -1,0 +1,80 @@
+<template>
+	<view class="tbc-flex-col" style="justify-content: center;align-items: center;" :style="outerStyle">
+		<scroll-view style="flex-direction: row;" class="tbc-flex-row" scroll-x :show-scrollbar="false" :style="containerStyle">
+			<view class="tbc-flex-row" style="flex-direction: row;">
+				<view class="tbc-flex-row" style="align-items: center;justify-content: center;position: relative;padding-left: 30rpx;padding-right: 30rpx;flex-direction: row;">
+					<text style="font-size: 24rpx;color: #fff;font-weight: bold;">热门搜索</text>
+				</view>
+
+				<view class="tbc-flex-row" style="align-items: center;justify-content: center;position: relative;padding-left: 30rpx;padding-right: 30rpx;flex-direction: row;"
+				 v-for="(item, index) in keywords" :key="index" @click="toLink({
+					 link: '/pages/goods/list?keyword='+ item
+				 })">
+					<text style="font-size: 24rpx;color: #fff;">{{item}}</text>
+				</view>
+			</view>
+		</scroll-view>
+	</view>
+</template>
+<script>
+	import common from './mixins/common.js'
+	export default {
+		props: {
+			module: {
+				type: Object,
+				default () {
+					return {
+
+					}
+				}
+			}
+		},
+
+		mixins: [common],
+
+		data() {
+			return {}
+		},
+
+		computed: {
+			keywords() {
+				let list = this.module.data
+				let keywords = []
+				list.forEach(item => keywords.push(item.text))
+				return keywords.join('、').split('、')
+			},
+
+			outerStyle() {
+				let style = []
+				let config = this.module.config.outer || {}
+				if (config.style) style.push(outer.style)
+				if (config.width) style.push('width: ' + config.width + 'rpx')
+				if (config.height) style.push('height: ' + config.height + 'rpx')
+				if (config.background) style.push('background-color:' + config.background)
+				return style.join(";")
+			},
+
+			containerStyle() {
+				let style = []
+				let config = this.module.config.container || {}
+				if (config.style) style.push(container.style)
+				if (config.width) style.push('width: ' + config.width + 'rpx')
+				if (config.background) style.push('background:' + config.background)
+				return style.join(";")
+			},
+
+			fontStyle() {
+				let style = []
+				let config = this.module.config.font || {}
+				if (config.fontSize) style.push('font-size: ' + config.fontSize + 'rpx')
+				if (config.fontColor) style.push('color: ' + config.fontColor)
+				return style.join(";")
+			}
+		},
+
+		methods: {
+
+
+		}
+	}
+</script>

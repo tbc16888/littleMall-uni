@@ -1,0 +1,159 @@
+<template>
+	<view>
+		<!-- #ifndef APP-NVUE -->
+		<view class="tbc-page-background"></view>
+		<!-- #endif -->
+
+		<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;align-items: center;background-color: #FFFFFF;padding-top: 30rpx;padding-bottom: 30rpx;margin-bottom: 20rpx;"
+		 v-for="(goods, index) in goodsList" :key="index">
+			<view class="tbc-flex-col" style="flex-direction: column;width: 690rpx;">
+				<view class="tbc-flex-row" style="flex-direction: row;">
+					<view style="width: 140rpx;height: 140rpx;margin-right: 20rpx;">
+						<image :src="goods.goods_image" style="width: 140rpx;height: 140rpx;border-radius: 100rpx;"></image>
+					</view>
+					<view class="tbc-flex-col" style="flex-direction: column;flex: 1;">
+						<text style="font-size: 26rpx;lines: 2;" class="tbc-text-clamp-2">{{goods.goods_name}}</text>
+						<view class="tbc-flex-row" style="flex-direction: row;margin-top: 20rpx;">
+							<view style="width: 50rpx;height: 50rpx;" v-for="i in 5" :key="i" @click="setScore(index, i)">
+								<image src="/static/icon/score-yellow.png" style="width: 50rpx;height: 50rpx;" v-if="i <= comment[index].score"></image>
+								<image src="/static/icon/score.png" style="width: 50rpx;height: 50rpx;" v-if="i > comment[index].score"></image>
+							</view>
+						</view>
+					</view>
+				</view>
+
+				<view style="height: 30rpx;"></view>
+				<view class="tbc-flex-col" style="flex-direction: column;width: 690rpx;">
+					<textarea style="font-size: 28rpx;color: #333;width: 690rpx;padding-top: 10px;padding-bottom: 10px;height: 200rpx;"
+					 placeholder="写出您的感受,可以帮助更多小伙伴哦～" placeholder-style="color:#999;" :maxlength="200" v-model="comment[index].text"></textarea>
+				</view>
+
+
+
+				<view class="tbc-flex-row" style="flex-direction: row;flex-wrap: wrap;width: 690rpx;">
+
+					<view class="tbc-flex-col" style="width: 120rpx;height: 120rpx;flex-direction: column;align-items: center;justify-content: center;border-radius: 16rpx;margin-bottom: 10rpx;margin-top:10rpx;position:relative;margin-right: 10px;"
+					 v-for="(image, idx) in comment[index].images" :key="idx">
+						<image :src="image" style="width: 120rpx;height: 120rpx;border-radius: 16rpx;"></image>
+						<image src="/static/icon/close_black.png" style="position: absolute;right: 0;top: 0;width: 30rpx;height: 30rpx;"
+						 @click="removeImage(index, idx)"></image>
+					</view>
+
+					<view class="tbc-flex-col" style="width: 120rpx;height: 120rpx;flex-direction: column;align-items: center;justify-content: center;border-width: 1px;border-style: solid;border-color: #DDD;border-radius: 16rpx;margin-bottom: 10rpx;margin-top:10rpx;position:relative;"
+					 v-if="comment[index].images.length < 5" @click="onUploadClick(index)">
+
+						<view style="width:17px;height: 1px;background-color: #DDD;"></view>
+						<view style="width: 1px;height:17px;background-color: #DDD;position: absolute;"></view>
+					</view>
+
+				</view>
+			</view>
+		</view>
+
+		<view style="height: 110rpx;"></view>
+		<view style="position: fixed;bottom: 0;">
+			<view class="tbc-flex-row" @click="formSubmit" style="flex-direction: row;width: 750rpx;
+			background-color: #0081FF;align-items: center;justify-content: center;height: 100rpx;">
+				<text style="color: #FFF;font-size: 30rpx;">提交</text>
+			</view>
+		</view>
+		<upload ref="upload" @success="onUploadSuccess" @choice="onChoiceFile"></upload>
+	</view>
+</template>
+
+<script>
+	import Upload from '@/components/tbc-components/upload/index.vue'
+	export default {
+		components: {
+			Upload
+		},
+		data() {
+			return {
+				order: {
+					order_sn: ''
+				},
+				goodsList: [],
+				comment: [{
+					score: 5,
+					text: '',
+					images: []
+				}],
+				itemIndex: -1
+			}
+		},
+
+		onLoad(options) {
+			this.order.order_sn = options.order_sn || ''
+			this.getOrderInfo()
+		},
+
+		methods: {
+			setScore(index, score) {
+				this.comment[index].score = score
+			},
+			
+			// 删除图片
+			removeImage(itemIndex, imageIndex) {
+				this.comment[itemIndex].images.splice(imageIndex, 1)
+			},
+
+			onUploadClick(itemIndex) {
+				this.itemIndex = itemIndex
+				this.$refs.upload.choice()
+			},
+
+			onChoiceFile(res) {
+				this.comment[this.itemIndex].images.push(res.file_url)
+			},
+
+			onUploadSuccess(res) {
+				this.comment[this.itemIndex].images.push(res.file_url)
+			},
+			
+			async getOrderInfo() {
+				const res = await uni.$http.get('/order/detail', {
+					order_sn: this.order.order_sn
+				})
+				uni.stopPullDownRefresh()
+				if (res.data.code !== 0) {
+					return uni.showToast({
+						title: res.data.message,
+						icon: 'none'
+					})
+				}
+				let data = res.data.data
+				let comment = []
+				this.goodsList = data.goods.data.list
+				this.goodsList.forEach(item => {
+					comment.push({
+						score: 5,
+						text: '',
+						images: [],
+						order_goods_id: item.order_goods_id
+					})
+				})
+				this.comment = comment
+			},
+
+			async formSubmit() {
+				let form = JSON.parse(JSON.stringify(this.comment))
+				form.forEach(item => item.images = JSON.stringify(item.images))
+				const res = await uni.$http.post('/order.comment/add', {
+					order_sn: this.order.order_sn,
+					comment: JSON.stringify(form)
+				})
+				// 裤子收到了款式很潮哦，质量也是超棒的，很显瘦，布料柔软，摸着舒服，感觉是那种不起球的面料，很满意！！！
+				if (res.data.code !== 0) {
+					return uni.showToast({
+						title: res.data.message,
+						icon: 'none'
+					})
+				}
+				uni.showToast({
+					title: res.data.message,
+				})
+				uni.navigateBack({})
+			}
+		}
+	}
+</script>

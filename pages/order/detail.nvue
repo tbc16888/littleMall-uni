@@ -1,0 +1,125 @@
+<template>
+	<view>
+		<view class="tbc-page-background"></view>
+
+
+		<view style="width: 750rpx;background-color: #FFF;" v-if="order.status">
+			<status :status="order.status.data" :digital="digital" />
+		</view>
+
+
+		<view style="width: 750rpx;background-color: #FFF;">
+			<logistics :logistics="order.logistics.data" v-if="order.logistics" />
+			<view style="height: 1px;width: 750rpx;background-color: #F5F5F5;"></view>
+			<shipping-address :address="order.address.data" v-if="order.address" />
+		</view>
+
+		<view style="height: 20rpx;"></view>
+
+		<view style="width: 750rpx;background-color: #FFF;" v-if="order.goods">
+			<goods :goods="order.goods.data" />
+		</view>
+		<view style="width: 750rpx;background-color: #FFF;" v-if="order.charges">
+			<view style="height: 12px;"></view>
+			<charges :charges="order.charges.data" />
+			<view style="height: 12px;"></view>
+		</view>
+
+		<view style="height: 20rpx;"></view>
+		<view style="width: 750rpx;background-color: #FFF;" v-if="order.info">
+			<view style="height: 20px;"></view>
+			<information :info="order.info.data" />
+			<view style="height: 20px;"></view>
+		</view>
+
+		<template v-if="order.operation && order.operation.data.list.length">
+			<view style="height: 120rpx;"></view>
+			<view style="position: fixed;bottom: 0;height: 100rpx;background-color: #FFF;width: 750rpx;justify-content: center;">
+				<operation :operation="order.operation.data" @success="getOrderInfo" :order="order.basic.data.field" />
+			</view>
+		</template>
+	</view>
+</template>
+<script>
+	import countdown from '@/utils/countdown.js'
+
+	import OrderPayment from '@/components/app/OrderPayment.vue'
+	import status from './components/detail/status.nvue'
+	import logistics from './components/detail/logistics.nvue'
+	import shippingAddress from './components/detail/address.nvue'
+	import goods from './components/detail/goods.nvue'
+	import charges from './components/detail/charges.nvue'
+	import information from './components/detail/information.nvue'
+	import operation from './components/operation.nvue'
+
+	export default {
+
+
+		components: {
+			status,
+			logistics,
+			shippingAddress,
+			goods,
+			charges,
+			information,
+			operation,
+			OrderPayment,
+		},
+
+		data() {
+			return {
+				orderSn: '',
+				order: {},
+				digital: [],
+				timer: null,
+			}
+		},
+
+		onLoad: function(options) {
+			this.order_sn = options.order_sn
+			this.getOrderInfo()
+		},
+
+		onUnload: function() {
+			clearInterval(this.timer)
+		},
+
+		onPullDownRefresh: function() {
+			this.getOrderInfo()
+		},
+
+		methods: {
+
+			async getOrderInfo() {
+				const res = await uni.$http.get('/order/detail', {
+					order_sn: this.order_sn
+				})
+				uni.stopPullDownRefresh()
+				if (res.data.code !== 0) {
+					return uni.showToast({
+						title: res.data.message,
+						icon: 'none'
+					})
+				}
+				let data = res.data.data
+				this.order = data
+				this.detectCountdown()
+			},
+
+			detectCountdown() {
+				let config = this.order.countdown || null
+				clearInterval(this.timer)
+				this.digital = []
+				if (config.data.field.second) {
+					this.timer = countdown.start(config.data.field.second, (digital) => {
+						this.digital = countdown.zerofill(digital)
+					}, () => {
+						clearInterval(this.timer)
+						this.digital = []
+						this.getOrderInfo()
+					})
+				}
+			}
+		}
+	}
+</script>

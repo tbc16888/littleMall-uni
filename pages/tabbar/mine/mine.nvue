@@ -1,0 +1,287 @@
+<template>
+	<view>
+		<view class="tbc-page-background"></view>
+
+		<!-- #ifdef APP-NVUE || H5 -->
+		<view style="position: fixed;top: 0;z-index:9999">
+			<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;" ref="nav"
+				:style="navBackgroundColor">
+				<view :style="'height:' + statusBarHeight + 'px'"></view>
+				<view class="tbc-flex-row"
+					style="flex-direction: row;align-items: center;justify-content: flex-end;padding-right: 30rpx;height: 90rpx;">
+					<view class="tbc-flex-row" style="width:44rpx;height:44rpx;margin-right: 40rpx;">
+						<image src="/static/mine/setting.png" style="width:44rpx;height: 44rpx;"></image>
+					</view>
+					<view class="tbc-flex-row" style="width:44rpx;height:44rpx;">
+						<image src="/static/mine/notice.png" style="width:44rpx;height: 44rpx;"></image>
+					</view>
+				</view>
+			</view>
+		</view>
+		<!-- #endif -->
+
+		<!-- 用户头部 -->
+		<view class="tbc-flex-col" style="position:relative;background-color:#e41f19;">
+			<view class="tbc-flex-col" style="align-items: center;">
+				<!-- #ifdef APP-NVUE || H5 -->
+				<view style="height: 60rpx;"></view>
+				<!-- #endif -->
+				<view style="height: 100rpx;"></view>
+				<view class="tbc-flex-row" style="flex-direction: row;width:690rpx;align-items: center;"
+					@click="toProfile">
+					<view style="height:120rpx;width:120rpx;margin-right: 20rpx;">
+						<image style="height:120rpx;width:120rpx;border-radius: 120rpx;" :src="loginUserInfo.avatar">
+						</image>
+					</view>
+					<view class="tbc-flex-col" style="flex-direction: column;">
+						<view>
+							<text
+								style="font-size: 36rpx;font-weight: bold;color:#fff;font-family:PingFang SC;">{{loginUserInfo.nick_name}}</text>
+						</view>
+						<view style="margin-top:10rpx;" v-if="loginUserInfo.user_id">
+							<text style="font-size:28rpx;color: #fff;">{{loginUserInfo.mobile}}</text>
+						</view>
+					</view>
+				</view>
+				<!-- 统计信息 -->
+				<view style="padding-top: 40rpx;">
+					<view class="tbc-flex-row" style="flex-direction: row;flex-wrap: wrap;">
+						<view class="tbc-flex-col"
+							style="flex-direction: column;align-items: center;margin-bottom: 20rpx;width:187.5rpx;"
+							v-for="(item, index) in statistics" :key="index" @click="onTabBarClick(item)">
+							<text style="font-size: 32rpx;color: #fff;font-weight: bold;">{{item.value}}</text>
+							<text style="font-size: 24rpx;margin-top:16rpx;color: #fff;">{{item.label}}</text>
+						</view>
+					</view>
+				</view>
+				<!-- 统计信息  结束 -->
+				<view style="height: 10rpx;"></view>
+			</view>
+		</view>
+		<!-- 用户头部 结束-->
+
+
+		<!-- 我的订单 -->
+		<view class="tbc-flex-col"
+			style="flex-direction: column;align-items: center;position: relative;overflow: hidden;">
+			<view
+				style="position: absolute;height:100rpx;top:0;width: 750rpx;background-color:#e41f19;border-bottom-left-radius: 15rpx;border-bottom-right-radius: 15rpx;">
+			</view>
+			<view style="width:690rpx;border-radius:16rpx;background-color: #FFF;">
+				<view class="tbc-flex-row" style="flex-direction: row;height: 100rpx;align-items: center;"
+					@click="toOrderList({tabCode: ''})">
+					<view style="flex:1">
+						<text style="font-size: 30rpx;margin-left:30rpx;">我的订单</text>
+					</view>
+					<view style="">
+						<text style="font-size: 24rpx;color: #666;">全部订单</text>
+					</view>
+					<view>
+						<image src="/static/icon/arrow_right.png" style="width: 26rpx;height: 26rpx;"></image>
+					</view>
+					<view style="width: 30rpx;"></view>
+				</view>
+
+				<view class="tbc-flex-row" style="flex-direction: row;flex-wrap: wrap;padding-bottom: 20rpx;">
+					<view class="tbc-flex-col"
+						style="flex-direction: column;align-items: center;margin-bottom: 20rpx;width: 170rpx;"
+						v-for="(item, index) in tabBarList1" :key="index" @click="toOrderList(item)">
+						<view class="tbc-flex-row"
+							style="align-items: center;justify-content: center;width: 82rpx;height: 82rpx;">
+							<image style="width: 66rpx;height: 66rpx;background-color: #3F536E;"></image>
+							<view class="tbc-flex-col" v-if="item.count"
+								style="position: absolute;top:0;right: 0;z-index:2;width:26rpx;height: 26rpx;background-color: #FA5151;border-radius:26rpx;align-items: center;justify-content: center;">
+								<text
+									style="font-size:20rpx;color: #FFF;font-family: PingFang SC;">{{item.count}}</text>
+							</view>
+						</view>
+						<text style="font-size: 24rpx;margin-top:16rpx;color: #444;">{{item.label}}</text>
+					</view>
+				</view>
+			</view>
+		</view>
+		<!-- 我的订单 结束 -->
+
+
+		<!-- 常用工具 -->
+		<view class="tbc-flex-col" style="flex-direction: column;align-items: center;margin-top: 20rpx;">
+			<view style="width:690rpx;border-radius:16rpx;background-color: #FFF;">
+				<view class="tbc-flex-row" style="flex-direction: row;height: 100rpx;align-items: center;">
+					<text style="font-size: 30rpx;margin-left:30rpx;">常用工具</text>
+				</view>
+				<view class="tbc-flex-row" style="flex-direction: row;flex-wrap: wrap;padding-bottom: 20rpx;">
+					<view class="tbc-flex-col"
+						style="flex-direction: column;align-items: center;margin-bottom: 20rpx;width: 170rpx;"
+						v-for="(item, index) in tabBarList2" :key="index" @click="onTabBarClick(item)">
+						<view
+							style="width:82rpx;height:82rpx;position: relative;border-radius: 10rpx;align-items: center;justify-content: center;"
+							class="tbc-flex-row">
+							<image :src="item.icon" style="width: 66rpx;height: 66rpx;background-color: #3F536E;">
+							</image>
+						</view>
+						<text style="font-size: 24rpx;margin-top:16rpx;color: #444;">{{item.label}}</text>
+					</view>
+				</view>
+			</view>
+		</view>
+		<!-- 常用工具 结束 -->
+
+	</view>
+</template>
+
+<script>
+	import {
+		mapState
+	} from 'vuex'
+
+	export default {
+
+
+		data() {
+			return {
+				moduleList: [],
+				statistics: [
+
+					{
+						label: '账户余额',
+						value: 0,
+						field: 'balance',
+						tabCode: '/pages/wallet/wallet'
+					},
+					{
+						label: '积分',
+						value: 0,
+						field: 'integral',
+						tabCode: ''
+					},
+					{
+						label: '我的收藏',
+						value: 0
+					},
+					{
+						label: '浏览记录',
+						value: 0
+					},
+				],
+				tabBarList1: [{
+						label: '待付款',
+						icon: '/static/order/wait_pay.png',
+						tabCode: 'waitPay',
+						count: 0,
+					},
+					{
+						label: '待发货',
+						icon: '/static/order/wait_send.png',
+						tabCode: 'waitSend',
+						count: 0,
+					},
+					{
+						label: '待收货',
+						icon: '/static/order/all.png',
+						tabCode: 'waitConfirm',
+						count: 0,
+					},
+					{
+						label: '待评论',
+						icon: '/static/order/wait_comment.png',
+						tabCode: 'waitComment',
+						count: 0,
+					}
+				],
+				tabBarList2: [{
+						label: '我的地址',
+						icon: '',
+						tabCode: '/pages/mine/address'
+					},
+					{
+						label: '优惠券',
+						icon: '',
+						tabCode: '/pages/coupon/mine'
+					},
+					{
+						label: '系统设置',
+						icon: '',
+						tabCode: '/pages/setting/setting'
+					}
+				],
+				scrollTop: 0
+			}
+		},
+		computed: {
+			...mapState(['loginUserInfo']),
+			statusBarHeight() {
+				return uni.getSystemInfoSync().statusBarHeight
+			},
+
+			navScrollRatio() {
+				let ratio = this.scrollTop / (uni.upx2px(90) + this.statusBarHeight)
+				if (ratio > 1) ratio = 1
+				return ratio
+			},
+
+			navBackgroundColor: function() {
+				return 'background-color:rgba(233,51,35, ' + this.navScrollRatio + ')'
+			},
+
+			height() {
+				console.log('height: ' + Math.abs(this.scrollTop) + "px")
+				return 'height: ' + Math.abs(this.scrollTop) + "px"
+			},
+		},
+
+		onLoad: function() {},
+
+		onShow: function() {},
+
+
+		onPullDownRefresh: function() {
+			this.$store.dispatch('getLoginUserInfo')
+			uni.stopPullDownRefresh()
+		},
+
+		onPageScroll: function(e) {
+			this.scrollTop = e.scrollTop
+		},
+
+		methods: {
+
+			toPageUrl(page) {
+				let url = page
+				let authList = [
+					'/pages/coupon/mine', '/pages/mine/address', "/pages/order/list",
+					"/pages/mine/profile"
+				]
+				authList.forEach(item => {
+					if (page.indexOf(item) > -1 && !this.loginUserInfo.user_id) {
+						url = "/pages/authorize/login"
+					}
+				})
+			
+				console.log(page)
+				console.log(authList.indexOf(page))
+	
+				uni.navigateTo({
+					url,
+					fail: function() {
+						uni.showToast({
+							title: '功能未完善',
+							icon: 'none'
+						})
+					}
+				})
+			},
+
+			toProfile() {
+				this.toPageUrl("/pages/mine/profile")
+			},
+
+			toOrderList(data) {
+				this.toPageUrl("/pages/order/list?tab=" + data.tabCode)
+			},
+
+			onTabBarClick(data) {
+				this.toPageUrl(data.tabCode)
+			}
+		}
+	}
+</script>

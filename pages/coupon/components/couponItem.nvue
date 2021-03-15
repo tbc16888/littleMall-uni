@@ -1,0 +1,103 @@
+<template>
+	<view class="tbc-flex-col" style="flex-direction: column;background-color: #FFF;box-shadow: 0rpx 2rpx 4rpx rgba(171,171,171,0.4);border-radius: 10rpx;width: 690rpx;align-items: center;filter: grayscale(100%);">
+		
+		<!-- border-bottom-width: 1px;border-color: #EEE;border-style: dashed; -->
+		<view class="tbc-flex-row" style="flex-direction: row;padding:30rpx;align-items: center;">
+
+			<view class="tbc-flex-col" style="flex-direction: column;align-items: center;margin-right: 40rpx;">
+				<view class="tbc-flex-row" style="flex-direction: row;align-items: center;">
+					<text style="color:#F00;font-family:PingFang SC;font-size: 30rpx;padding-top:10rpx;">¥</text>
+					<text style="color:#F00;font-size:50rpx;font-weight:bold;">{{coupon.discount}}</text>
+				</view>
+				<text style="font-size:24rpx;color:#F00;">满{{coupon.minimum}}可用</text>
+			</view>
+
+			<view class="tbc-flex-col" style="flex-direction: column;flex: 1;">
+				<text style="font-size: 26rpx;">{{coupon.coupon_name}}</text>
+				<text style="font-size: 24rpx;color:#666;margin-top: 10rpx">{{coupon.effective_time}}</text>
+
+			</view>
+
+
+			<view class="tbc-flex-row" style="flex-direction: row;height:50rpx;align-items: center;justify-content: center;border-radius: 25rpx;padding-left: 20rpx;padding-right:20rpx;background-color:#F30;margin-left: 20rpx;"
+			 @click="onTapCoupon" v-if="mode == 1 && !coupon.is_expired && !coupon.is_used">
+				<text style="color: #FFF;font-size: 26rpx;">去使用</text>
+			</view>
+			
+			<view class="tbc-flex-row" style="flex-direction: row;height:50rpx;align-items: center;justify-content: center;padding-left: 20rpx;padding-right:20rpx;;margin-left: 20rpx;line-height: 50rpx;"
+			 @click="onTapCoupon" v-if="mode == 2">
+				<text style="color: #FFF;font-size: 26rpx;">去使用</text>
+				<image src="/static/icon/radio.png" style="width: 36rpx;height: 36rpx;"></image>
+			</view>
+			
+			<view class="tbc-flex-row" style="flex-direction: row;height:50rpx;align-items: center;justify-content: center;padding-left: 20rpx;padding-right:20rpx;;margin-left: 20rpx;" v-if="coupon.is_expired">
+				<text style="font-size: 26rpx;">已过期</text>
+			</view>
+			<view class="tbc-flex-row" style="flex-direction: row;height:50rpx;align-items: center;justify-content: center;padding-left: 20rpx;padding-right:20rpx;;margin-left: 20rpx;" v-if="coupon.is_used">
+				<text style="font-size: 26rpx;">已使用</text>
+			</view>
+		</view>
+
+
+		<!-- <view style="border-bottom-width: 1px;border-color: #EEE;border-style: dashed;"></view> -->
+		
+		
+		<view :class="{'tbc-flex-col': 1, 'tbc-text-clamp-1': !coupon.showDesc}" style="flex-direction: column;padding: 10rpx;width: 660rpx;" @click="toggleShowDesc">
+			<text style="font-size: 26rpx;font-family:PingFang SC">{{coupon.coupon_desc}}</text>
+		</view>
+		
+		<view style="padding-left: 20rpx;padding-right: 20rpx;padding-top: 14rpx;padding-bottom: 14rpx;position: relative;" 
+		 @click="toggleShowDesc" v-if="false">
+
+			<view :class="coupon.showDesc ? '':'tbc-text-clamp-1'" style="padding-right: 30rpx;">
+				<text v-if="coupon.unusable_reason" style="color:#F30">{{coupon.unusable_reason}}</text>
+				<text style="font-size: 26rpx;" :style="coupon.showDesc ? '':'lines:1'">{{coupon.coupon_desc}}</text>
+			</view>
+
+
+			<view style="position: absolute;right:20rpx;top:24rpx;">
+				<view style="height:10rpx;width:18rpx;">
+					<image src="/static/icon/arrow-down.png" style="height:10rpx;width:18rpx;" v-if="!coupon.showDesc"></image>
+					<image src="/static/icon/arrow-up.png" style="height:10rpx;width:18rpx;" v-if="coupon.showDesc"></image>
+				</view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		props: {
+			coupon: {
+				type: Object,
+				default () {
+					return {}
+				}
+			},
+
+			width: {
+				type: Number,
+				default: 690
+			},
+			
+			mode: {
+				type: [String, Number],
+				default: 1
+			}
+		},
+
+		methods: {
+			onTapCoupon() {
+				this.$emit('click', this.coupon)
+			},
+
+			toggleShowDesc() {
+				console.log('toggleShowDesc')
+				this.coupon.showDesc = this.coupon.showDesc ? false : true
+			}
+		}
+	}
+</script>
+
+<style>
+</style>

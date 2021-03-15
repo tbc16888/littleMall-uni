@@ -1,0 +1,60 @@
+<template>
+	<uni-popup ref="qrCode" type="center" :mask-click="true">
+
+		<view class="tbc-flex-col" style="flex-direction: column;align-items:center;">
+
+			<view class="tbc-flex-col" style="width: 540rpx;height:540rpx;background-color: #FFFFFF;flex-direction: column;align-items: center;border-radius: 10rpx;justify-content: center;">
+				<canvas canvas-id="qrcode" style="width: 500rpx;height: 500rpx;" />
+			</view>
+		</view>
+
+		<view class="tbc-flex-col" style="width: 620rpx;margin-top: 50rpx;flex-direction: column;align-items: center;" @click="$refs.qrCode.close()">
+			<image src="/static/icon/close_white.png" style="width: 56rpx;height: 56rpx;"></image>
+		</view>
+	</uni-popup>
+</template>
+
+<script>
+	import uQRCode from '@/utils/uqrcode.js'
+	import UniPopup from '@/components/uni-official/uni-popup/uni-popup.vue'
+	export default {
+
+		components: {
+			UniPopup
+		},
+
+		data() {
+			return {
+				qrCodeText: ''
+			}
+		},
+
+		methods: {
+
+			show(text) {
+				this.qrCodeText = text
+				this.$refs.qrCode.open()
+				setTimeout(() => {
+					this.make()
+				}, 30)
+			},
+
+			make() {
+				uQRCode.make({
+					canvasId: 'qrcode',
+					componentInstance: this,
+					text: this.qrCodeText,
+					size: uni.upx2px(500),
+					margin: 0,
+					backgroundColor: '#ffffff',
+					foregroundColor: '#000000',
+					fileType: 'jpg',
+					correctLevel: uQRCode.defaults.correctLevel
+				})
+			},
+		}
+	}
+</script>
+
+<style>
+</style>

@@ -1,0 +1,22 @@
+<template>
+	<view class="tbc-flex-col" style="flex-direction: column;width: width: 750rpx;" v-if="banner.show">
+		<view class="tbc-flex-row" style="flex-direction: row;">
+			<image :src="banner.field.image" style="width: 750rpx;height: 100rpx;"></image>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		props: {
+			banner: {
+				type: Object,
+				default () {
+					return {
+						show: 0
+					}
+				}
+			}
+		}
+	}
+</script>

@@ -1,0 +1,123 @@
+<template>
+	<view class="tbc-flex-col"
+		style="flex-direction:column;align-items: center;width: 640rpx;position: relative;flex: 1;height: 100%;background-color: #F5F5F5;">
+		<scroll-view scroll-y="true"
+			style="flex: 1;flex-direction:column;align-items: center;width: 640rpx;position: absolute;top: 0;bottom: 100rpx;"
+			class="tbc-flex-col">
+			<view style="height: 50rpx;background-color: #FFFFFF;width: 640rpx;"></view>
+			<view class="tbc-flex-col" style="flex-direction: column;width:640rpx;background-color: #FFFFFF;">
+
+				<view class="tbc-flex-row" style="flex-direction: row;height: 90rpx;align-items: center;">
+					<text style="font-size: 28rpx;font-weight: bold;padding-left: 30rpx;">价格区间</text>
+				</view>
+
+				<view class="tbc-flex-row" style="flex-direction: row;">
+					<view style="width: 30rpx;"></view>
+					<input type="number" placeholder="最低价"
+						style="background-color: #F5F5F5;height: 60rpx;border-radius: 60rpx;font-size: 24rpx;text-align: center;flex: 1;" v-model="minPrice"/>
+					<text style="padding-left:20rpx;padding-right:20rpx;color: #666;">-</text>
+					<input type="number" placeholder="最高价"
+						style="background-color: #F5F5F5;height: 60rpx;border-radius: 60rpx;font-size: 24rpx;text-align: center;flex: 1;" v-model="maxPrice"/>
+					<view style="width: 30rpx;"></view>
+				</view>
+				<view style="height: 20rpx;"></view>
+			</view>
+
+
+
+			<view class="tbc-flex-col"
+				style="flex-direction: column;width:640rpx;background-color: #FFFFFF;margin-top: 20rpx;"
+				v-for="(filter, idx) in filterList" :key="idx">
+
+				<view class="tbc-flex-row" style="flex-direction: row;height: 90rpx;align-items: center;">
+					<view style="flex: 1;">
+						<text style="font-size: 28rpx;font-weight: bold;padding-left: 30rpx;">{{filter.label}}</text>
+					</view>
+					<view class="tbc-flex-row" @click="toggleFilterFold(idx)"
+						style="height: 90rpx;width: 90rpx;flex-direction: column;align-items: flex-end;justify-content: center;padding-right: 30rpx;">
+						<image src="/static/icon/arrow-down.png" style="width:18rpx;height: 12rpx;"></image>
+					</view>
+				</view>
+
+
+				<view class="tbc-flex-row" style="flex-direction: row;flex-wrap: wrap;padding-right: 30rpx;"
+					:class="{'tbc-hidden':filter.fold}">
+					<view class="tbc-flex-row"
+						style="border-width: 1px;border-color: #f7f7f7;border-style: solid;height: 50rpx;padding-left: 30rpx;padding-right: 30rpx;background-color: #f7f7f7;border-radius:50rpx;margin-left: 30rpx;align-items: center;justify-content: center;margin-bottom: 20rpx;"
+						:style="filter.value.indexOf(item.value) > -1 ? 'background-color:#fff2f2;border-color:#fa5151;':'border-color: #F5F5F5;background-color: #F5F5F5;'"
+						v-for="(item, index) in filter.list" :key="idx +'_'+ item.value"
+						@click="onFilterListItemClick(idx, index)">
+						<text style="font-size: 24rpx;font-family:PingFang SC;"
+							:style="filter.value.indexOf(item.value) > -1 ? 'color:#fa5151;':'color:#000'">{{item.label}}</text>
+					</view>
+				</view>
+			</view>
+
+		</scroll-view>
+		<view class="tbc-flex-row"
+			style="flex-direction: row;width: 640rpx;height:100rpx;padding-left: 30rpx;padding-right: 30rpx;align-items: center;position: absolute;bottom: 0;left: 0;right: 0;background-color: #FFF;">
+			<view class="tbc-flex-row"
+				style="height: 70rpx;flex-direction: row;align-items: center;justify-content: center;border-radius: 44rpx;flex: 1;margin-left: 10rpx;margin-right: 10rpx;border-width: 1px;border-color: #ccc;border-style: solid;"
+				@click="resetFilter">
+				<text style="font-size: 28rpx;">重置</text>
+			</view>
+			<view class="tbc-flex-row"
+				style="height:70rpx;flex-direction: row;align-items: center;justify-content: center;border-radius: 44rpx;background-color: #fa5151;flex: 1;margin-left: 10rpx;margin-right: 10rpx;"
+				@click="confirmFilter">
+				<text style="font-size: 28rpx;color: #FFF;">确定</text>
+			</view>
+		</view>
+	</view>
+
+</template>
+
+<script>
+	export default {
+		props: {
+			filterList: {
+				type: Array,
+				default () {
+					return []
+				}
+			}
+		},
+		data() {
+			return {
+				minPrice: '',
+				maxPrice: '',
+			}
+		},
+
+		methods: {
+
+			toggleFilterFold(listIndex) {
+				let filterItem = this.filterList[listIndex]
+				filterItem.fold = filterItem.fold ? 0 : 1
+			},
+
+			onFilterListItemClick(listIndex, itemIndex) {
+				let filterItem = this.filterList[listIndex]
+				let position = filterItem.value.indexOf(filterItem.list[itemIndex].value)
+				if (position > -1) return filterItem.value.splice(position, 1)
+				if (!filterItem.multi) filterItem.value = []
+				filterItem.value.push(filterItem.list[itemIndex].value)
+			},
+
+			resetFilter() {
+				this.filterList.forEach(filter => {
+					filter.value = []
+				})
+			},
+
+			confirmFilter() {
+				let filterList = {}
+				if (this.minPrice) filterList.min_price = this.minPrice
+				if (this.maxPrice) filterList.max_price = this.maxPrice
+				this.filterList.forEach(filter => {
+					filterList[filter.field] = filter.value.join(",")
+				})
+				this.$emit('change', filterList)
+			}
+		}
+	}
+</script>
