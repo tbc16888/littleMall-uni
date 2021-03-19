@@ -1,3 +1,14 @@
+let channel = ''
+// #ifdef APP-PLUS
+channel = 'app';
+// #endif
+// #ifdef MP-WEIXIN
+channel = 'weixin';
+// #endif
+// #ifdef H5
+channel = 'h5';
+// #endif
+console.log(channel)
 // 统一请求
 const instance = async (url, options) => {
 
@@ -8,6 +19,7 @@ const instance = async (url, options) => {
 		'Authorization': uni.getStorageSync('login@token') || '',
 		'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
 	}
+	if (channel) header.Channel = channel
 	if (options.header) header = {...header, ...options.header}
 	options.method = options.method || 'GET'
 

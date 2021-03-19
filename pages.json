@@ -231,6 +231,27 @@
 				// #endif 
 				"navigationBarTitleText": "物流信息"
 			}
+		},{
+			"path": "pages/order/comment",
+			"style": {
+				// #ifdef H5 || MP-WEIXIN
+				"enablePullDownRefresh": true,
+				// #endif 
+				"navigationBarTitleText": "发表评价"
+			}
+		},{
+			"path": "pages/order/refund",
+			"style": {
+				// #ifdef H5 || MP-WEIXIN
+				"enablePullDownRefresh": true,
+				// #endif 
+				"navigationBarTitleText": "申请退款"
+			}
+		},{
+			"path": "pages/order/success",
+			"style": {
+				"navigationBarTitleText": "支付成功"
+			}
 		}, {
 			"path": "pages/mine/address",
 			"style": {
@@ -266,6 +287,15 @@
 				"enablePullDownRefresh": true,
 				// #endif 
 				"navigationBarTitleText": "我的优惠券"
+			}
+		},
+		{
+			"path": "pages/mine/collect",
+			"style": {
+				// #ifdef H5 || MP-WEIXIN
+				"enablePullDownRefresh": true,
+				// #endif 
+				"navigationBarTitleText": "我的收藏"
 			}
 		}
 	],

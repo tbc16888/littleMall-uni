@@ -144,7 +144,6 @@
 						dataList.push(item)
 					}
 				})
-				console.log(dataList)
 				this.dataList = dataList
 				this.invalidList = invalidList
 				this.response = data

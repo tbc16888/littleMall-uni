@@ -156,11 +156,13 @@
 					},
 					{
 						label: '我的收藏',
-						value: 0
+						value: 0,
+						tabCode: '/pages/mine/collect'
 					},
 					{
 						label: '浏览记录',
-						value: 0
+						value: 0,
+						tabCode: '/pages/mine/browse'
 					},
 				],
 				tabBarList1: [{
@@ -249,7 +251,7 @@
 				let url = page
 				let authList = [
 					'/pages/coupon/mine', '/pages/mine/address', "/pages/order/list",
-					"/pages/mine/profile"
+					"/pages/mine/profile", '/pages/mine/collect'
 				]
 				authList.forEach(item => {
 					if (page.indexOf(item) > -1 && !this.loginUserInfo.user_id) {

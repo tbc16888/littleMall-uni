@@ -9,7 +9,7 @@
 
 
 		<view style="width: 750rpx;background-color: #FFF;">
-			<logistics :logistics="order.logistics.data" v-if="order.logistics" />
+			<logistics :logistics="order.logistics.data" v-if="order.logistics" :order="order.basic.data.field" />
 			<view style="height: 1px;width: 750rpx;background-color: #F5F5F5;"></view>
 			<shipping-address :address="order.address.data" v-if="order.address" />
 		</view>
@@ -34,15 +34,19 @@
 
 		<template v-if="order.operation && order.operation.data.list.length">
 			<view style="height: 120rpx;"></view>
-			<view style="position: fixed;bottom: 0;height: 100rpx;background-color: #FFF;width: 750rpx;justify-content: center;">
-				<operation :operation="order.operation.data" @success="getOrderInfo" :order="order.basic.data.field" />
+			<view
+				style="position: fixed;bottom: 0;height: 100rpx;background-color: #FFF;width: 750rpx;justify-content: center;">
+				<operation :operation="order.operation.data" @success="getOrderInfo" :order="order.basic.data.field"
+					@payment="showPaymentSelector" />
 			</view>
 		</template>
+
+
+		<order-payment ref="payment" @success="getOrderInfo"></order-payment>
 	</view>
 </template>
 <script>
 	import countdown from '@/utils/countdown.js'
-
 	import OrderPayment from '@/components/app/OrderPayment.vue'
 	import status from './components/detail/status.nvue'
 	import logistics from './components/detail/logistics.nvue'
@@ -80,6 +84,10 @@
 			this.getOrderInfo()
 		},
 
+		onShow: function() {
+			this.getOrderInfo()
+		},
+
 		onUnload: function() {
 			clearInterval(this.timer)
 		},
@@ -89,6 +97,11 @@
 		},
 
 		methods: {
+			showPaymentSelector() {
+				let order = this.order.basic.data.field
+				this.$refs.payment.show(order)
+			},
+
 
 			async getOrderInfo() {
 				const res = await uni.$http.get('/order/detail', {

@@ -66,11 +66,22 @@
 
 			// 申请退款
 			orderRefund(order, callback) {
-				this._doConfirmAndRequest('确定要申请退款吗？', '/order/refund', order, function() {
-					callback && callback(order)
-				})
+				// this._doConfirmAndRequest('确定要申请退款吗？', '/order/refund', order, function() {
+				// 	callback && callback(order)
+				// })
+				uni.navigateTo({
+					url: '/pages/order/refund?order_sn=' + order.order_sn
+				});
 			},
 
+			// 申请售后
+			orderService(order, callback) {
+				uni.navigateTo({
+					url: '/pages/order/refund?order_sn=' + order.order_sn
+				});
+			},
+			
+			
 			// 确认收货
 			orderConfirm(order, callback) {
 				this._doConfirmAndRequest('确定是否收到货品？', '/order/complete', order, function() {
@@ -93,7 +104,7 @@
 
 			orderComment(order, success) {
 				uni.navigateTo({
-					url: '/pages/mall/order/comment?order_sn=' + order.order_sn
+					url: '/pages/order/comment?order_sn=' + order.order_sn
 				});
 			},
 

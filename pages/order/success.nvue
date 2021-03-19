@@ -1,0 +1,79 @@
+<template>
+	<view>
+		<view class="tbc-page-background"></view>
+		<view style="position: absolute;top: 0;height: 300rpx;background-color: #eb0909;width: 750rpx;"></view>
+		<view class="tbc-flex-col" style="width: 750rpx;align-items: center;">
+			<view style="height: 100rpx;"></view>
+			<view class="tbc-flex-col"
+				style="flex-direction: column;width: 600rpx;background-color: #FFF;border-radius: 10px;align-items: center;box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);">
+				<view style="width: 80rpx;height: 80rpx;margin-top: 60rpx;">
+					<image src="/static/icon/success.png" style="width: 80rpx;height: 80rpx;border-radius: 60rpx;">
+					</image>
+				</view>
+				<view class="tbc-flex-row" style="flex-direction: row;align-items: center;width: 500rpx;">
+					<view style="margin-top: 40rpx;flex: 1;align-items: center;">
+						<text style="font-size: 40rpx;">订单支付成功</text>
+						<!-- <text style="font-size: 26rpx;color: #666;font-family:PingFang SC;">实付 ¥19.9</text> -->
+					</view>
+				</view>
+				<view style="height: 50rpx;">
+
+				</view>
+
+				<view style="flex-direction: row;align-items: center;align-self:center;padding-bottom: 50rpx;"
+					class="tbc-flex-row">
+					<view style="height:60rpx;border-color:#999;border-width:0.5px;border-radius:60rpx;border-style:solid;padding-left:30rpx;padding-right:30rpx;margin-left:20rpx;justify-content:center;"
+					 :style="{'background-color': item.background || '#fff', 'border-color': item.border || '#999'}" v-for="(item, index) in buttons"
+					 :key="index" @click.stop="onItemClick(index)">
+						<text style="font-size:26rpx;color:#333;line-height:24rpx;" :style="{'color': item.color || '#333'}">{{item.label}}</text>
+					</view>
+				</view>
+			</view>
+
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				orderSn: '',
+				buttons: [{
+						label: '返回首页',
+						url: '/pages/tabbar/index/index'
+					},
+					{
+						label: '查看订单',
+						background: '#eb0909',
+						border: '#eb0909',
+						color: '#fff',
+						code: ''
+					},
+				]
+			}
+		},
+
+		onLoad: function(options) {
+			this.orderSn = options.order_sn || ''
+		},
+
+		methods: {
+			onItemClick(index) {
+				index === 0 ? this.toIndex():this.toOrderDetail()
+			},
+			
+			toIndex() {
+				uni.switchTab({
+					url: '/pages/tabbar/index/index'
+				})
+			},
+
+			toOrderDetail() {
+				uni.redirectTo({
+					url: "/pages/order/detail?order_sn=" + this.orderSn
+				})
+			}
+		}
+	}
+</script>

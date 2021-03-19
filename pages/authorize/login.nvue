@@ -10,7 +10,8 @@
 		<!-- #endif -->
 
 		<!-- 手机号登录 -->
-		<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;align-items: center;" v-if="loginMethod == 'mobile'">
+		<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;align-items: center;"
+			v-if="loginMethod == 'mobile'">
 			<view class="tbc-flex-col" style="width: 650rpx;">
 
 				<view class="">
@@ -23,7 +24,7 @@
 					<view style="height: 85rpx;"></view>
 				</view>
 
-				<view class="tbc-flex-row" style="height: 100rpx;align-items: center;">
+				<view class="tbc-flex-row" style="height: 100rpx;align-items: center;flex-direction: row;">
 					<!-- <view style="margin-right: 20rpx;" @click="toCountry">
 						<text style="color: #666;font-size: 28rpx;">+86</text>
 					</view> -->
@@ -35,7 +36,8 @@
 						<image src="/static/icon/close_black.png" style="width: 28rpx;height: 28rpx;"></image>
 					</view>
 					<view style="height: 30rpx;width: 1px;background-color: #DDD;margin: 0 30rpx;"></view>
-					<view class="tbc-flex-row" style="width: 140rpx;align-items: center;justify-content: center;" @click="sendMobileCode">
+					<view class="tbc-flex-row" style="width: 140rpx;align-items: center;justify-content: center;"
+						@click="sendMobileCode">
 						<text style="font-size: 26rpx;color: #999;">{{sendCodeText}}</text>
 					</view>
 				</view>
@@ -54,10 +56,11 @@
 			</view>
 
 
-			<view class="tbc-flex-row" @click="loginSubmit" style="margin-top: 60rpx;flex-direction: row;width: 650rpx;align-items: center;justify-content: center;background-color: #007AFF;height: 90rpx;border-radius:45rpx;">
+			<view class="tbc-flex-row" @click="loginSubmit"
+				style="margin-top: 60rpx;flex-direction: row;width: 650rpx;align-items: center;justify-content: center;background-color: #007AFF;height: 90rpx;border-radius:45rpx;">
 				<text style="font-size: 30rpx;color: #FFF;">登录</text>
 			</view>
-		<!-- 	<view class="tbc-flex-row" style="width: 650rpx;margin-top: 30rpx;justify-content: flex-end;">
+			<!-- 	<view class="tbc-flex-row" style="width: 650rpx;margin-top: 30rpx;justify-content: flex-end;">
 				<text style="font-size: 24rpx;color: #666;">账号密码登录</text>
 			</view> -->
 		</view>
@@ -72,6 +75,17 @@
 		<!-- #endif -->
 		<!-- 微信一键登录 结束 -->
 
+
+		<!-- 头条登录 -->
+		<!-- #ifdef MP-TOUTIAO -->
+		<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;" v-if="loginMethod == 'toutiao'">
+			<view style="height: 100rpx;"></view>
+			<toutiao @success="_loginSuccessCallback" />
+		</view>
+		<!-- #endif -->
+		<!-- 头条登录 结束 -->
+
+
 		<!-- 其他登录 -->
 		<quick @success="_loginSuccessCallback" />
 
@@ -80,7 +94,7 @@
 		<view style="height: 20px;"></view>
 		<view style="position: fixed;bottom: 0;background-color: #FFF;">
 			<view class="tbc-flex-col" style="width: 750rpx;align-items: center;height: 30px;justify-content: center;">
-				<view class="tbc-flex-row">
+				<view class="tbc-flex-row" style="flex-direction: row;">
 					<text class="tbc-agreement-text">登录即代表您已同意</text>
 					<text class="tbc-agreement-text" style="color: #009EFF;">《用户协议》</text>
 					<text class="tbc-agreement-text">与</text>
@@ -91,7 +105,7 @@
 
 
 		<uni-popup ref="popup">
-			<sync ></sync>
+			<sync></sync>
 		</uni-popup>
 	</view>
 </template>
@@ -101,22 +115,24 @@
 	import sync from './components/sync.nvue'
 	import quick from './components/quick.nvue'
 	import wxMini from './components/wx-mini.nvue'
+	import toutiao from './components/toutiao.nvue'
 	export default {
 
 		components: {
 			uniPopup,
 			wxMini,
 			sync,
-			quick
+			quick,
+			toutiao
 		},
 
 		data() {
 			return {
 				wxCode: '',
-				loginMethod: 'mobile',
+				loginMethod: '',
 				sendCodeText: '获取验证码',
 				form: {
-					mobile: '',
+					mobile: '15577984914',
 					password: '',
 					code: '',
 					action: 'login'
@@ -130,6 +146,12 @@
 		onLoad: function() {
 			// #ifdef MP-WEIXIN
 			this.loginMethod = 'wx'
+			// #endif
+			// #ifdef  MP-TOUTIAO
+			this.loginMethod = 'toutiao'
+			// #endif
+			// #ifdef APP-NVUE || H5
+			this.loginMethod = 'mobile'
 			// #endif
 		},
 

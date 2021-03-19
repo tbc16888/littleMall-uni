@@ -8,7 +8,7 @@
 		</view>
 		<view style="height:108rpx;"></view>
 		<view class="tbc-flex-col" style="width: 750rpx;;" v-for="(item, index) in orderList" :key="index">
-			<order-item :item="item" :index="index" @payment="showPaymentSelector" @refresh="onItemRefresh(index)"></order-item>
+			<order-item :item="item" :index="index" @payment="showPaymentSelector" @refresh="initOrderList(index)"></order-item>
 			<view style="height: 20rpx;"></view>
 		</view>
 		<none v-if="total > -1 && !orderList.length "></none>
@@ -33,7 +33,7 @@
 			</cell>
 		</tbc-list>
 		<!-- #endif-->
-		<order-payment ref="payment"></order-payment>
+		<order-payment ref="payment" @success="initOrderList"></order-payment>
 	</view>
 </template>
 
@@ -132,15 +132,15 @@
 				this.getOrderList()
 			},
 			
-			async onItemRefresh(index) {
-				let order = this.orderList[index].basic.data.field
-				const res = await uni.$http.get('/order/detail', {
-					order_sn: order.order_sn
-				})
-				if (res.data.code !== 0) return ;
-				this.orderList[index] = res.data.data
-				this.refresh++
-			},
+			// async onItemRefresh(index) {
+			// 	let order = this.orderList[index].basic.data.field
+			// 	const res = await uni.$http.get('/order/detail', {
+			// 		order_sn: order.order_sn
+			// 	})
+			// 	if (res.data.code !== 0) return ;
+			// 	this.orderList[index] = res.data.data
+			// 	this.refresh++
+			// },
 			
 			async getOrderList() {
 				if (this.total === this.orderList.length) return

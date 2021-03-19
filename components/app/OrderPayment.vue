@@ -18,24 +18,26 @@
 					<view style="flex-direction:row;align-items: center;padding:30rpx;" class="tbc-flex-row"
 						@tap="select(index)">
 						<view style="margin-right: 20rpx;">
-							<image :src="item.icon" style="width:48rpx;height: 48rpx;"></image>
+							<image :src="item.icon" style="width:60rpx;height: 60rpx;"></image>
 						</view>
 						<view class="tbc-flex-col" style="flex-direction: column;flex: 1;">
-							<text style="font-size: 28rpx;color: #333333">{{item.label}}</text>
+							<text style="font-size: 30rpx;color: #333333" :style="'color:' + (item.disabled ? '#999':'#333')">{{item.name}}</text>
+							<text style="font-size: 22rpx;color: #fc872d" :style="'color:' + (item.disabled ? '#999':'#fc872d')">{{item.note}}</text>
 						</view>
-						<view style="width: 60rpx;">
+						<view style="width: 60rpx;" v-if="!item.disabled">
 							<image src="/static/icon/radio.png" style="width: 40rpx;height: 40rpx;"
 								v-if="index != selected"></image>
 							<image src="/static/icon/radio_on.png" style="width: 40rpx;height: 40rpx;"
 								v-if="index == selected"></image>
 						</view>
 					</view>
-					<!-- <view style="height: 1px;width: 750rpx;background-color: #F5F5F5;"></view> -->
+					<view style="height: 1px;width: 750rpx;background-color: #F5F5F5;"></view>
 				</view>
 			</scroll-view>
 			<view class="tbc-flex-col" style="align-items: center;margin-bottom: 20rpx;">
 				<view class="tbc-flex-row"
-					style="height:80rpx;align-items: center;justify-content: center;background-color: #eb0909;width:650rpx;border-radius:80rpx;" @click="formSubmit">
+					style="height:80rpx;align-items: center;justify-content: center;background-color: #eb0909;width:650rpx;border-radius:80rpx;"
+					@click="formSubmit">
 					<text style="color: #fff;font-size: 26rpx;">确定</text>
 				</view>
 			</view>
@@ -54,29 +56,17 @@
 			return {
 				order: {},
 				timer: null,
-				paymentList: [{
-						label: '余额支付',
-						icon: '/static/icon/balance.png',
-						code: 'alipay'
-					},
-					{
-						label: '支付宝支付',
-						icon: '/static/icon/alipay.png',
-						code: 'alipay'
-					}, {
-						label: '微信支付',
-						icon: '/static/icon/wxpay.png',
-						code: 'wxpay'
-					}
-				],
+				paymentList: [],
 				selected: -1
 			}
 		},
 
 		methods: {
+			
 			show(data) {
 				this.order = data
 				this.$refs.showPayment.open()
+				this.getPaymentList()
 			},
 
 			close() {
@@ -86,41 +76,50 @@
 			onChange(data) {
 				if (!data.show) clearInterval(this.timer)
 			},
-			
-			
-			select(index) {
-				this.selected = index
-			},
-			
-			async formSubmit() {
-				let type = this.paymentList[this.selected].code
-				this.formSubmitTest(type)
-				return
-				let form = {}
-				let that = this
-				form.order_sn = this.order.order_sn
-				let action = type === 'alipay' ? 'alipayApp' : 'wxApp'
-				const res = await uni.$http.post('/pay/' + action, form)
+
+			async getPaymentList() {
+				const res = await uni.$http.get('/pay', {
+					order_sn: this.order.order_sn
+				})
 				if (res.data.code !== 0) {
 					return uni.showToast({
 						title: res.data.message,
 						icon: 'none'
 					})
 				}
+				this.paymentList = res.data.data.list
+			},
 
-				let orderInfo = ''
-				if (type == 'alipay') orderInfo = res.data.data.string
-				if (type == 'wxpay') orderInfo = JSON.stringify(res.data.data)
+			select(index) {
+				if (this.paymentList[index].disabled) {
+					return 
+				}
+				this.selected = index
+			},
 
+			async formSubmit() {
+				let item = this.paymentList[this.selected]
+				let action = item.code
+				let form = {}
+				let that = this
+				form.order_sn = this.order.order_sn
+				const res = await uni.$http.post(item.api, form)
+				if (res.data.code !== 0) {
+					return uni.showToast({
+						title: res.data.message,
+						icon: 'none'
+					})
+				}
+				if (['alipay', 'wxpayy'].indexOf(action) === -1) {
+					return this.paySuccess()
+				}
+				
+				let orderInfo  = res.data.data
 				uni.requestPayment({
-					provider: type,
+					provider: action,
 					orderInfo: orderInfo,
 					success: function(res) {
-						uni.showModal({
-							content: "支付成功",
-							showCancel: false
-						})
-						that.detectOrderStatus()
+						that.paySuccess()
 					},
 					fail: function(err) {
 						uni.showModal({
@@ -140,26 +139,33 @@
 					title: res.data.message,
 					icon: 'none'
 				})
-				uni.showToast({
-					title: res.data.message,
-				})
-				this.detectOrderStatus()
+	
+				this.paySuccess()
 			},
 
-			detectOrderStatus() {
+
+			paySuccess() {
+				this.detectOrderStatus(500)
+				uni.navigateTo({
+					url: "/pages/order/success?order_sn=" + this.order.order_sn
+				})
+			},
+			
+			
+			detectOrderStatus(time) {
 				clearInterval(this.timer)
 				this.timer = setTimeout(() => {
 					uni.$http.get('/order/detail', {
 						order_sn: this.order.order_sn
 					}).then(res => {
 						if (res.data.code !== 0) return
-						let data = res.data.data
-						if (data.pay_status !== 1) return this.detectOrderStatus()
+						let data = res.data.data.basic.data.field
+						if (data.pay_time === '0000-00-00 00:00:00') return this.detectOrderStatus(2000)
 						this.close()
 						for (let i in data) this.order[i] = data[i]
 						return this.$emit('success', this.order)
 					})
-				}, 3000)
+				}, time)
 			}
 		}
 	}

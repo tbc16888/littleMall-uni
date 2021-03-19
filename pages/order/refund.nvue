@@ -1,22 +1,129 @@
 <template>
 	<view>
-		
+		<view class="tbc-page-background"></view>
+
+
+		<view class="tbc-flex-col" v-for="(item, index) in refundList" :key="index">
+			<view class="tbc-flex-col" style="background-color: #FFF;align-items: center;width: 750rpx;">
+				<view style="height: 30rpx;"></view>
+				<view style="width: 690rpx;">
+					<order-goods :goods="item.goods"></order-goods>
+				</view>
+				<view style="height: 30rpx;"></view>
+			</view>
+			<item :form="item.form" :index="index" @reasonClick="onReasonClick" />
+		</view>
+
+
+		<view style="height: 110rpx;"></view>
+		<view style="position: fixed;bottom: 0;">
+			<view class="tbc-flex-row" @click="formSubmit" style="flex-direction: row;width: 750rpx;
+			background-color: #eb0909;align-items: center;justify-content: center;height: 100rpx;">
+				<text style="color: #FFF;font-size: 30rpx;">提交</text>
+			</view>
+		</view>
+		<uploader ref="upload" @success="onUploadSuccess" @choice="onChoiceFile" />
+
+		<reason ref="reason" @confirm="onReasonSelected" />
 	</view>
 </template>
 
 <script>
+	import uploader from '@/components/tbc-components/uploader/index.nvue'
+	import reason from './components/refund/reason.nvue'
+	import item from './components/refund/item.nvue'
+	import orderGoods from '@/components/app/OrderGoods.nvue'
 	export default {
+		components: {
+			uploader,
+			reason,
+			item,
+			orderGoods
+		},
+
 		data() {
 			return {
-				
+				order: {
+					order_sn: '',
+					order_goods_id: ''
+				},
+				goodsList: [],
+				refundList: [],
+				reasonList: [],
+				index: -1
 			}
 		},
+
+		onLoad: function(options) {
+			this.order.order_sn = options.order_sn || ''
+			this.order.order_goods_id = options.order_goods_id || ''
+			this.getOrderInfo()
+		},
+
+		onPullDownRefresh: function() {
+			this.getOrderInfo()
+		},
+
 		methods: {
-			
+			onReasonClick(index) {
+				this.index = index
+				this.$refs.reason.show(this.refundList[index].form.reason)
+			},
+
+			onReasonSelected(reason) {
+				this.refundList[this.index].form.reason = reason
+				console.log(this.refundList[this.index].form)
+				this.$forceUpdate()
+			},
+
+			async getOrderInfo() {
+				const res = await uni.$http.get('/order/detail', {
+					order_sn: this.order.order_sn
+				})
+				uni.stopPullDownRefresh()
+				if (res.data.code !== 0) {
+					return uni.showToast({
+						title: res.data.message,
+						icon: 'none'
+					})
+				}
+				let data = res.data.data
+				let refundList = []
+				this.goodsList = data.goods.data.list
+				this.goodsList.forEach(item => {
+					if (!this.order.order_goods_id || item.order_goods_id === this.order.order_goods_id) {
+						if (item.refund_status < 1) {
+							refundList.push({
+								form: {
+									amount: item.goods_amount,
+									reason: '',
+									images: [],
+									description: '',
+									order_goods_id: item.order_goods_id
+								},
+								goods: item
+							})
+						}
+						
+					}
+				})
+				this.refundList = refundList
+			},
+
+			async formSubmit() {
+				let refund = []
+				this.refundList.forEach(item => refund.push(item.form))
+				const res = await uni.$http.post('/order/refund', {
+					order_sn: this.order.order_sn,
+					refund: JSON.stringify(refund)
+				})
+				if (res.data.code !== 0) {
+					return uni.showToast({
+						title: res.data.message,
+						icon: 'none'
+					})
+				}
+			}
 		}
 	}
 </script>
-
-<style>
-
-</style>

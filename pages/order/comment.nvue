@@ -1,8 +1,6 @@
 <template>
 	<view>
-		<!-- #ifndef APP-NVUE -->
 		<view class="tbc-page-background"></view>
-		<!-- #endif -->
 
 		<view class="tbc-flex-col" style="flex-direction: column;width: 750rpx;align-items: center;background-color: #FFFFFF;padding-top: 30rpx;padding-bottom: 30rpx;margin-bottom: 20rpx;"
 		 v-for="(goods, index) in goodsList" :key="index">
@@ -15,8 +13,8 @@
 						<text style="font-size: 26rpx;lines: 2;" class="tbc-text-clamp-2">{{goods.goods_name}}</text>
 						<view class="tbc-flex-row" style="flex-direction: row;margin-top: 20rpx;">
 							<view style="width: 50rpx;height: 50rpx;" v-for="i in 5" :key="i" @click="setScore(index, i)">
-								<image src="/static/icon/score-yellow.png" style="width: 50rpx;height: 50rpx;" v-if="i <= comment[index].score"></image>
-								<image src="/static/icon/score.png" style="width: 50rpx;height: 50rpx;" v-if="i > comment[index].score"></image>
+								<image src="/static/icon/star-red.png" style="width: 50rpx;height: 50rpx;" v-if="i <= comment[index].score"></image>
+								<image src="/static/icon/star.png" style="width: 50rpx;height: 50rpx;" v-if="i > comment[index].score"></image>
 							</view>
 						</view>
 					</view>
@@ -53,19 +51,19 @@
 		<view style="height: 110rpx;"></view>
 		<view style="position: fixed;bottom: 0;">
 			<view class="tbc-flex-row" @click="formSubmit" style="flex-direction: row;width: 750rpx;
-			background-color: #0081FF;align-items: center;justify-content: center;height: 100rpx;">
+			background-color: #eb0909;align-items: center;justify-content: center;height: 100rpx;">
 				<text style="color: #FFF;font-size: 30rpx;">提交</text>
 			</view>
 		</view>
-		<upload ref="upload" @success="onUploadSuccess" @choice="onChoiceFile"></upload>
+		<uploader ref="upload" @success="onUploadSuccess" @choice="onChoiceFile" />
 	</view>
 </template>
 
 <script>
-	import Upload from '@/components/tbc-components/upload/index.vue'
+	import Uploader from '@/components/tbc-components/uploader/index.nvue'
 	export default {
 		components: {
-			Upload
+			Uploader
 		},
 		data() {
 			return {
@@ -99,11 +97,13 @@
 
 			onUploadClick(itemIndex) {
 				this.itemIndex = itemIndex
-				this.$refs.upload.choice()
+				this.$refs.upload.choice(5 - this.comment[itemIndex].images.length)
 			},
 
 			onChoiceFile(res) {
-				this.comment[this.itemIndex].images.push(res.file_url)
+				res.file_url.forEach(item => {
+					this.comment[this.itemIndex].images.push(item)
+				})
 			},
 
 			onUploadSuccess(res) {
@@ -125,12 +125,15 @@
 				let comment = []
 				this.goodsList = data.goods.data.list
 				this.goodsList.forEach(item => {
-					comment.push({
-						score: 5,
-						text: '',
-						images: [],
-						order_goods_id: item.order_goods_id
-					})
+					if (!item.is_comment)  {
+						comment.push({
+							score: 5,
+							text: '',
+							images: [],
+							order_goods_id: item.order_goods_id
+						})
+					}
+			
 				})
 				this.comment = comment
 			},

@@ -8,7 +8,8 @@
 
 		<view class="tbc-flex-col" style="flex-direction: column;flex:1;">
 			<view class="tbc-text-clamp-2" :style="titleSizeStyle">
-				<text style="font-size:26rpx;text-overflow: ellipsis;align-self: flex-start;lines: 2;">{{goods.goods_name}}</text>
+				<text
+					style="font-size:26rpx;text-overflow: ellipsis;align-self: flex-start;lines: 2;">{{goods.goods_name}}</text>
 			</view>
 
 			<view style="margin-top:10rpx;">
@@ -17,53 +18,28 @@
 
 			<view style="flex: 1;"></view>
 
-			<!-- 		<view class="tbc-flex-row" style="margin-top:10rpx;flex-direction: row;">
-				<view class="tbc-flex-row" style="flex-direction: row;border-color: #FFA000;border-width: 1px;border-radius:8rpx;background-color: #FFF5E5;width:auto;padding-left:10rpx;padding-right:10rpx;height:40rpx;align-items: center;">
-					<text style="color:#FFA000;font-size:24rpx;font-family:PingFang-SC-Medium">1人团</text>
-				</view>
-			</view> -->
 
-
-
-
-			<view class="tbc-flex-row" style="flex-direction: row;margin-top:20rpx;align-items:center;"  v-if="goods.use_integral_type != 4">
-				<view class="tbc-flex-row" style="flex-direction:row;flex: 1;align-items:center;">
-
-					<view class="tbc-flex-row" style="flex-direction:row;align-items:flex-end;">
-						<text style="font-size:30rpx;color:#f30;padding-bottom:2rpx;font-family:PingFang-SC-Bold;">¥</text>
-						<text style="font-size:40rpx;color:#f30;font-family:PingFang-SC-Bold;">{{goods.activity_price}}</text>
-					</view>
-				<!-- 	<view class="tbc-flex-row" style="flex-direction:row;margin-left: 10rpx;">
-						<text style="font-size:28rpx;color:#999;text-decoration:line-through;">¥{{goods.shop_price}}</text>
-					</view> -->
-
-
-
-				</view>
-
-
-
-
-
-				<!-- 				<view class="tbc-flex-row" style="flex-direction: row;padding-left: 30rpx;padding-right: 30rpx;background-color: #008FFF;border-radius: 40rpx;height: 40rpx;align-items: center;">
-					<text style="color: #FFF;font-size: 24rpx;">去拼团</text>
-				</view> -->
-				<!-- 	<image src="../../static/icon/wx.png" style="width: 48rpx;height: 48rpx;"></image>
-				<image src="../../static/icon/weixin_pay.png" style="width: 48rpx;height: 48rpx;margin-left: 10rpx;"></image> -->
-			</view>
+		<view class="tbc-flex-row" style="flex-direction: row;margin-top: 20rpx;align-items:flex-end;">
+			<template v-if="goods.integral">
+				<text style="color: #ff3c3f;font-family:PingFang SC;font-size: 36rpx;font-weight: bold;">{{goods.integral}}积分</text>
+			</template>
+			 <template >
+			 	<view></view>
+			 </template>
+			<template v-if="goods.final_price">
+				<template v-if="goods.integral">
+					<text style="color: #ff3c3f;font-family:PingFang SC;font-size: 36rpx;font-weight: bold;">+</text>
+				</template>
+				<text style="color: #FF3300;font-family:PingFang SC;font-weight: bold;font-size: 36rpx;">￥{{goods.final_price}}</text>
+			</template>
+		</view>
+		
 			
-			<view class="tbc-flex-row" style="flex-direction: row;margin-top:20rpx;align-items:center;" v-if="goods.use_integral_type == 4">
-				<view class="tbc-flex-row" style="flex-direction:row;flex: 1;align-items:center;">
-					<view class="tbc-flex-row" style="flex-direction:row;align-items:flex-end;">
-						<text style="font-size:24rpx;color:#999;">积分: </text>
-						<text style="font-size:36rpx;color:#FF5A00;font-weight: bold;margin-right: 10rpx;">{{goods.use_integral_num}}</text>
-						<text style="font-size:24rpx;color:#999;"> / 原价 ￥{{goods.activity_price}}</text>
-					</view>
-				</view>
-				<view class="tbc-flex-row" style="flex-direction: row;align-items: center;background-color:#FF5A00;height:60rpx;justify-content: center;border-radius:60rpx;padding-left: 30rpx;padding-right: 30rpx;">
-					<text style="font-size: 22rpx;color: #fff;">兑换</text>
-				</view>
-			</view>
+
+
+
+
+
 		</view>
 	</view>
 </template>

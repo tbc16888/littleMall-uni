@@ -18,15 +18,12 @@
 			<view :style="skuTextStyle">
 				<text style="color:#999;font-size:24rpx;font-family: PingFang SC;font-weight: 500;">{{goods.goods_sku_text}}</text>
 			</view>
-
-
-			<view class="tbc-flex-row" style="flex-direction: row;height:40rpx;justify-items: center;align-items: center;" v-if="profit">
-				<view style="width:54rpx;background-color:#3c4148;">
-					<text style="color:#FFF;font-size:20rpx;font-family:PingFang SC;text-align:center;">收益</text>
-				</view>
-				<view style="background-color:#fce0b9;padding-left:10rpx;padding-right: 10rpx;">
-					<text style="color:#333;font-size:20rpx;font-family:PingFang SC;">¥{{profit}}</text>
-				</view>
+			
+			<view style="margin-top: 10rpx;" v-if="goods.refund_status == 1">
+				<text style="color: #FF3300;font-size:24rpx;font-family: PingFang SC;">退款中</text>
+			</view>
+			<view style="margin-top: 10rpx;" v-if="goods.refund_status == 2">
+				<text style="color: #FF3300;font-size:24rpx;font-family: PingFang SC;">已退款</text>
 			</view>
 
 			<view style="flex: 1;"></view>
@@ -42,6 +39,7 @@
 					<text style="color:#333;font-size:26rpx;">x{{goods.goods_number}}</text>
 				</view>
 			</view>
+		
 		</view>
 
 		<!-- <view class="tbc-flex-col" style="width: 140rpx;align-items: flex-end;">
@@ -67,14 +65,6 @@
 					}
 				}
 			},
-
-			profit: {
-				type: Number,
-				default () {
-					return 0
-				}
-			},
-
 			imageSize: {
 				type: Number,
 				default () {

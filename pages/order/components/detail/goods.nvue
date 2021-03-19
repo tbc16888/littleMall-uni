@@ -2,11 +2,23 @@
 	<view class="tbc-flex-col" style="flex-direction:column;align-items: center;">
 		<view class="tbc-flex-row" style="flex-direction: row;width: 690rpx;align-items: center;">
 			<view class="tbc-flex-row" style="height: 88rpx;align-items: center;flex-direction: row;">
-				<text style="font-family:PingFang SC;font-weight: bold;font-size:28rpx;color:#333333;">订单商品</text>
+				<text style="font-family:PingFang SC;font-weight: bold;font-size:30rpx;color:#333333;">订单商品</text>
 			</view>
 		</view>
-		<view v-for="(item, index) in goods.list" :key="index">
-			<order-goods :goods="item"></order-goods>
+		<view v-for="(goods, index) in goods.list" :key="index">
+			<order-goods :goods="goods"></order-goods>
+			<view class="tbc-flex-row"
+				style="flex-direction: row;justify-content: flex-end;align-items: center;margin-top: 20rpx;"
+				v-if="goods.operation.length">
+
+				<view
+					style="height:60rpx;border-color:#999;border-width:0.5px;border-radius:60rpx;border-style:solid;padding-left:30rpx;padding-right:30rpx;margin-left:20rpx;justify-content:center;"
+					:style="{'background-color': item.background || '#fff', 'border-color': item.border || '#999'}"
+					v-for="(item, idx) in goods.operation" :key="idx" @click.stop="onItemClick(index, idx)">
+					<text style="font-size:26rpx;color:#333;line-height:24rpx;"
+						:style="{'color': item.color || '#333'}">{{item.label}}</text>
+				</view>
+			</view>
 			<view style="height: 20rpx;"></view>
 		</view>
 	</view>
@@ -18,14 +30,77 @@
 		components: {
 			OrderGoods
 		},
-		
+
 		props: {
 			goods: {
 				type: Object,
-				default() {
+				default () {
 					return {}
 				}
 			}
+		},
+
+		methods: {
+
+			onItemClick(index, idx) {
+				let data = this.goods.list[index]
+				let item = data.operation[idx]
+				let name = item.code
+				let action = 'order' + name.substring(0, 1).toUpperCase() + name.substring(1)
+				this[action](data, async () => {
+					// const res = await uni.$http.get('/order/detail', {
+					// 	order_sn: this.order.order_sn
+					// })
+				})
+			},
+
+
+			// 申请退款
+			orderRefund(order, callback) {
+				let params = ['order_sn=' + order.order_sn, 'order_goods_id=' + order.order_goods_id]
+				uni.navigateTo({
+					url: '/pages/order/refund?' + params.join('&')
+				});
+				// this._doConfirmAndRequest('确定要申请退款吗？', '/order/refund', order, function() {
+				// 	callback && callback(order)
+				// })
+			},
+
+			// 申请售后
+			orderService(order, callback) {
+				let params = ['order_sn=' + order.order_sn, 'order_goods_id=' + order.order_goods_id]
+				uni.navigateTo({
+					url: '/pages/order/refund?' + params.join('&')
+				});
+			},
+			orderComment(order, success) {
+				uni.navigateTo({
+					url: '/pages/order/comment?order_sn=' + order.order_sn
+				});
+			},
+
+
+			// 提示并请求
+			_doConfirmAndRequest(content, api, order, success) {
+				let _this = this
+				uni.showModal({
+					title: '提示',
+					content,
+					success: function(action) {
+						if (action.cancel) return;
+						uni.$http.post(api, {
+							order_sn: order.order_sn
+						}).then(res => {
+							uni.showToast({
+								title: res.data.message,
+								icon: (res.data.code === 0 ? 'success' : 'none')
+							})
+							if (res.data.code !== 0) return
+							_this.operationSuccess()
+						})
+					}
+				})
+			},
 		}
 	}
 </script>
