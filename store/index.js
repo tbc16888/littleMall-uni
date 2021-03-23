@@ -2,7 +2,12 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 Vue.use(Vuex)
 
+import order from './module/order.js'
+
 const store = new Vuex.Store({
+	modules: {
+		order
+	},
 	
 	state: {
 		loginToken: '',

@@ -259,12 +259,11 @@
 					}
 				})
 			
-				console.log(page)
-				console.log(authList.indexOf(page))
-	
+			let that = this
 				uni.navigateTo({
 					url,
 					fail: function() {
+						that.$store.commit('order/setOrderList', [])
 						uni.showToast({
 							title: '功能未完善',
 							icon: 'none'

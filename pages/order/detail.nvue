@@ -116,6 +116,7 @@
 				}
 				let data = res.data.data
 				this.order = data
+				this.$store.commit('order/setOrderItem', data)
 				this.detectCountdown()
 			},
 

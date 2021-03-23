@@ -3,34 +3,26 @@
 </template>
 
 <script>
-	
 	export default {
 		data() {
 			return {
 				config: {},
+				lastConfigTime: 0,
+				files: [],
+				success: [],
 			}
 		},
 
 		methods: {
-			choice(count) {
+			// 选择文件
+			choice(count, autoUpload) {
 				let _this = this
 				uni.chooseImage({
 					count,
-					complete: function(res) {
+					complete: async function(res) {
 						if (res.errMsg !== 'chooseImage:ok') return
-
-						// res.tempFilePaths.forEach(item => {
-						// 	_this.start(item)
-						// })
-						
-						res.tempFilePaths.forEach((item, index) => {
-							setTimeout(() => {
-								uni.showLoading({
-									title: '正在上传，' + index + '/' + res.tempFilePaths.length
-								})
-							}, 1000 * index)
-						})
-						
+						if (autoUpload === undefined) autoUpload = true
+						if (autoUpload) return _this.start(res.tempFilePaths)
 						_this.$emit('choice', {
 							file_url: res.tempFilePaths
 						})
@@ -38,14 +30,32 @@
 				})
 			},
 
+	
+
 			// 开始上传
-			async start(filePath) {
-				const res = await this.getUploadConfig()
-				if (res) this.uploadToQiNiuYun(filePath)
+			async start(filePathList) {
+				this.files = filePathList
+				this.success = []
+				uni.showLoading({
+					title: '正在上传',
+					mask: true
+				})
+				
+				let res = true
+				let now = (new Date()).getTime()
+				if ((now - this.lastConfigTime) > 10) {
+					this.lastConfigTime = now
+					res = await this.getUploadConfig()
+				}
+				if (res) {
+					for (let i = 0; i < filePathList.length; i++) {
+						await this.uploadToQiNiuYun(filePathList[i], i)
+					}
+				}
+				return this.files
 			},
 
-
-
+			// 获取上传配置
 			async getUploadConfig() {
 				const res = await uni.$http.get('/upload/config')
 				if (res.data.code !== 0) {
@@ -56,23 +66,26 @@
 					return false
 				}
 				this.config = res.data.data
-				return true 
+				return true
 			},
 
-			uploadToQiNiuYun(filePath) {
+			async uploadToQiNiuYun(filePath, index) {
 				let _this = this
-				uni.uploadFile({
+				let [error, res] = await uni.uploadFile({
 					url: _this.config.upload_url,
 					filePath: filePath,
 					name: _this.config.upload_form_field,
 					formData: {
 						'token': _this.config.upload_token
-					},
-					success: (uploadFileRes) => {
-						let res = JSON.parse(uploadFileRes.data)
-						_this.$emit('success', res.data)
 					}
 				});
+				if (res.errMsg !== 'uploadFile:ok') return false
+				let data = JSON.parse(res.data)
+				this.files[index] = data.data.file_url
+				_this.success.push(index)
+				_this.$emit('success', data.data)
+				if (_this.files.length === _this.success.length) uni.hideLoading()
+				return true
 			},
 		}
 	}

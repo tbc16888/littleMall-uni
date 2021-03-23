@@ -165,7 +165,6 @@
 			},
 
 			async onConfirmClick(code) {
-				console.log(code)
 				if (!code) return ''
 				const res = await uni.$http.post('/cart/add', {
 					goods_id: this.goods.goods_id,
@@ -268,10 +267,9 @@
 					let skuInfo = skuPickerInstance.getSkuInfo(checked)
 					skuSelected = skuInfo.skuInfo
 				}
-
 				let skuRealTimeInfo = skuPickerInstance.statistics(checked)
 				this.skuAttrList = skuAttrList
-				this.skuSelected = skuSelected
+				this.skuSelected = JSON.parse(JSON.stringify(skuSelected))
 				this.skuRealTimeInfo = skuRealTimeInfo
 				if (skuRealTimeInfo.image) this.image = skuRealTimeInfo.image
 			},

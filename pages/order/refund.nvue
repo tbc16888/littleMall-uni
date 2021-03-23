@@ -6,10 +6,10 @@
 		<view class="tbc-flex-col" v-for="(item, index) in refundList" :key="index">
 			<view class="tbc-flex-col" style="background-color: #FFF;align-items: center;width: 750rpx;">
 				<view style="height: 30rpx;"></view>
-				<view style="width: 690rpx;">
-					<order-goods :goods="item.goods"></order-goods>
+				<view style="width: 690rpx;" v-for="(goods) in item.goods" :key="goods.order_goods_id">
+					<order-goods :goods="goods"></order-goods>
+					<view style="height: 30rpx;"></view>
 				</view>
-				<view style="height: 30rpx;"></view>
 			</view>
 			<item :form="item.form" :index="index" @reasonClick="onReasonClick" />
 		</view>
@@ -90,23 +90,38 @@
 				let data = res.data.data
 				let refundList = []
 				this.goodsList = data.goods.data.list
-				this.goodsList.forEach(item => {
-					if (!this.order.order_goods_id || item.order_goods_id === this.order.order_goods_id) {
-						if (item.refund_status < 1) {
-							refundList.push({
-								form: {
-									amount: item.goods_amount,
-									reason: '',
-									images: [],
-									description: '',
-									order_goods_id: item.order_goods_id
-								},
-								goods: item
-							})
+				
+				// 商品退款
+				if (this.order.order_goods_id) {
+					this.goodsList.forEach(item => {
+						if (!this.order.order_goods_id || item.order_goods_id === this.order.order_goods_id) {
+							if (item.refund_status < 1) {
+								refundList.push({
+									form: {
+										amount: item.goods_amount,
+										reason: '',
+										images: [],
+										description: '',
+										order_goods_id: item.order_goods_id
+									},
+									goods: [item]
+								})
+							}
 						}
-						
-					}
-				})
+					})
+				}else{
+					refundList.push({
+						form: {
+							amount: data.basic.data.field.order_amount,
+							reason: '',
+							images: [],
+							description: '',
+							order_goods_id: ''
+						},
+						goods: this.goodsList
+					})
+				}
+				
 				this.refundList = refundList
 			},
 
@@ -123,6 +138,8 @@
 						icon: 'none'
 					})
 				}
+				this.$store.dispatch('order/getOrderDetail', this.order.order_sn)
+				uni.navigateBack()
 			}
 		}
 	}
