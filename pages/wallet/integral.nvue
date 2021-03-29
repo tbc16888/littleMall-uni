@@ -1,0 +1,91 @@
+<template>
+	<view>
+		<view class="tbc-page-background"></view>
+
+		<!-- 用户头部 -->
+		<view class="tbc-flex-col"
+			style="position:relative;background-color:#e41f19;align-items: center;padding-top: 40px;padding-bottom: 20px;">
+			<view style="width: 690rpx;">
+				<view class="tbc-flex-row" style="flex-direction: row;margin-top:0rpx;">
+					<text style="font-size:60rpx;color:#fff;font-weight: bold;">{{loginUserInfo.integral}}</text>
+					<text style="font-size:30rpx;color:#fff;padding-top: 26rpx;margin-left: 10rpx;">积分</text>
+				</view>
+			</view>
+
+			<view style="position: absolute;top: 30rpx;right: 30rpx;" @click="toPage('/pages/wallet/integral-list')">
+				<text style="color: #FFFFFF;font-size: 26rpx;">查看明细</text>
+			</view>
+		</view>
+		<!-- 用户头部 结束-->
+
+
+		<!-- 常用工具 -->
+		<view class="tbc-flex-col" style="flex-direction: column;align-items: center;position: relative;">
+			<view style="position: absolute;height:100rpx;top:0;width: 750rpx;background-color:#e41f19;">
+			</view>
+			<view class="tbc-flex-col" style="width:690rpx;border-radius:16rpx;background-color: #FFF;">
+				<view class="tbc-flex-row" style="flex-direction: row;height: 100rpx;align-items: center;">
+					<text style="font-size: 30rpx;margin-left:30rpx;">签到</text>
+				</view>
+				<view class="tbc-flex-row"
+					style="flex-direction: row;padding-bottom: 20rpx;width: 650rpx;align-self: center;">
+					<view style="flex:1;padding: 6rpx;" v-for="index in 7" :key="index">
+						<view class="tbc-flex-col"
+							style="flex-direction: column;align-items: center;background-color: #fdc600;border-radius: 10rpx;justify-content: center;">
+							<view class="tbc-flex-row"
+								style="width:60rpx;height:60rpx;border-radius: 10rpx;align-items: center;justify-content: center;background-color: #3F536E;margin-top: 10rpx;">
+							</view>
+							<text style="font-size: 24rpx;margin-top:16rpx;">{{index}}天</text>
+						</view>
+					</view>
+				</view>
+
+				<view class="tbc-flex-col" style="align-items: center;">
+					<view class="tbc-flex-row"
+						style="height: 80rpx;align-items: center;justify-content: center;background-color: #e41f19;width:650rpx;border-radius:80rpx;">
+						<text style="color: #fff;font-size: 26rpx;">立即签到</text>
+					</view>
+				</view>
+
+				<view style="height: 30rpx;"></view>
+			</view>
+
+
+
+		</view>
+		<!-- 常用工具 结束 -->
+
+	</view>
+</template>
+
+<script>
+	import {
+		mapState
+	} from 'vuex'
+
+	export default {
+
+
+		data() {
+			return {
+
+			}
+		},
+
+		computed: {
+			...mapState(['loginUserInfo'])
+		},
+
+		onLoad: function() {
+
+		},
+
+		methods: {
+			toPage(page) {
+				uni.navigateTo({
+					url: page
+				})
+			}
+		}
+	}
+</script>

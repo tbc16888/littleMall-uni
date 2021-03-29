@@ -1,0 +1,111 @@
+<template>
+	<view class="tbc-flex-col"
+		style="flex-direction: column;height: 260px;width: 750rpx;border-top-left-radius: 10px;border-top-right-radius: 10px;background-color: #FFFFFF;">
+		<view class="tbc-flex-row"
+			style="height: 50px;width: 750rpx;flex-direction: row;align-items: center;position: relative;">
+			<view class="tbc-flex-row" style="width: 120rpx;justify-content: center;align-items: center;"
+				@click="cancel">
+				<text style="font-size: 16px;">取消</text>
+			</view>
+			<view class="tbc-flex-row" style="flex: 1;"></view>
+			<view class="tbc-flex-row" style="width: 120rpx;justify-content: center;align-items: center;"
+				@click="confirm">
+				<text style="font-size: 16px;color: #008FFF;">确定</text>
+			</view>
+			<view style="position: absolute;width: 750rpx;height: 1px;background-color: #F4F4F4;bottom: 0;"></view>
+		</view>
+
+		<view style="flex: 1;width: 750rpx;">
+			<picker-view :value="value" @change="onPickerChange" style="height: 216px;" indicator-style="height:40px" @column-change="onPickerColumnChange">
+				<picker-view-column v-for="(group, index) in range" :key="index" :index="index">
+					<view class="tbc-flex-row" v-for="(item, idx) in group" :key="idx"
+						style="flex-direction: row;align-items: center;height: 40px;justify-content: center;">
+						<text style="font-size: 16px;">{{item}}</text>
+					</view>
+				</picker-view-column>
+			</picker-view>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		props: {
+
+			// range: {
+			// 	type: Array,
+			// 	default () {
+			// 		return []
+			// 	}
+			// },
+
+			// value: {
+			// 	type: Array,
+			// 	default () {
+			// 		return []
+			// 	}
+			// }
+		},
+
+		data() {
+			return {
+				value: [],
+				range: [
+					[],
+					[]
+				],
+				month: ''
+			}
+		},
+
+		created: function() {
+			this.initPickerData()
+		},
+		methods: {
+			cancel() {
+				this.$emit('cancel')
+			},
+			
+			confirm() {
+				this.$emit('confirm', this.month)
+			},
+
+			initPickerData() {
+				let date = new Date()
+				for (let i = 2020; i <= date.getFullYear(); i++) {
+					this.range[0].push(i + '年')
+				}
+				for (let i = 1; i <= 12; i++) {
+					this.range[1].push(('0' + i).slice(-2) + '月')
+				}
+			},
+
+			onPickerChange(e) {
+				let value = e.detail.value
+				for (let i = 0; i < value.length; i++) value[i] = value[i] || 0
+				let month = [
+					this.range[0][value[0]],
+					this.range[1][value[1]],
+				];
+				this.month = month.join('-').replace('年', '').replace('月', '')
+			},
+
+			// onPickerColumnChange(value) {
+			// 	let date = new Date()
+			// 	let isCurrentYear = this.range[0][value[0]] == date.getFullYear()
+			// 	if (e.detail.column == 0 && isCurrentYear) {
+			// 		console.log('sssssssss')
+			// 		let data = []
+			// 		for (let i = 1; i <= (date.getMonth() + 1); i++) {
+			// 			data.push(('0' + i).slice(-2) + '月')
+			// 		}
+			// 		this.range[1] = data
+			// 	}
+			// 	this.time = new Date().getTime()
+			// 	console.log(this.time)
+			// 	this.range[e.detail.column] = e.detail.value
+			// 	console.log('修改的列为：' + e.detail.column + '，值为：' + e.detail.value)
+			// },
+		}
+	}
+</script>

@@ -90,9 +90,9 @@
 							style="align-items: center;justify-content: center;width: 82rpx;height: 82rpx;">
 							<image style="width: 66rpx;height: 66rpx;background-color: #3F536E;"></image>
 							<view class="tbc-flex-col" v-if="item.count"
-								style="position: absolute;top:0;right: 0;z-index:2;width:26rpx;height: 26rpx;background-color: #FA5151;border-radius:26rpx;align-items: center;justify-content: center;">
+								style="position: absolute;top:0;right: 0;z-index:2;width:34rpx;height: 34rpx;background-color: #e41f19;border-radius:34rpx;align-items: center;justify-content: center;">
 								<text
-									style="font-size:20rpx;color: #FFF;font-family: PingFang SC;">{{item.count}}</text>
+									style="font-size:20rpx;color: #FFF;font-family: PingFang SC;font-weight: bold;">{{item.count}}</text>
 							</view>
 						</view>
 						<text style="font-size: 24rpx;margin-top:16rpx;color: #444;">{{item.label}}</text>
@@ -141,7 +141,6 @@
 			return {
 				moduleList: [],
 				statistics: [
-
 					{
 						label: '账户余额',
 						value: 0,
@@ -152,16 +151,18 @@
 						label: '积分',
 						value: 0,
 						field: 'integral',
-						tabCode: ''
+						tabCode: '/pages/wallet/integral'
 					},
 					{
 						label: '我的收藏',
 						value: 0,
+						field: 'collect',
 						tabCode: '/pages/mine/collect'
 					},
 					{
 						label: '浏览记录',
 						value: 0,
+						field: 'browse',
 						tabCode: '/pages/mine/browse'
 					},
 				],
@@ -211,6 +212,7 @@
 		},
 		computed: {
 			...mapState(['loginUserInfo']),
+
 			statusBarHeight() {
 				return uni.getSystemInfoSync().statusBarHeight
 			},
@@ -233,11 +235,15 @@
 
 		onLoad: function() {},
 
-		onShow: function() {},
-
+		onShow: function() {
+			this.getStatistics()
+			this.getOrderStatistics()
+		},
 
 		onPullDownRefresh: function() {
 			this.$store.dispatch('getLoginUserInfo')
+			this.getStatistics()
+			this.getOrderStatistics()
 			uni.stopPullDownRefresh()
 		},
 
@@ -258,8 +264,8 @@
 						url = "/pages/authorize/login"
 					}
 				})
-			
-			let that = this
+
+				let that = this
 				uni.navigateTo({
 					url,
 					fail: function() {
@@ -282,6 +288,29 @@
 
 			onTabBarClick(data) {
 				this.toPageUrl(data.tabCode)
+			},
+
+			// 获取统计信息
+			async getStatistics() {
+				const res = await uni.$http.get('/user.statistics')
+				if (res.data.code !== 0) return 
+				// let info = this.loginUserInfo
+				let data = res.data.data
+				for (let i in this.loginUserInfo) data[i] = this.loginUserInfo[i]
+				this.statistics.forEach(item => {
+					if (data[item.field] !== undefined) item.value = data[item.field]
+				})
+			},
+			
+			// 获取订单统计
+			async getOrderStatistics() {
+				const res = await uni.$http.get('/order.statistics')
+				if (res.data.code !== 0) return 
+				// let info = this.loginUserInfo
+				let data = res.data.data
+				this.tabBarList1.forEach(item => {
+					if (data[item.tabCode] !== undefined) item.count = data[item.tabCode]
+				})
 			}
 		}
 	}

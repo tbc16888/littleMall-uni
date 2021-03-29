@@ -1,0 +1,205 @@
+<template>
+	<view>
+
+		<!-- #ifndef APP-NVUE -->
+		<uni-swipe-action>
+			<uni-swipe-action-item v-for="(goods, index) in goodsList" :key="goods.browse_id" :right-options="options"
+				@change="swipeChange($event, index)" @click="swipeClick($event, index)">
+				<view class="tbc-flex-col"
+					style="flex-direction: column;width: 750rpx;background-color: #FFF;align-items: center;">
+					<view style="margin-bottom: 20rpx;margin-top: 20rpx;width: 690rpx;" class="tbc-flex-col">
+						<tbc-goods-item-row :goods="goods" :width="690" />
+					</view>
+				</view>
+			</uni-swipe-action-item>
+		</uni-swipe-action>
+
+		<none v-if="isShowNone"></none>
+		<view class="tbc-flex-col"
+			style="width:750rpx;flex-direction: column;align-items: center;background-color: #F5F5F5;">
+			<load-more :status="loadMoreStatus" :contentText="{
+				contentdown: '',
+				contentrefresh: '正在加载...',
+				contentnomore: '已全部加载'
+			}" v-if="!isRefreshing && !isShowNone"></load-more>
+		</view>
+		<!-- #endif -->
+
+		<!-- #ifdef APP-NVUE -->
+		<tbc-list @loading="getGoodsList" ref="list" @refresh="initGoodsList" top="0">
+			<cell v-for="(goods, index) in goodsList" :key="goods.browse_id">
+				<uni-swipe-action>
+					<uni-swipe-action-item :right-options="options"  @change="swipeChange($event, index)" @click="swipeClick($event, index)" :key="goods.browse_id">
+						<view class="tbc-flex-col"
+							style="flex-direction: column;width: 750rpx;background-color: #FFF;align-items: center;">
+							<view style="margin-bottom: 20rpx;margin-top: 20rpx;width: 690rpx;" class="tbc-flex-col">
+								<tbc-goods-item-row :goods="goods" :width="690" />
+							</view>
+						</view>
+					</uni-swipe-action-item>
+				</uni-swipe-action>
+			</cell>
+
+
+			<cell v-if="isShowNone">
+				<none></none>
+			</cell>
+
+			<cell>
+				<view class="tbc-flex-col"
+					style="width:750rpx;flex-direction: column;align-items: center;height: 100rpx;justify-content: center;">
+					<load-more :status="loadMoreStatus" :contentText="{
+						contentdown: '',
+						contentrefresh: '正在加载...',
+						contentnomore: '已全部加载'
+					}" v-if="!isRefreshing && !isShowNone"></load-more>
+				</view>
+			</cell>
+		</tbc-list>
+		<!-- #endif -->
+
+
+
+
+	</view>
+</template>
+
+<script>
+	import tbcList from '@/components/tbc-components-nvue/list.nvue'
+	import None from '@/components/app/None.nvue'
+	import tbcGoodsItemCol from '@/components/app/GoodsItemCol.nvue'
+	import tbcGoodsItemRow from '@/components/app/GoodsItemRow.nvue'
+	import loadMore from '@/components/uni-official/uni-load-more/uni-load-more.vue'
+	import uniSwipeAction from '@/components/uni-official/uni-swipe-action/uni-swipe-action.vue'
+	import uniSwipeActionItem from '@/components/uni-official/uni-swipe-action-item/uni-swipe-action-item.vue'
+	export default {
+		components: {
+			tbcList,
+			None,
+			tbcGoodsItemCol,
+			tbcGoodsItemRow,
+			loadMore,
+			uniSwipeAction,
+			uniSwipeActionItem
+		},
+
+		data() {
+			return {
+				keyword: '',
+				goodsList: [],
+				page: 1,
+				size: 10,
+				page: 1,
+				pageCount: 0,
+				filterList: [],
+				layout: 'col',
+				filterListCondition: {},
+				sort: '',
+				statusBarHeight: '',
+				showFilterPanel: false,
+				isInitComplete: false,
+				isLoading: false,
+				isRefreshing: false,
+				options: [{
+					text: '取消收藏',
+					style: {
+						backgroundColor: '#dd524d'
+					}
+				}]
+			}
+		},
+
+		computed: {
+
+			isShowNone() {
+				return this.isInitComplete && this.page > 1 && !this.goodsList.length
+			},
+
+			loadMoreStatus: function() {
+				if (this.isRefreshing || this.total <= -1) return ''
+				if (this.isLoading) return 'loading'
+				if (this.page - 1 >= this.pageCount) return 'nomore'
+				return 'more'
+			},
+		},
+
+		onReady: function() {
+			this.statusBarHeight = uni.getSystemInfoSync().statusBarHeight
+		},
+
+		onLoad: function(options) {
+			this.keyword = options.keyword || ''
+			this.getGoodsList()
+		},
+
+
+
+		onPullDownRefresh: function() {
+			this.initGoodsList()
+		},
+
+		onReachBottom: function() {
+			this.getGoodsList()
+		},
+
+		methods: {
+
+			async swipeClick(e, index) {
+				const res = await uni.$http.post('/user.browse/delete', {
+					browse_id: this.goodsList[index].browse_id
+				})
+				if (res.data.code !== 0) {
+					return uni.showToast({
+						title: res.data.message,
+						icon: 'none'
+					})
+				}
+				this.goodsList.splice(index, 1) 
+			},
+			
+			swipeChange(e, index) {
+		
+			},
+
+
+			async initGoodsList() {
+				this.isRefreshing = true
+				this.page = 1
+				this.getGoodsList()
+			},
+
+
+			stopPullDownRefresh() {
+				// #ifdef APP-NVUE
+				this.$refs.list.stopPullDownRefresh()
+				// #endif
+				uni.stopPullDownRefresh()
+			},
+
+			async getGoodsList() {
+				if (this.page > 1 && this.page - 1 >= this.pageCount) return
+				this.isLoading = true
+				const res = await uni.$http.get('/user.browse', {
+					page: this.page++,
+					size: this.size,
+					sort: this.sort,
+					keyword: this.keyword
+				})
+				this.isRefreshing = false
+				this.isLoading = false
+				this.isInitComplete = true
+				this.stopPullDownRefresh()
+				if (res.data.code !== 0) {
+					return uni.showToast({
+						title: res.data.message,
+						icon: 'none'
+					})
+				}
+				let data = res.data.data
+				this.pageCount = Math.ceil(data.total / this.size)
+				if (this.page <= 2) this.goodsList = []
+				this.goodsList = this.goodsList.concat(data.list)
+			},
+		}
+	}
+</script>

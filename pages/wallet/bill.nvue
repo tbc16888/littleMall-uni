@@ -1,0 +1,137 @@
+<template>
+	<view>
+		<view class="tbc-flex-col"  v-for="month in monthData" :key="month.month">
+			<view class="tbc-flex-col"
+				style="flex-direction: column;width: 750rpx;align-items: center;background-color: #F5F5F5;">
+
+				<view class="tbc-flex-row"
+					style="flex-direction: row;height: 110rpx;justify-content: center;width: 690rpx;align-items: center;">
+
+					<view
+						style="background-color: #FFF;border-radius: 26rpx;height: 52rpx;width: 176rpx;justify-content: center;flex-direction: row;align-items: center;"
+						class="tbc-flex-row" @click="$refs.monthPopup.open()">
+						<view>
+							<text style="color: #333;font-size: 26rpx;">{{month.month}}</text>
+						</view>
+						<view style="width: 16rpx;height: 12rpx;margin-left: 16rpx;">
+							<image src="/static/icon/triangle-down.png" style="width: 16rpx;height: 12rpx;"></image>
+						</view>
+					</view>
+					<view style="flex: 1;"> </view>
+					<view style="">
+						<text style="font-size: 28rpx;color: #999;">收入￥{{month.income}}</text>
+						<text style="font-size: 28rpx;color: #999;">支出￥{{month.expend}}</text>
+					</view>
+				</view>
+			</view>
+
+
+			<view class="tbc-flex-col"
+				style="background-color: #FFF;width: 750rpx;align-items: center;flex-direction: column;">
+				<view class="tbc-flex-col"
+					style="flex-direction: column;width: 690rpx;border-bottom-width: 1px;border-color: #EFEFEF;justify-content: center;background-color: #FFF;padding-top:30rpx;padding-bottom: 30rpx;"
+					v-for="(item) in month.list" :key="item.log_id">
+					<view class="tbc-flex-row" style="flex-direction: row;">
+						<view style="flex:1">
+							<text style="font-size: 34rpx;color: #333;">{{item.change_type_name}}</text>
+						</view>
+						<text style="font-size: 36rpx;color: #333;font-weight: bold;">{{item.change_amount}}</text>
+					</view>
+					<view class="tbc-flex-row" style="flex-direction: row;margin-top: 10rpx;">
+						<view style="flex:1">
+							<text style="font-size: 28rpx;color: #7F7F7F;">{{item.change_time}}</text>
+						</view>
+					</view>
+				</view>
+			</view>
+		</view>
+
+
+		<uni-popup type="bottom" ref="monthPopup">
+			<month-picker @cancel="$refs.monthPopup.close()" @confirm="onMonthPickerConfirm">
+			</month-picker>
+		</uni-popup>
+	</view>
+</template>
+
+<script>
+	import uniPopup from '@/components/uni-official/uni-popup/uni-popup.vue'
+	import monthPicker from './compoennts/month-picker.nvue'
+	export default {
+		components: {
+			uniPopup,
+			monthPicker
+		},
+
+		data() {
+			return {
+				picketValue: ['', ''],
+				pickerRangeDate: [
+					[],
+					[]
+				],
+				time: new Date().getTime(),
+				dataList: [],
+
+				formatList: {},
+				monthData: {},
+				page: 1,
+				size: 10,
+				pageCount: -1,
+				month: ''
+			}
+		},
+
+		onLoad: function() {
+			this.getBillList()
+		},
+
+		onReachBottom: function() {
+			this.getBillList()
+		},
+
+		methods: {
+
+			async getBillList() {
+				if (this.page > 1 && this.page - 1 >= this.pageCount) return
+				this.isLoading = true
+				const res = await uni.$http.get('/user.balance', {
+					page: this.page++,
+					size: this.size,
+					sort: this.sort,
+					keyword: this.keyword,
+					month: this.month,
+				})
+				this.isRefreshing = false
+				this.isLoading = false
+				this.isInitComplete = true
+				//this.stopPullDownRefresh()
+				if (res.data.code !== 0) {
+					return uni.showToast({
+						title: res.data.message,
+						icon: 'none'
+					})
+				}
+				let data = res.data.data
+				this.pageCount = Math.ceil(data.total / this.size)
+				let monthData = (this.page <= 2) ? {} : this.monthData
+				data.group.forEach(item => {
+					if (monthData[item.month] === undefined) {
+						monthData[item.month] = item
+					} else {
+						monthData[item.month].list = monthData[item.month].list.concat(item.list)
+					}
+				})
+				this.monthData = monthData
+				this.$forceUpdate()
+			},
+
+			onMonthPickerConfirm(month) {
+				this.month = month
+				this.page = 1
+				this.getBillList()
+				this.$refs.monthPopup.close()
+			}
+		}
+	}
+</script>
