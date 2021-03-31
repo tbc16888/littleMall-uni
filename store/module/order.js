@@ -8,11 +8,9 @@ export default {
 
 	getters: {
 		orderList(state) {
-			console.log(state.orderList)
 			return state.orderList || []
 		}
 	},
-
 
 	mutations: {
 
@@ -29,6 +27,14 @@ export default {
 				return order.basic.data.field.order_sn === data.basic.data.field.order_sn
 			})
 			state.orderList.splice(index, 1, data)
+		},
+
+		//
+		removeOrderItem(state, data) {
+			let index = state.orderList.findIndex(order => {
+				return order.basic.data.field.order_sn === data.basic.data.field.order_sn
+			})
+			state.orderList.splice(index, 1)
 		}
 	},
 

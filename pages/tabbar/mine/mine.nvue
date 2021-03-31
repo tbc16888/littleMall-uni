@@ -140,8 +140,7 @@
 		data() {
 			return {
 				moduleList: [],
-				statistics: [
-					{
+				statistics: [{
 						label: '账户余额',
 						value: 0,
 						field: 'balance',
@@ -257,7 +256,8 @@
 				let url = page
 				let authList = [
 					'/pages/coupon/mine', '/pages/mine/address', "/pages/order/list",
-					"/pages/mine/profile", '/pages/mine/collect'
+					"/pages/mine/profile", '/pages/mine/collect', '/pages/wallet/wallet',
+					'/pages/wallet/integral'
 				]
 				authList.forEach(item => {
 					if (page.indexOf(item) > -1 && !this.loginUserInfo.user_id) {
@@ -293,7 +293,10 @@
 			// 获取统计信息
 			async getStatistics() {
 				const res = await uni.$http.get('/user.statistics')
-				if (res.data.code !== 0) return 
+				if (res.data.code !== 0) {
+					if (res.data.code === 401) this.statistics.forEach(item => item.value = 0)
+					return
+				}
 				// let info = this.loginUserInfo
 				let data = res.data.data
 				for (let i in this.loginUserInfo) data[i] = this.loginUserInfo[i]
@@ -301,11 +304,14 @@
 					if (data[item.field] !== undefined) item.value = data[item.field]
 				})
 			},
-			
+
 			// 获取订单统计
 			async getOrderStatistics() {
 				const res = await uni.$http.get('/order.statistics')
-				if (res.data.code !== 0) return 
+				if (res.data.code !== 0) {
+					if (res.data.code === 401) this.tabBarList1.forEach(item => item.count = 0)
+					return
+				}
 				// let info = this.loginUserInfo
 				let data = res.data.data
 				this.tabBarList1.forEach(item => {

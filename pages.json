@@ -321,7 +321,7 @@
             "style" :                                                                                    
             {
                 "navigationBarTitleText": "账户明细",
-                "enablePullDownRefresh": false
+                "enablePullDownRefresh": true
             }
             
         }
@@ -330,7 +330,7 @@
             "style" :                                                                                    
             {
                 "navigationBarTitleText": "我的积分",
-                "enablePullDownRefresh": false
+                "enablePullDownRefresh": true
             }
             
         }

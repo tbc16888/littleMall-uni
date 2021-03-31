@@ -53,14 +53,14 @@
 			<view style="background-color: #FFF;padding-top: 30rpx;padding-bottom: 30rpx;">
 				<remark ref="remark"></remark>
 			</view>
-		</view><strong></strong>
+		</view>
 		
 		
 		<template v-if="settlement.submit">
 			<view style="height: 120rpx;"></view>
-			<view style="position: fixed;bottom: 0;height: 100rpx;width: 750rpx;background-color: #FFF;">
+			<cover-view style="position: fixed;bottom: 0;height: 100rpx;width: 750rpx;background-color: #FFF;z-index:9">
 				<submit :submit="settlement.submit" @submit="formSubmit"></submit>
-			</view>
+			</cover-view>
 		</template>
 
 		<uni-popup ref="coupon" type="bottom">

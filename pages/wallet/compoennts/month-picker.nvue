@@ -16,7 +16,8 @@
 		</view>
 
 		<view style="flex: 1;width: 750rpx;">
-			<picker-view :value="value" @change="onPickerChange" style="height: 216px;" indicator-style="height:40px" @column-change="onPickerColumnChange">
+			<picker-view :value="value" @change="onPickerChange" style="height: 216px;" indicator-style="height:40px"
+				@column-change="onPickerColumnChange">
 				<picker-view-column v-for="(group, index) in range" :key="index" :index="index">
 					<view class="tbc-flex-row" v-for="(item, idx) in group" :key="idx"
 						style="flex-direction: row;align-items: center;height: 40px;justify-content: center;">
@@ -30,47 +31,57 @@
 
 <script>
 	export default {
+
 		props: {
-
-			// range: {
-			// 	type: Array,
-			// 	default () {
-			// 		return []
-			// 	}
-			// },
-
-			// value: {
-			// 	type: Array,
-			// 	default () {
-			// 		return []
-			// 	}
-			// }
+			init: {
+				type: String,
+				default () {
+					return ''
+				}
+			},
 		},
 
 		data() {
 			return {
-				value: [],
+				value: [0, 0],
 				range: [
 					[],
 					[]
 				],
-				month: ''
+				month: '',
+				initList: []
 			}
 		},
 
 		created: function() {
 			this.initPickerData()
+			// 微信问题采用其他方式
+			// this.setPickerValue(this.init)
 		},
+
 		methods: {
+
+			setPickerValue(value) {
+				this.initList = value ? value.split('-') : []
+				if (!this.initList.length) return
+				this.value = [0, 0]
+				this.initList.forEach((item, index) => {
+					this.value[index] = this.range[index].findIndex(label => label.indexOf(item) >
+						-1)
+				})
+			},
+
 			cancel() {
 				this.$emit('cancel')
 			},
-			
+
 			confirm() {
+				this.getPickerValueMapper(this.value)
 				this.$emit('confirm', this.month)
 			},
 
 			initPickerData() {
+				if (this.range[0].length) return
 				let date = new Date()
 				for (let i = 2020; i <= date.getFullYear(); i++) {
 					this.range[0].push(i + '年')
@@ -82,6 +93,11 @@
 
 			onPickerChange(e) {
 				let value = e.detail.value
+				this.value = value
+				this.getPickerValueMapper(value)
+			},
+
+			getPickerValueMapper(value) {
 				for (let i = 0; i < value.length; i++) value[i] = value[i] || 0
 				let month = [
 					this.range[0][value[0]],

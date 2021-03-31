@@ -19,19 +19,28 @@
 		<!-- 用户头部 结束-->
 
 
-		<!-- 常用工具 -->
+		<!-- 签到 -->
 		<view class="tbc-flex-col" style="flex-direction: column;align-items: center;position: relative;">
 			<view style="position: absolute;height:100rpx;top:0;width: 750rpx;background-color:#e41f19;">
 			</view>
+			
 			<view class="tbc-flex-col" style="width:690rpx;border-radius:16rpx;background-color: #FFF;">
+				
 				<view class="tbc-flex-row" style="flex-direction: row;height: 100rpx;align-items: center;">
 					<text style="font-size: 30rpx;margin-left:30rpx;">签到</text>
 				</view>
+			
+			
+			
+			
+			
+				
 				<view class="tbc-flex-row"
-					style="flex-direction: row;padding-bottom: 20rpx;width: 650rpx;align-self: center;">
-					<view style="flex:1;padding: 6rpx;" v-for="index in 7" :key="index">
+					style="flex-direction: row;padding-bottom: 20rpx;width: 650rpx;align-self: center;flex-wrap: wrap;">
+					<view style="padding: 6rpx;width: 160rpx;" v-for="index in 7" :key="index">
 						<view class="tbc-flex-col"
 							style="flex-direction: column;align-items: center;background-color: #fdc600;border-radius: 10rpx;justify-content: center;">
+							<text style="font-size: 24rpx;margin-top:16rpx;">{{index}}天</text>
 							<view class="tbc-flex-row"
 								style="width:60rpx;height:60rpx;border-radius: 10rpx;align-items: center;justify-content: center;background-color: #3F536E;margin-top: 10rpx;">
 							</view>

@@ -44,6 +44,10 @@
 			...mapState(['loginUserInfo'])
 		},
 
+		onLoad: function() {
+			console.log('onLoad')
+		},
+
 		onNavigationBarButtonTap: function(e) {
 			this.toPage("/pages/wallet/bill")
 		},

@@ -1,15 +1,15 @@
 <template>
 	<view>
-		<view class="tbc-flex-col"  v-for="month in monthData" :key="month.month">
-			<view class="tbc-flex-col"
-				style="flex-direction: column;width: 750rpx;align-items: center;background-color: #F5F5F5;">
+
+		<view class="tbc-flex-col" v-for="(month) in dataList" :key="month.month">
+			<view class="tbc-flex-col" style="flex-direction: column;align-items: center;background-color: #F5F5F5;position: sticky;">
 
 				<view class="tbc-flex-row"
 					style="flex-direction: row;height: 110rpx;justify-content: center;width: 690rpx;align-items: center;">
 
 					<view
 						style="background-color: #FFF;border-radius: 26rpx;height: 52rpx;width: 176rpx;justify-content: center;flex-direction: row;align-items: center;"
-						class="tbc-flex-row" @click="$refs.monthPopup.open()">
+						class="tbc-flex-row" @click="showMonthPicker(month.month)">
 						<view>
 							<text style="color: #333;font-size: 26rpx;">{{month.month}}</text>
 						</view>
@@ -20,35 +20,33 @@
 					<view style="flex: 1;"> </view>
 					<view style="">
 						<text style="font-size: 28rpx;color: #999;">收入￥{{month.income}}</text>
-						<text style="font-size: 28rpx;color: #999;">支出￥{{month.expend}}</text>
+						<text style="font-size: 28rpx;color: #999;">支出￥{{month.expense}}</text>
 					</view>
 				</view>
 			</view>
 
-
-			<view class="tbc-flex-col"
-				style="background-color: #FFF;width: 750rpx;align-items: center;flex-direction: column;">
-				<view class="tbc-flex-col"
-					style="flex-direction: column;width: 690rpx;border-bottom-width: 1px;border-color: #EFEFEF;justify-content: center;background-color: #FFF;padding-top:30rpx;padding-bottom: 30rpx;"
-					v-for="(item) in month.list" :key="item.log_id">
-					<view class="tbc-flex-row" style="flex-direction: row;">
-						<view style="flex:1">
-							<text style="font-size: 34rpx;color: #333;">{{item.change_type_name}}</text>
+			<view class="tbc-flex-col" style="flex-direction: column;background-color: #FFF;align-items: center;">
+				<view style="width: 690rpx;" v-for="(item) in month.list" :key="item.log_id">
+					<view class="tbc-flex-col" style="padding-top:30rpx;padding-bottom: 30rpx;">
+						<view class="tbc-flex-row" style="flex-direction: row;">
+							<view style="flex:1">
+								<text style="font-size: 34rpx;color: #333;">{{item.change_type_name}}</text>
+							</view>
+							<text style="font-size: 36rpx;color: #333;font-weight: bold;">{{item.change_amount}}</text>
 						</view>
-						<text style="font-size: 36rpx;color: #333;font-weight: bold;">{{item.change_amount}}</text>
-					</view>
-					<view class="tbc-flex-row" style="flex-direction: row;margin-top: 10rpx;">
-						<view style="flex:1">
+						<view class="tbc-flex-row" style="flex-direction: row;margin-top: 10rpx;">
 							<text style="font-size: 28rpx;color: #7F7F7F;">{{item.change_time}}</text>
 						</view>
 					</view>
+					<view style="height: 1px;background-color: #EFEFEF;"></view>
 				</view>
 			</view>
 		</view>
 
+		<none v-if="pageCount > -1 && total === 0"></none>
 
 		<uni-popup type="bottom" ref="monthPopup">
-			<month-picker @cancel="$refs.monthPopup.close()" @confirm="onMonthPickerConfirm">
+			<month-picker ref="monthPicker" @cancel="$refs.monthPopup.close()" @confirm="onMonthPickerConfirm" :init="initMonth">
 			</month-picker>
 		</uni-popup>
 	</view>
@@ -57,32 +55,35 @@
 <script>
 	import uniPopup from '@/components/uni-official/uni-popup/uni-popup.vue'
 	import monthPicker from './compoennts/month-picker.nvue'
+	import none from '@/components/app/None.nvue'
 	export default {
 		components: {
 			uniPopup,
-			monthPicker
+			monthPicker,
+			none
 		},
 
 		data() {
 			return {
-				picketValue: ['', ''],
-				pickerRangeDate: [
-					[],
-					[]
-				],
-				time: new Date().getTime(),
 				dataList: [],
-
 				formatList: {},
 				monthData: {},
 				page: 1,
 				size: 10,
 				pageCount: -1,
-				month: ''
+				total: -1,
+				choiceMonth: '',
+				initMonth: ''
 			}
 		},
 
 		onLoad: function() {
+			this.getBillList()
+		},
+
+		onPullDownRefresh: function() {
+			this.choiceMonth = ''
+			this.page = 1
 			this.getBillList()
 		},
 
@@ -91,21 +92,27 @@
 		},
 
 		methods: {
+			createItemData(month) {
+				return {
+					month,
+					list: [],
+					income: 0,
+					expense: 0
+				}
+			},
 
 			async getBillList() {
 				if (this.page > 1 && this.page - 1 >= this.pageCount) return
-				this.isLoading = true
 				const res = await uni.$http.get('/user.balance', {
 					page: this.page++,
 					size: this.size,
 					sort: this.sort,
 					keyword: this.keyword,
-					month: this.month,
+					month: this.choiceMonth,
 				})
-				this.isRefreshing = false
-				this.isLoading = false
-				this.isInitComplete = true
-				//this.stopPullDownRefresh()
+
+
+				uni.stopPullDownRefresh()
 				if (res.data.code !== 0) {
 					return uni.showToast({
 						title: res.data.message,
@@ -113,21 +120,34 @@
 					})
 				}
 				let data = res.data.data
+				this.total = data.total
 				this.pageCount = Math.ceil(data.total / this.size)
-				let monthData = (this.page <= 2) ? {} : this.monthData
+				let dataList = (this.page <= 2) ? [] : this.dataList
 				data.group.forEach(item => {
-					if (monthData[item.month] === undefined) {
-						monthData[item.month] = item
+					let index = dataList.findIndex(row => row.month === item.month)
+					if (index > -1) {
+						dataList[index].list = dataList[index].list.concat(item.list)
 					} else {
-						monthData[item.month].list = monthData[item.month].list.concat(item.list)
+						dataList.push(item)
 					}
 				})
-				this.monthData = monthData
-				this.$forceUpdate()
+				if (!dataList.length && this.choiceMonth) {
+					dataList.push(this.createItemData(this.choiceMonth))
+				}	
+				this.dataList = dataList
+			},
+
+			showMonthPicker(month) {
+				this.initMonth = month
+				this.$refs.monthPopup.open()
+				// 微信picker-view 渲染问题
+				setTimeout(() => {
+					this.$refs.monthPicker.setPickerValue(month)
+				}, 200)
 			},
 
 			onMonthPickerConfirm(month) {
-				this.month = month
+				this.choiceMonth = month
 				this.page = 1
 				this.getBillList()
 				this.$refs.monthPopup.close()
