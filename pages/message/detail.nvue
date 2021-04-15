@@ -1,0 +1,19 @@
+<template>
+	<view>
+		<view class="tbc-page-background"></view>
+
+	</view>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+
+			}
+		},
+		methods: {
+
+		}
+	}
+</script>

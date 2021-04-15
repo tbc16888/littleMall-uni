@@ -1,0 +1,51 @@
+<template>
+	<view>
+
+		<view class="tbc-page-background"></view>
+
+		<view class="tbc-flex-col" style="align-items: center;">
+
+			<view class="tbc-flex-col"
+				style="flex-direction: column;width: 690rpx;background-color: #FFF;border-radius: 10rpx;margin-top: 20rpx;position: relative;padding-top: 30rpx;padding-bottom: 30rpx;padding-left: 30rpx;"
+				v-for="i in 5" :key="i" @click="toDetail">
+				<view class="tbc-flex-row" style="flex-direction:row;">
+					<text class="tbc-text-clamp-1"
+						style="font-size:32rpx;text-overflow:ellipsis;lines:1;flex:1;font-family: PingFang SC;">您有一张优惠券即将到期</text>
+				</view>
+
+				<view class="tbc-flex-row" style="flex-direction:row;margin-top: 14rpx;">
+					<text
+						style="color:#666;font-size:26rpx;flex:1;font-family: PingFang SC;">重磅，国内112家景区向所有游客免票啦。快去瞧一瞧有你想去的景区吗。</text>
+				</view>
+
+				<view class="tbc-flex-row" style="flex-direction:row;margin-top: 20rpx;">
+
+					<text style="font-size:24rpx;color:#999;font-family: PingFang SC;">2020/06/24 21:15</text>
+				</view>
+			</view>
+		</view>
+		<view style="height: 40rpx;"></view>
+	</view>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+			
+			}
+		},
+		onLoad: function(options) {
+			uni.setNavigationBarTitle({
+				title: options.title || ''
+			})
+		},
+		methods: {
+toDetail() {
+uni.navigateTo({
+	url: '/pages/message/detail'
+})	
+}
+		}
+	}
+</script>

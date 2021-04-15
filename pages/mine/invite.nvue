@@ -1,0 +1,98 @@
+<template>
+	<view>
+		<view class="tbc-page-background"></view>
+
+		<view class="tbc-flex-col" style="align-items: center;">
+			<view class="tbc-flex-row"
+				style="height: 90rpx;align-items: center;justify-content: center;background-color: #db0018;width:690rpx;border-radius:90rpx;margin-top:30rpx;"
+				@click="showInvite">
+				<text style="color: #fff;font-size: 26rpx;">立即邀请</text>
+			</view>
+		</view>
+
+
+
+
+		<uni-popup type="bottom" ref="invite">
+
+			<view class="tbc-flex-col"
+				style="flex-direction: column;background-color: #FFFFFF;border-top-left-radius: 20rpx;border-top-right-radius: 20rpx;">
+				<view class="tbc-flex-row" style="flex-direction: row;height: 120rpx;align-items: center;">
+					<view class="tbc-flex-col" style="flex: 1;flex-direction: column;align-items: center;">
+						<text style="font-size: 30rpx;color: #333;">选择分享平台</text>
+					</view>
+				</view>
+
+
+				<view class="tbc-flex-row"
+					style="flex-direction: row;align-items: center;justify-content: center;padding-bottom: 30rpx;padding-top: 30rpx;">
+					<view class="tbc-flex-col"
+						style="flex-direction: column;align-items: center;width: 300rpx;height: 160rpx;"
+						v-for="(item, index) in inviteList" :key="index" @click="onShareItemClick(index)">
+						<view style="width: 100rpx;height: 100rpx;background-color: #3F536E;">
+
+						</view>
+						<text style="font-size: 26rpx;color: #333;margin-top: 10rpx;">{{item.label}}</text>
+					</view>
+				</view>
+				<view style="height: 1px;width: 750rpx;background-color: #F5F5F5;"></view>
+				<view class="tbc-flex-col" style="align-items: center;margin-bottom: 20rpx;">
+					<view class="tbc-flex-row"
+						style="height:80rpx;align-items: center;justify-content: center;width:650rpx;" @click="close">
+						<text style="color: #000;font-size: 26rpx;">取消</text>
+					</view>
+				</view>
+			</view>
+		</uni-popup>
+	</view>
+</template>
+
+<script>
+	export default {
+
+		data() {
+			return {
+				inviteList: []
+			}
+		},
+
+		methods: {
+			showInvite() {
+				// this.$refs.invite.open()
+				this.getShareList()
+			},
+
+			async getShareList() {
+				const res = await uni.$http.get('/app.share')
+				if (res.data.code !== 0) return uni.showToast({
+					title: res.data.message,
+					icon: 'none'
+				})
+				this.inviteList = res.data.data.list
+				return this.$refs.invite.open()
+			},
+
+
+			close() {
+				this.$refs.invite.close()
+			},
+
+			onShareItemClick(index) {
+				let item = this.inviteList[index]
+				if (item.code !== '') return 
+				let shareParams = {}
+				for (let i in item.data) shareParams[i] = item.data[i]
+				console.log(shareParams)
+				uni.share({
+					...shareParams,
+					success: function(res) {
+						console.log("success:" + JSON.stringify(res));
+					},
+					fail: function(err) {
+						console.log("fail:" + JSON.stringify(err));
+					}
+				});
+			}
+		}
+	}
+</script>

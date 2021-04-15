@@ -5,7 +5,7 @@
 		<view class="tbc-tabbar-container" v-for="(tabBar, idx) in itemList" :key="idx">
 			<view style="height: 10px;width: 100%;"></view>
 			<view class="tbc-tabbar-wrapper" style="background-color: #FFF;">
-				<list-cell :rows="tabBar" @click="onCellClick" />
+				<tbc-list-cell :rows="tabBar" @click="onCellClick" />
 			</view>
 		</view>
 
@@ -19,14 +19,9 @@
 </template>
 
 <script>
-	import ListCell from '@/components/tbc-components/tbc-list-cell/index.nvue'
 
 	export default {
-
-		components: {
-			ListCell
-		},
-
+	
 		data() {
 			return {
 				token: '',

@@ -53,12 +53,10 @@
 </template>
 
 <script>
-	import uniPopup from '@/components/uni-official/uni-popup/uni-popup.vue'
 	import monthPicker from './compoennts/month-picker.nvue'
 	import none from '@/components/app/None.nvue'
 	export default {
 		components: {
-			uniPopup,
 			monthPicker,
 			none
 		},

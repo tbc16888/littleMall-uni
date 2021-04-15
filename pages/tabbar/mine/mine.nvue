@@ -12,7 +12,7 @@
 					<view class="tbc-flex-row" style="width:44rpx;height:44rpx;margin-right: 40rpx;">
 						<image src="/static/mine/setting.png" style="width:44rpx;height: 44rpx;"></image>
 					</view>
-					<view class="tbc-flex-row" style="width:44rpx;height:44rpx;">
+					<view class="tbc-flex-row" style="width:44rpx;height:44rpx;" @click="toPageUrl('/pages/message/message')">
 						<image src="/static/mine/notice.png" style="width:44rpx;height: 44rpx;"></image>
 					</view>
 				</view>
@@ -43,6 +43,7 @@
 						</view>
 					</view>
 				</view>
+				
 				<!-- 统计信息 -->
 				<view style="padding-top: 40rpx;">
 					<view class="tbc-flex-row" style="flex-direction: row;flex-wrap: wrap;">
@@ -61,81 +62,46 @@
 		<!-- 用户头部 结束-->
 
 
+
 		<!-- 我的订单 -->
 		<view class="tbc-flex-col"
 			style="flex-direction: column;align-items: center;position: relative;overflow: hidden;">
 			<view
 				style="position: absolute;height:100rpx;top:0;width: 750rpx;background-color:#e41f19;border-bottom-left-radius: 15rpx;border-bottom-right-radius: 15rpx;">
 			</view>
-			<view style="width:690rpx;border-radius:16rpx;background-color: #FFF;">
-				<view class="tbc-flex-row" style="flex-direction: row;height: 100rpx;align-items: center;"
-					@click="toOrderList({tabCode: ''})">
-					<view style="flex:1">
-						<text style="font-size: 30rpx;margin-left:30rpx;">我的订单</text>
-					</view>
-					<view style="">
-						<text style="font-size: 24rpx;color: #666;">全部订单</text>
-					</view>
-					<view>
-						<image src="/static/icon/arrow_right.png" style="width: 26rpx;height: 26rpx;"></image>
-					</view>
-					<view style="width: 30rpx;"></view>
-				</view>
-
-				<view class="tbc-flex-row" style="flex-direction: row;flex-wrap: wrap;padding-bottom: 20rpx;">
-					<view class="tbc-flex-col"
-						style="flex-direction: column;align-items: center;margin-bottom: 20rpx;width: 170rpx;"
-						v-for="(item, index) in tabBarList1" :key="index" @click="toOrderList(item)">
-						<view class="tbc-flex-row"
-							style="align-items: center;justify-content: center;width: 82rpx;height: 82rpx;">
-							<image style="width: 66rpx;height: 66rpx;background-color: #3F536E;"></image>
-							<view class="tbc-flex-col" v-if="item.count"
-								style="position: absolute;top:0;right: 0;z-index:2;width:34rpx;height: 34rpx;background-color: #e41f19;border-radius:34rpx;align-items: center;justify-content: center;">
-								<text
-									style="font-size:20rpx;color: #FFF;font-family: PingFang SC;font-weight: bold;">{{item.count}}</text>
-							</view>
-						</view>
-						<text style="font-size: 24rpx;margin-top:16rpx;color: #444;">{{item.label}}</text>
-					</view>
-				</view>
-			</view>
+			<order :tabBarList="tabBarList1" @itemClick="toPageUrl"></order>
 		</view>
 		<!-- 我的订单 结束 -->
-
+		
+		<!-- 我的收益 -->
+		<!-- <view class="tbc-flex-col" style="flex-direction: column;align-items: center;margin-top: 20rpx;">
+			<profit :tabBarList="tabBarList1"></profit>
+		</view> -->
+		<!-- 我的收益 结束 -->
 
 		<!-- 常用工具 -->
 		<view class="tbc-flex-col" style="flex-direction: column;align-items: center;margin-top: 20rpx;">
-			<view style="width:690rpx;border-radius:16rpx;background-color: #FFF;">
-				<view class="tbc-flex-row" style="flex-direction: row;height: 100rpx;align-items: center;">
-					<text style="font-size: 30rpx;margin-left:30rpx;">常用工具</text>
-				</view>
-				<view class="tbc-flex-row" style="flex-direction: row;flex-wrap: wrap;padding-bottom: 20rpx;">
-					<view class="tbc-flex-col"
-						style="flex-direction: column;align-items: center;margin-bottom: 20rpx;width: 170rpx;"
-						v-for="(item, index) in tabBarList2" :key="index" @click="onTabBarClick(item)">
-						<view
-							style="width:82rpx;height:82rpx;position: relative;border-radius: 10rpx;align-items: center;justify-content: center;"
-							class="tbc-flex-row">
-							<image :src="item.icon" style="width: 66rpx;height: 66rpx;background-color: #3F536E;">
-							</image>
-						</view>
-						<text style="font-size: 24rpx;margin-top:16rpx;color: #444;">{{item.label}}</text>
-					</view>
-				</view>
-			</view>
+			<tools :tabBarList="tabBarList2" @itemClick="toPageUrl"></tools>
 		</view>
 		<!-- 常用工具 结束 -->
-
+		<view style="height: 40rpx;"></view>
 	</view>
 </template>
 
 <script>
+	import order from './components/order.nvue'
+	import tools from './components/tools.nvue'
+	import profit from './components/profit.nvue'
 	import {
 		mapState
 	} from 'vuex'
 
 	export default {
-
+		components: {
+			order,
+			tools,
+			profit
+		},
 
 		data() {
 			return {
@@ -199,6 +165,11 @@
 						label: '优惠券',
 						icon: '',
 						tabCode: '/pages/coupon/mine'
+					},
+					{
+						label: '邀请用户',
+						icon: '',
+						tabCode: '/pages/mine/invite'
 					},
 					{
 						label: '系统设置',

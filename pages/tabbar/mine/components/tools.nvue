@@ -1,0 +1,38 @@
+<template>
+	<view style="width:690rpx;border-radius:16rpx;background-color: #FFF;">
+		<view class="tbc-flex-row" style="flex-direction: row;height: 100rpx;align-items: center;">
+			<text style="font-size: 30rpx;margin-left:30rpx;">常用工具</text>
+		</view>
+		<view class="tbc-flex-row" style="flex-direction: row;flex-wrap: wrap;padding-bottom: 20rpx;">
+			<view class="tbc-flex-col"
+				style="flex-direction: column;align-items: center;margin-bottom: 20rpx;width: 170rpx;"
+				v-for="(item, index) in tabBarList" :key="index" @click="onTabBarClick(item)">
+				<view
+					style="width:82rpx;height:82rpx;position: relative;border-radius: 10rpx;align-items: center;justify-content: center;"
+					class="tbc-flex-row">
+					<image :src="item.icon" style="width: 66rpx;height: 66rpx;background-color: #3F536E;">
+					</image>
+				</view>
+				<text style="font-size: 24rpx;margin-top:16rpx;color: #444;">{{item.label}}</text>
+			</view>
+		</view>
+	</view>
+</template>
+<script>
+	export default {
+		props: {
+			tabBarList: {
+				type: Array,
+				default() {
+					return []
+				}
+			}
+		},
+		
+		methods: {
+			onTabBarClick(data) {
+				this.$emit('itemClick', data.tabCode)
+			}
+		}
+	}
+</script>

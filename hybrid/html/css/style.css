@@ -1,0 +1,5 @@
+body,div,span,p,a,ul,li{margin:0;padding:0;outline:0;-webkit-user-select:none;-moz-user-select:none;user-select:none;-ms-user-select:none;-webkit-span-size-adjust:100%;-webkit-tap-highlight-color:rgba(0,0,0,0);}
+html,body{background-color:#F5F5f5;min-height: 500px}
+.tbc-flex-col{display:flex;flex-direction:column}
+.tbc-flex-row{display:flex;flex-direction:row}
+[v-cloak]{ display: none !important;}

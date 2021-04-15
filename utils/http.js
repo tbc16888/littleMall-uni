@@ -12,7 +12,8 @@ console.log(channel)
 // 统一请求
 const instance = async (url, options) => {
 
-	let baseURL = 'http://mall.demo.taoshatec.com/v1'
+	// let baseURL = 'http://mall.demo.taoshatec.com/v1'
+	let baseURL = 'http://little-mall.demo.taoshatec.com/v1'
 	if (url.indexOf('http') === -1) url = baseURL + url
 
 	let header = {

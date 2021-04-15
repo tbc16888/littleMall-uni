@@ -1,0 +1,81 @@
+<template>
+	<view>
+		<view class="tbc-page-background"></view>
+		<view style="height: 20rpx;"></view>
+
+		<view class="tbc-flex-col" style="background-color: #FFFFFF;padding-bottom: 30rpx;">
+			<view class="tbc-flex-col" style="flex-direction: column;align-items: center;padding-top: 30rpx;"
+				v-for="(item, index) in tabBarList" :key="index" @click="toList(item)">
+				<view class="tbc-flex-row" style="flex-direction: row;width: 690rpx">
+
+					<view class="tbc-flex-col"
+						style="width:94rpx;height:94rpx;align-items: center;justify-content: center;position: relative;">
+						<view class="tbc-flex-col" style="width:80rpx;height:80rpx;border-radius:10rpx;"
+							:style="'background-color:' + item.icon">
+							<!-- 图片 -->
+						</view>
+						<!-- 角标 -->
+						<view class="tbc-flex-row"
+							style="position:absolute;top:0;right:0;z-index:2;width:32rpx;height:32rpx;background-color:#FA5151;border-radius:32rpx;align-items:center;justify-content:center;">
+							<text style="font-size:22rpx;color:#FFF;">1</text>
+						</view>
+					</view>
+
+					<!-- 右边 -->
+					<view class="tbc-flex-col" style="flex-direction: column;flex: 1;margin-left: 20rpx;">
+						<view class="tbc-flex-row" style="flex-direction:row;align-items:center;">
+							<text class="tbc-text-clamp-1"
+								style="font-size:32rpx;text-overflow:ellipsis;lines:1;flex:1;font-family: PingFang SC;">{{item.label}}</text>
+							<text
+								style="font-size:26rpx;color:#AAA;lines:1;margin-left:30rpx;font-family: PingFang SC;">2020/06/24</text>
+						</view>
+
+						<view class="tbc-flex-row" style="flex-direction:row;margin-top: 14rpx;">
+							<text class="tbc-text-clamp-1"
+								style="color:#AAA;font-size:26rpx;lines:1;flex:1;text-overflow:ellipsis;font-family: PingFang SC;">重磅，国内112家景区向所有游客免票啦。快去瞧一瞧有你想去的景区吗。</text>
+						</view>
+						<view style="height: 1px;flex: 1;background-color: #EEE;margin-top: 30rpx;"
+							v-if="index < tabBarList.length - 1"></view>
+					</view>
+					<!-- 右边结束 -->
+				</view>
+			</view>
+		</view>
+
+	</view>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				tabBarList: [{
+						label: '在线客服',
+						icon: '#287EF7',
+						type: 'custom_service'
+					}, {
+						label: '系统消息',
+						icon: '#FF8C00',
+						type: 'system'
+					},
+					{
+						label: '优惠活动',
+						icon: '#EA0CB2',
+						type: 'activity'
+					},
+
+				]
+			}
+		},
+		methods: {
+			toList(item) {
+				let query = []
+				query.push('title=' + item.label)
+				query.push('type=' + item.type)
+				uni.navigateTo({
+					url: "/pages/message/list?" + query.join('&')
+				})
+			}
+		}
+	}
+</script>

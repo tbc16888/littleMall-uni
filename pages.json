@@ -306,44 +306,60 @@
 				// #endif 
 				"navigationBarTitleText": "浏览记录"
 			}
+		}, {
+			"path": "pages/wallet/wallet",
+			"style": {
+				"navigationBarTitleText": "我的钱包",
+				"enablePullDownRefresh": false
+			}
+
+		}, {
+			"path": "pages/wallet/bill",
+			"style": {
+				"navigationBarTitleText": "账户明细",
+				"enablePullDownRefresh": true
+			}
+
+		}, {
+			"path": "pages/wallet/integral",
+			"style": {
+				"navigationBarTitleText": "我的积分",
+				"enablePullDownRefresh": false
+			}
+
+		}, {
+			"path": "pages/wallet/integral-list",
+			"style": {
+				"navigationBarTitleText": "积分明细",
+				"enablePullDownRefresh": true
+			}
+
+		}, {
+			"path": "pages/mine/invite",
+			"style": {
+				"navigationBarTitleText": "邀请好友",
+				"enablePullDownRefresh": false
+			}
+		}, {
+			"path": "pages/message/message",
+			"style": {
+				"navigationBarTitleText": "消息中心",
+				"enablePullDownRefresh": false
+			}
+		}, {
+			"path": "pages/message/list",
+			"style": {
+				"navigationBarTitleText": " ",
+				"enablePullDownRefresh": false
+			}
+		}, {
+			"path": "pages/message/detail",
+			"style": {
+				"navigationBarTitleText": " ",
+				"enablePullDownRefresh": false
+			}
 		}
-	    ,{
-            "path" : "pages/wallet/wallet",
-            "style" :                                                                                    
-            {
-                "navigationBarTitleText": "我的钱包",
-                "enablePullDownRefresh": false
-            }
-            
-        }
-        ,{
-            "path" : "pages/wallet/bill",
-            "style" :                                                                                    
-            {
-                "navigationBarTitleText": "账户明细",
-                "enablePullDownRefresh": true
-            }
-            
-        }
-        ,{
-            "path" : "pages/wallet/integral",
-            "style" :                                                                                    
-            {
-                "navigationBarTitleText": "我的积分",
-                "enablePullDownRefresh": true
-            }
-            
-        }
-        ,{
-            "path" : "pages/wallet/integral-list",
-            "style" :                                                                                    
-            {
-                "navigationBarTitleText": "积分明细",
-                "enablePullDownRefresh": false
-            }
-            
-        }
-    ],
+	],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
 		"navigationBarTitleText": "简易小商城",

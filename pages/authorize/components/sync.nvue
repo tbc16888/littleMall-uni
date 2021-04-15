@@ -15,7 +15,8 @@
 
 			<view style="width: 20rpx;"></view>
 			<view class="tbc-flex-row" style="flex-direction: row;align-items: center;background-color:#db0018;height:70rpx;justify-content: center;border-radius:70rpx;flex:1">
-				<button open-type="getUserInfo" @getuserinfo="getUserInfo" style="font-size: 26rpx;color: #fff;background: none;width: auto;line-height: 2;font-weight: normal;width: 100%;">确定</button>
+				<!-- <button open-type="getUserInfo" @getuserinfo="getUserInfo" style="font-size: 26rpx;color: #fff;background: none;width: auto;line-height: 2;font-weight: normal;width: 100%;">确定</button> -->
+				<button @click="getUserProfile" style="font-size: 26rpx;color: #fff;background: none;width: auto;line-height: 2;font-weight: normal;width: 100%;">确定</button>
 			</view>
 		</view>
 	</view>
@@ -30,6 +31,16 @@
 				this.$emit('cancel')
 			},
 			
+			async getUserProfile() {
+				let that = this
+				wx.getUserProfile({
+					desc: '用于同步个人信息',
+					complete(e) {
+						if (e.errMsg === 'getUserProfile:fail auth deny') return 
+						that.getUserInfo({detail: {rawData: JSON.stringify(e.userInfo)}})
+					}
+				})
+			},
 			
 			async getUserInfo(e) {
 				const userInfo = JSON.parse(e.detail.rawData)
